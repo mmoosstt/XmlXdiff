@@ -1,72 +1,118 @@
 import xml.dom.minidom as minidom
 import hashlib
 
-def computehash (elem, hashdict):
-    # [1]. Create a hash object
-    sha = hashlib.sha1()
+class Xmldiff:
 
-    # [2]. Look for attributes
-
-    # [3].
-    if not elem.hasChildNodes():
-        elem.normalize()
-        value = elem.nodeValue
-
-        sha.update (value.strip())
-        hashdict[elem] = sha.hexdigest()
-
-    else:
-        childhash = []
-        for child in elem.childNodes:
-            childhash.append (computehash (child, hashdict))
-
-        for iter in sorted (childhash):
-            sha.update (iter)
-
-        hashdict[elem] = sha.hexdigest()
-
-    return hashdict[elem]
-
-
-def typeofelem (elem, docroot):
-    if elem == docroot:
-        return ''
-    else:
-        parent = elem.parentNode
-        return typeofelem(parent, docroot) + '/' + elem.nodeName
-
-def readxml():
     dict1 = {}
-    doc1 = minidom.parse ('tests/a.xml')
-    root1 = doc1.documentElement
-    computehash (root1, dict1)
-
     dict2 = {}
-    doc2 = minidom.parse ('tests/c.xml')
-    root2 = doc2.documentElement
-    computehash (root2, dict2)
+    doc1  = 0
+    doc2  = 0
+    root1 = 0
+    root2 = 0
 
-    if dict1[root1] == dict2[root2]:
-        print "XMLs are same"
-    else:
-        print "XMLs are different"
+    @classmethod
+    def signature (self, elem, docroot):
+        if elem == docroot:
+            return ''
+        else:
+            parent = elem.parentNode
+            return self.signature(parent, docroot) + '/' + elem.nodeName
 
-def valid_node (node):
-    if node.nodeName == '#text':
-        if node.nodeValue.strip() == '':
+    @classmethod
+    def valid_node (self, node):
+        if node.nodeName == '#text':
+            if node.nodeValue.strip() == '':
+                return False
+        return True
+
+
+    def __init__ (self):
+        self.dict1 = {}
+        self.dict2 = {}
+        self.doc1  = 0
+        self.doc2  = 0
+        self.root1 = 0
+        self.root2 = 0
+
+    def computehash (self, elem, hashdict):
+        # [1]. Create a hash object
+        sha = hashlib.sha1()
+
+        # [2]. Look for attributes
+
+        # [3].
+        if not elem.hasChildNodes():
+            elem.normalize()
+            value = elem.nodeValue
+
+            sha.update (value.strip())
+            hashdict[elem] = sha.hexdigest()
+
+        else:
+            childhash = []
+            for child in elem.childNodes:
+                childhash.append (computehash (child, hashdict))
+
+                for iter in sorted (childhash):
+                    sha.update (iter)
+
+            hashdict[elem] = sha.hexdigest()
+
+        return hashdict[elem]
+
+
+    def readxml(self, xml1, xml2):
+        self.doc1 = minidom.parse (xml1)
+        self.root1 = self.doc1.documentElement
+        self.computehash (self.root1, self.dict1)
+
+        self.doc2 = minidom.parse (xml2)
+        self.root2 = self.doc2.documentElement
+        self.computehash (self.root2, self.dict2)
+
+        if self.dict1[self.root1] == self.dict2[self.root2]:
+            print "XMLs are same"
+        else:
+            print "XMLs are different"
+
+
+    def checkroothash(self):
+        if self.dict1[self.root1] == self.dict2[self.root2]:
+            return True
+        else:
             return False
-    return True
 
-def _test_typeofelem():
+    def mincostmatching (self):
+        n1 = set()
+        for leaf1 in iterleafnodes (doc1):
+            n1.append (leaf1)
+
+        n2 = set()
+        for leaf2 in iterleafnodes (doc2):
+            n2.append (leaf2)
+
+        while len(n1) != 0 or len(n2) != 0:
+            for x in n1:
+                for y in n2:
+                    if signature(x) == signature(y):
+                        # computedist (x, y)
+
+            n1 = parents (n1)
+            n2 = parents (n2)
+
+
+
+    
+def _test_signature():
     doc1 = minidom.parse('tests/a.xml')
     root1 = doc1.documentElement
 
     def inner_test(elem):
-        print typeofelem (elem, doc1)
+        print Xmldiff.signature (elem, doc1)
 
         if elem.hasChildNodes:
             for child in elem.childNodes:
-                if valid_node (child):
+                if Xmldiff.valid_node (child):
                     inner_test (child)
         else:
             print 'elem has no child'
@@ -74,4 +120,6 @@ def _test_typeofelem():
     inner_test (root1)
 
 if __name__ == '__main__':
-    _test_typeofelem()
+    xd = Xmldiff();
+
+    xd.readxml('tests/a.xml', 'tests/d.xml')
