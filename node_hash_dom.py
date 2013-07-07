@@ -11,7 +11,7 @@ def computehash (elem, hashdict):
     if not elem.hasChildNodes():
         elem.normalize()
         value = elem.nodeValue
-        
+
         sha.update (value.strip())
         hashdict[elem] = sha.hexdigest()
 
@@ -27,6 +27,13 @@ def computehash (elem, hashdict):
 
     return hashdict[elem]
 
+
+def typeofelem (elem, docroot):
+    if elem == docroot:
+        return ''
+    else:
+        parent = elem.parentNode
+        return typeofelem(parent, docroot) + '/' + elem.nodeName
 
 def readxml():
     dict1 = {}
@@ -44,6 +51,27 @@ def readxml():
     else:
         print "XMLs are different"
 
+def valid_node (node):
+    if node.nodeName == '#text':
+        if node.nodeValue.strip() == '':
+            return False
+    return True
+
+def _test_typeofelem():
+    doc1 = minidom.parse('tests/a.xml')
+    root1 = doc1.documentElement
+
+    def inner_test(elem):
+        print typeofelem (elem, doc1)
+
+        if elem.hasChildNodes:
+            for child in elem.childNodes:
+                if valid_node (child):
+                    inner_test (child)
+        else:
+            print 'elem has no child'
+
+    inner_test (root1)
 
 if __name__ == '__main__':
-    readxml()
+    _test_typeofelem()

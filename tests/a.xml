@@ -8,5 +8,8 @@
     <low>
       Another text
     </low>
+    <another_low>
+      Text in another low
+    </another_low>
   </mid>
 </top>
