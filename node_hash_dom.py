@@ -11,12 +11,15 @@ class Xmldiff:
     root2 = 0
 
     @classmethod
-    def signature (self, elem, docroot):
-        if elem == docroot:
+    def signature (self, elem):
+        if elem.nodeType == minidom.Node.DOCUMENT_NODE:
             return ''
+        elif elem.nodeType == minidom.Node.ATTRIBUTE_NODE:
+            return self.signature (elem.ownerElement) + '/' + elem.nodeName + '/#attr'
+        elif elem.nodeType != minidom.Node.TEXT_NODE:
+            return self.signature(elem.parentNode) + '/' + elem.nodeName
         else:
-            parent = elem.parentNode
-            return self.signature(parent, docroot) + '/' + elem.nodeName
+            return self.signature(elem.parentNode) + '/' + elem.nodeName
 
     @classmethod
     def valid_node (self, node):
@@ -40,7 +43,7 @@ class Xmldiff:
 
         # [2]. Look for attributes
 
-        # [3].
+        # [3]. Look for child nodes
         if not elem.hasChildNodes():
             elem.normalize()
             value = elem.nodeValue
@@ -51,7 +54,7 @@ class Xmldiff:
         else:
             childhash = []
             for child in elem.childNodes:
-                childhash.append (computehash (child, hashdict))
+                childhash.append (self.computehash (child, hashdict))
 
                 for iter in sorted (childhash):
                     sha.update (iter)
@@ -82,44 +85,73 @@ class Xmldiff:
         else:
             return False
 
+    def computedist (x, y):
+        if not valid_node(x) and not valid_node(y):
+            return 0
+        if not valid_node(x) and valid_node(y):
+            return 1
+        if valid_node(x) and not valid_node(y):
+            return 1
+        
+        assert x.nodeType == y.nodeType
+
+        if x.nodeType == minidom.Node.ATTRIBUTE_NODE:
+            if x.value == y.value:  # values same. dist zero
+                return 0
+            else:
+                return 1
+
+        if x.nodeType == minidom.Node.TEXT_NODE:
+            if x.nodeValue == y.nodeValue:
+                return 0
+            else:
+                return 1
+
     def mincostmatching (self):
         n1 = set()
-        for leaf1 in iterleafnodes (doc1):
+        for leaf1 in self.iterleafnodes (self.doc1):
             n1.append (leaf1)
 
         n2 = set()
-        for leaf2 in iterleafnodes (doc2):
+        for leaf2 in self.iterleafnodes (self.doc2):
             n2.append (leaf2)
 
         while len(n1) != 0 or len(n2) != 0:
             for x in n1:
                 for y in n2:
-                    if signature(x) == signature(y):
-                        # computedist (x, y)
+                    if self.signature(x) == self.signature(y):
+                        computedist (x, y)
+                        pass
 
-            n1 = parents (n1)
-            n2 = parents (n2)
+            n1 = self.parents (n1)
+            n2 = self.parents (n2)
 
 
 
-    
+
 def _test_signature():
     doc1 = minidom.parse('tests/a.xml')
     root1 = doc1.documentElement
 
     def inner_test(elem):
-        print Xmldiff.signature (elem, doc1)
+        # [1]. print self
+        print Xmldiff.signature (elem)
 
-        if elem.hasChildNodes:
+        # [2]. print attributes
+        if elem.nodeType != minidom.Node.TEXT_NODE and elem.hasAttributes:
+            attrmap = elem.attributes
+            for v in attrmap._attrs.values():
+                print Xmldiff.signature(v)
+
+        # [3]. print children
+        if elem.hasChildNodes():
             for child in elem.childNodes:
                 if Xmldiff.valid_node (child):
                     inner_test (child)
-        else:
-            print 'elem has no child'
 
     inner_test (root1)
 
 if __name__ == '__main__':
-    xd = Xmldiff();
-
-    xd.readxml('tests/a.xml', 'tests/d.xml')
+    #    xd = Xmldiff();
+    #xd.readxml('tests/a.xml', 'tests/d.xml')
+    _test_signature()
