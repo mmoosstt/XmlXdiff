@@ -41,6 +41,7 @@ class Xmldiff:
         # [1]. Create a hash object
         sha = hashlib.sha1()
 
+
         # [2]. Look for attributes
 
         # [3]. Look for child nodes
