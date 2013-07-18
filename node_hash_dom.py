@@ -127,40 +127,60 @@ class Xmldiff:
         else:
             return False
 
+    def computemindist(self, x, y):
+        c1 = x.childNodes
+        c2 = y.childNodes
+
+        # generate partial bipartite matching between childNodes
+        bestMatching = None
+        minDist      = -1
+        for (unmapedX, mapped, unmappedY) in self.getPartialBipartMatch (c1, c2):
+            dist = 0
+            for childx in unmapedX:
+                dist = dist + self.disttable[(childx, None)]
+
+            for childy in unmapedY:
+                dist = dist + self.disttable[(None, childy)]
+
+            for (childx, childY) in mapped:
+                dist = dist + self.disttable[(childx, childy)]
+
+            if minDist < 0 or minDist > dist:
+                minDist = dist
+
+        self.disttable[(x, y)] = minDist
+
     def computedist (self, x, y):
-        if x == y == None:
-            return 0
-        elif x == None:
-            return 1
-        elif y == None:
-            return 1
-
+        '''
+        Computes distance between two nodes of two diffenent XML docs.
+        Uses 'computemindist', 'costInsert', 'costDelete'
+        '''
         # leaf node
-        if x.nodeType == minidom.Node.ATTRIBUTE_NODE:
-            if x.value == y.value:  # values same. dist zero
-                return 0
-            else:
-                return 1
+        if self.isleafnode(x) and self.isleafnode(y)
+            if self.signature(x) == self.signature(y):
+                if x.value == y.value:  # values same. dist zero
+                    self.disttable[(x, y)] = 0
+                else:
+                    self.disttable[(x, y)] = 1
+        if self.isleafnode(x) and y == None:
+            self.disttable[(x, y)] = 1
 
-        # leaf node
-        elif x.nodeType == minidom.Node.TEXT_NODE:
-            if x.nodeValue == y.nodeValue:
-                return 0
-            else:
-                return 1
+        if x == None and self.isleafnode(y):
+            self.disttable[(x, y)] = 1
 
         # none leaf node
-        else:
-            total = 0
-            for xchild in x.childNodes:
-                ymin = -1
-                for ychild in y.childNodes:
-                    if (xchild, ychild) in self.disttable.keys():
-                        if ymin < 0 or ymin > self.disttable[(xchild, ychild)]:
-                            ymin = self.disttable[(xchild, ychild)]
-                if ymin > 0:
-                    total = total + ymin
-            return total
+        if not self.isleafnode(x) and y == None:
+            self.disttable[(x, y)] = self.costDelete(x)
+
+        elif x == None and not self.isleafnode(y):
+            self.disttable[(x, y)] = self.costInsert(x)
+
+        elif not isleafnode(x) and not isleafnode(y):
+            if self.signature(x) != self.signature(y):
+                self.disttable[(x, y)] = self.costDelete(x) + self.costInsert(y)
+
+            else:
+                self.computemindist(x, y)
 
     def addChildtoMmin (self, root1, root2):
         self.M_min.add ((root1, root2))
@@ -188,8 +208,7 @@ class Xmldiff:
         while len(n1) != 0 or len(n2) != 0:
             for x in n1:
                 for y in n2:
-                    if self.signature(x) == self.signature(y):
-                        self.disttable[(x, y)] = self.computedist (x, y)
+                    self.computedist (x, y)
             n1 = self.parents (n1)
             n2 = self.parents (n2)
 
@@ -205,6 +224,9 @@ class Xmldiff:
 
     @classmethod
     def isleafnode (self, node):
+        if node == None:
+            return False
+
         if node.hasChildNodes:
             return False
         else:
