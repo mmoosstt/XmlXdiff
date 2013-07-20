@@ -1,12 +1,12 @@
-<top info="some_info">
+<top>
   <mid>
     <low>
-      Some text
+      Another text
     </low>
   </mid>
   <mid>
     <low>
-      Another text
+      Some text
     </low>
     <another_low>
       Text in another low
