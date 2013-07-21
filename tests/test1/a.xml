@@ -1,0 +1,32 @@
+<Books>
+    <Book>
+	<Title>Harry Potter and the Sorcerer's Stone</Title>
+	<Author>J.K. Rowling</Author>
+	<Seller>
+	    <ID>Mike</ID>
+	    <Rating>30</Rating>
+	</Seller>
+	<First_Bid>$5.00</First_Bid>
+	<Current_Bid>$8.50</Current_Bid>
+	<Bidder>
+	    <ID>Steve</ID>
+	    <Rating>25</Rating>
+	</Bidder>
+    </Book>
+<!--
+    <Book>
+	<Title>The Advantures of Tom Sawyer</Title>
+	<Author>Mark Twain</Author>
+	<Seller>
+	    <ID>Sean</ID>
+	    <Rating>100</Rating>
+	</Seller>
+	<First_Bid>$2.00</First_Bid>
+	<Current_Bid>$3.50</Current_Bid>
+	<Bidder>
+	    <ID>Tim</ID>
+	    <Rating>5</Rating>
+	</Bidder>
+    </Book>
+-->
+</Books>

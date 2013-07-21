@@ -26,6 +26,9 @@ class Xmldiff:
 
     @classmethod
     def valid_node (self, node):
+        if node.nodeType == minidom.Node.COMMENT_NODE:
+            return False
+        
         if node.nodeName == '#text':
             if node.nodeValue.strip() == '':
                 return False
@@ -115,6 +118,10 @@ class Xmldiff:
         self.M_min     = {}
 
     def computehash (self, elem, hashdict):
+        # [0]. is valid node
+        if not self.valid_node (elem):
+            return
+
         # [1]. Create a hash object
         sha = hashlib.sha1()
 
@@ -177,7 +184,28 @@ class Xmldiff:
                     for p in itertools.permutations(asub):
                         yield (adiff, zip(p, bsub), bdiff)
 
+    def printmapping (self, unmappedX, mapped, unmappedY):
+        print '------------------------------------'
+        print 'unmappedX = '
+        for x in unmappedX:
+            print x.toprettyxml(indent='', newl='')
+        print '--------------'
+
+        print 'mapped = '
+        for (x, y) in mapped:
+            print x.toprettyxml(indent='', newl='')
+            print y.toprettyxml(indent='', newl='')
+        print '--------------'
+
+        print 'unmappedY = '
+        for y in unmappedY:
+            print y.toprettyxml(indent='', newl='')
+
+
     def computemindist(self, x, y):
+        # if x.nodeName == 'top':
+        #     print 'computing for mid.....'
+
         c1 = [i for i in x.childNodes if self.valid_node(i)]
         c2 = [i for i in y.childNodes if self.valid_node(i)]
 
@@ -185,6 +213,11 @@ class Xmldiff:
         bestMapped = None
         minDist    = -1
         for (unmappedX, mapped, unmappedY) in self.getPartialBipartMatch (c1, c2):
+
+            # if x.nodeName == 'top':
+            #     self.printmapping(unmappedX, mapped, unmappedY)
+            #     print '--------------------------------------------------'
+
             dist = 0
             for childx in unmappedX:
                 dist = dist + self.costDelete(childx) #self.disttable[(childx, None)]
@@ -192,8 +225,11 @@ class Xmldiff:
             for childy in unmappedY:
                 dist = dist + self.costInsert(childy) #self.disttable[(None, childy)]
 
-            for (childx, childY) in mapped:
-                dist = dist + self.disttable[(childx, childy)]
+            for (childx, childy) in mapped:
+                if (childx, childy) in self.disttable.keys():
+                    dist = dist + self.disttable[(childx, childy)]
+                else:
+                    dist = dist + self.costDelete(childx) + self.costInsert(childy)
 
             if minDist < 0 or minDist > dist:
                 minDist    = dist
@@ -232,12 +268,19 @@ class Xmldiff:
         if x == None and self.isleafnode(y):
             self.updatedisttable(x, y, 1)
 
+        # one is leaf node and another is non leaf node
+        if self.isleafnode(x) and not self.isleafnode(y):
+            self.updatedisttable(x, y, self.costDelete(x) + self.costInsert(y))
+
+        if not self.isleafnode(x) and self.isleafnode(y):
+            self.updatedisttable(x, y, self.costDelete(x) + self.costInsert(y))
+
         # none leaf node
         if not self.isleafnode(x) and y == None:
             self.updatedisttable(x, y, self.costDelete(x))
 
         elif x == None and not self.isleafnode(y):
-            self.updatedisttable(x, y, costInsert(y))
+            self.updatedisttable(x, y, self.costInsert(y))
 
         elif not self.isleafnode(x) and not self.isleafnode(y):
             if self.signature(x) != self.signature(y):
@@ -345,7 +388,7 @@ def _test_signature(file):
 if __name__ == '__main__':
     print "testing xdiff_core..."
     xd = Xmldiff();
-    xd.readxml('tests/a.xml', 'tests/b.xml')
+    xd.readxml('tests/test1/a.xml', 'tests/test1/b.xml')
     xd.xdiff()
 
     #_test_signature()
