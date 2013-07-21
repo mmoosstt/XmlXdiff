@@ -273,9 +273,9 @@ class Xmldiff:
             n1 = self.parents (n1)
             n2 = self.parents (n2)
 
-        for k1, k2 in self.disttable.keys():
-            print self.signature(k1), self.signature(k2)
-            print self.disttable[(k1, k2)]
+        # for k1, k2 in self.disttable.keys():
+        #     print self.signature(k1), self.signature(k2)
+        #     print self.disttable[(k1, k2)]
 
     def notPresentInFst (self, mminset, node):
         for (x, y) in mminset:
