@@ -200,17 +200,17 @@ class Xmldiff:
                 bestMapped = mapped
 
         # set the distance computed.
-        #print "Setting mindist for", x, y, minDist
-        self.disttable[(x, y)] = minDist
+        self.updatedisttable(x, y, minDist)
 
         # set the min cost matching
         self.M_min[(x, y)] = set([(x, y)])
         for (childx, childy) in bestMapped:
             if (childx, childy) in self.M_min.keys():
-                # mset = self.M_min[(x, y)]
-                # mset.add(self.M_min[(childx, childy)])
                 for (mat1, mat2) in self.M_min[(childx, childy)]:
                     self.M_min[(x, y)].add((mat1, mat2))
+
+    def updatedisttable(self, x, y, dist):
+        self.disttable[(x, y)] =  dist
 
     def computedist (self, x, y):
         '''
@@ -221,34 +221,27 @@ class Xmldiff:
         if self.isleafnode(x) and self.isleafnode(y):
             if self.signature(x) == self.signature(y):
                 if x.nodeValue == y.nodeValue:  # values same. dist zero
-                    #print "Setting mindist for ", x, y, 0
-                    self.disttable[(x, y)] = 0
+                    self.updatedisttable(x, y, 0)
                 else:
-                    #print "Setting mindist for ", x, y, 1
-                    self.disttable[(x, y)] = 1
+                    self.updatedisttable(x, y, 1)
                 self.M_min[(x, y)]     = set([(x, y)])
 
         if self.isleafnode(x) and y == None:
-            #print "Setting mindist for ", x, y, 1
-            self.disttable[(x, y)] = 1
+            self.updatedisttable(x, y, 1)
 
         if x == None and self.isleafnode(y):
-            #print "Setting midist for ", x, y, 1
-            self.disttable[(x, y)] = 1
+            self.updatedisttable(x, y, 1)
 
         # none leaf node
         if not self.isleafnode(x) and y == None:
-            #print "Setting mindist for ", x, y, self.costDelete(x)
-            self.disttable[(x, y)] = self.costDelete(x)
+            self.updatedisttable(x, y, self.costDelete(x))
 
         elif x == None and not self.isleafnode(y):
-            #print "Setting mindist for ", x, y, self.costInsert(y)
-            self.disttable[(x, y)] = self.costInsert(y)
+            self.updatedisttable(x, y, costInsert(y))
 
         elif not self.isleafnode(x) and not self.isleafnode(y):
             if self.signature(x) != self.signature(y):
-                #print "Setting mindist for ", x, y, self.costDelete(x) + self.costInsert(y)
-                self.disttable[(x, y)] = self.costDelete(x) + self.costInsert(y)
+                self.updatedisttable(x, y, self.costDelete(x) + self.costInsert(y))
 
             else:
                 self.computemindist(x, y)
@@ -325,8 +318,8 @@ class Xmldiff:
             # generate editscript
             self.generatescript (self.root1, self.root2)
 
-def _test_signature():
-    doc1 = minidom.parse('tests/a.xml')
+def _test_signature(file):
+    doc1 = minidom.parse(file)
     root1 = doc1.documentElement
 
     def inner_test(elem):
@@ -350,6 +343,7 @@ def _test_signature():
 
 
 if __name__ == '__main__':
+    print "testing xdiff_core..."
     xd = Xmldiff();
     xd.readxml('tests/a.xml', 'tests/b.xml')
     xd.xdiff()
