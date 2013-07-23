@@ -13,7 +13,6 @@
 	    <Rating>25</Rating>
 	</Bidder>
     </Book>
-<!--
     <Book>
 	<Title>The Advantures of Tom Sawyer</Title>
 	<Author>Mark Twain</Author>
@@ -28,5 +27,4 @@
 	    <Rating>5</Rating>
 	</Bidder>
     </Book>
--->
 </Books>
