@@ -1,5 +1,4 @@
 <Books>
-<!--
     <Book>
 	<Title>The Advantures of Tom Sawyer</Title>
 	<Author>Mark Twain</Author>
@@ -14,7 +13,6 @@
 	    <Rating>5</Rating>
 	</Bidder>
     </Book>
--->
     <Book>
 	<Title>Harry Potter and the Sorcerer's Stone</Title>
 	<Author>J.K. Rowling</Author>

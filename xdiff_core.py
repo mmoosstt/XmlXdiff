@@ -28,7 +28,7 @@ class Xmldiff:
     def valid_node (self, node):
         if node.nodeType == minidom.Node.COMMENT_NODE:
             return False
-        
+
         if node.nodeName == '#text':
             if node.nodeValue.strip() == '':
                 return False
@@ -168,21 +168,9 @@ class Xmldiff:
         else:
             return False
 
-    def getPartialBipartMatch (self, a, b):
-        aset = set(a)
-        bset = set(b)
-
-        for asub in self.powerset(a):
-            for bsub in self.powerset(b):
-                if len(asub) == len(bsub):
-                    asubset = set(asub)
-                    bsubset = set(bsub)
-
-                    adiff = aset - asubset
-                    bdiff = bset - bsubset
-
-                    for p in itertools.permutations(asub):
-                        yield (adiff, zip(p, bsub), bdiff)
+    def getPartialBipartMatch (self, x, y):
+        bpm = graph.BipartiteMatcher (self, x, y)
+        return bpm.findMatches()
 
     def printmapping (self, unmappedX, mapped, unmappedY):
         print '------------------------------------'
@@ -203,44 +191,32 @@ class Xmldiff:
 
 
     def computemindist(self, x, y):
-        # if x.nodeName == 'top':
-        #     print 'computing for mid.....'
-
         c1 = [i for i in x.childNodes if self.valid_node(i)]
         c2 = [i for i in y.childNodes if self.valid_node(i)]
 
         # generate partial bipartite matching between childNodes
-        bestMapped = None
-        minDist    = -1
-        for (unmappedX, mapped, unmappedY) in self.getPartialBipartMatch (c1, c2):
 
-            # if x.nodeName == 'top':
-            #     self.printmapping(unmappedX, mapped, unmappedY)
-            #     print '--------------------------------------------------'
+        #for (unmappedX, mapped, unmappedY) in self.getPartialBipartMatch (c1, c2):
+        (unmappedX, mapped, unmappedY) = self.getPartialBipartMatch (c1, c2)
+        dist = 0
+        for childx in unmappedX:
+            dist = dist + self.costDelete(childx) #self.disttable[(childx, None)]
 
-            dist = 0
-            for childx in unmappedX:
-                dist = dist + self.costDelete(childx) #self.disttable[(childx, None)]
+        for childy in unmappedY:
+            dist = dist + self.costInsert(childy) #self.disttable[(None, childy)]
 
-            for childy in unmappedY:
-                dist = dist + self.costInsert(childy) #self.disttable[(None, childy)]
-
-            for (childx, childy) in mapped:
-                if (childx, childy) in self.disttable.keys():
-                    dist = dist + self.disttable[(childx, childy)]
-                else:
-                    dist = dist + self.costDelete(childx) + self.costInsert(childy)
-
-            if minDist < 0 or minDist > dist:
-                minDist    = dist
-                bestMapped = mapped
+        for (childx, childy) in mapped:
+            if (childx, childy) in self.disttable.keys():
+                dist = dist + self.disttable[(childx, childy)]
+            else:
+                dist = dist + self.costDelete(childx) + self.costInsert(childy)
 
         # set the distance computed.
-        self.updatedisttable(x, y, minDist)
+        self.updatedisttable(x, y, dist)
 
         # set the min cost matching
         self.M_min[(x, y)] = set([(x, y)])
-        for (childx, childy) in bestMapped:
+        for (childx, childy) in mapped:
             if (childx, childy) in self.M_min.keys():
                 for (mat1, mat2) in self.M_min[(childx, childy)]:
                     self.M_min[(x, y)].add((mat1, mat2))
@@ -309,10 +285,6 @@ class Xmldiff:
             n1 = self.parents (n1)
             n2 = self.parents (n2)
 
-        # for k1, k2 in self.disttable.keys():
-        #     print self.signature(k1), self.signature(k2)
-        #     print self.disttable[(k1, k2)]
-
     def notPresentInFst (self, mminset, node):
         for (x, y) in mminset:
             if x == node:
@@ -326,12 +298,14 @@ class Xmldiff:
         return True
 
     def generatescript(self, root1, root2):
-        if (root1, root2) not in self.M_min[(root1, root2)]:
+        if  (root1, root2) not in self.M_min.keys():
+            print "Delete ", root1.nodeName, "Insert ", root2.nodeName
+        elif (root1, root2) not in self.M_min[(root1, root2)]:
             print "Delete ", root1.nodeName, "Inset ", root2.nodeName
         else:
             if (root1, root2) in self.disttable.keys():
                 if self.disttable[(root1, root2)] == 0:
-                    print ''
+                    pass
 
             for x in [i for i in root1.childNodes if self.valid_node(i)]:
                 for y in [i for i in root2.childNodes if self.valid_node(i)]:
@@ -339,7 +313,7 @@ class Xmldiff:
                         if self.isleafnode(x) and self.isleafnode(y):
                             if (x, y) in self.disttable.keys():
                                 if self.disttable[(x, y)] == 0:
-                                    print ''
+                                    pass
                                 else:
                                     print "update ", x.nodeValue, " to ", y.nodeValue
                         else: #x, y are not leaf nodes
@@ -383,6 +357,7 @@ def _test_signature(file):
 
     inner_test (root1)
 
+import graph
 
 
 if __name__ == '__main__':
