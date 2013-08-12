@@ -134,7 +134,9 @@ class Xmldiff:
 
         # [3]. Look for child nodes
         if not elem.hasChildNodes():
-            elem.normalize()
+            # this somehow does not work with Python installed at SNPS
+            #elem.normalize()
+
             value = elem.nodeValue
 
             sha.update (value.strip())
@@ -168,26 +170,10 @@ class Xmldiff:
         else:
             return False
 
+
     def getPartialBipartMatch (self, x, y):
         bpm = graph.BipartiteMatcher (self, x, y)
         return bpm.findMatches()
-
-    def printmapping (self, unmappedX, mapped, unmappedY):
-        print '------------------------------------'
-        print 'unmappedX = '
-        for x in unmappedX:
-            print x.toprettyxml(indent='', newl='')
-        print '--------------'
-
-        print 'mapped = '
-        for (x, y) in mapped:
-            print x.toprettyxml(indent='', newl='')
-            print y.toprettyxml(indent='', newl='')
-        print '--------------'
-
-        print 'unmappedY = '
-        for y in unmappedY:
-            print y.toprettyxml(indent='', newl='')
 
 
     def computemindist(self, x, y):
@@ -195,15 +181,13 @@ class Xmldiff:
         c2 = [i for i in y.childNodes if self.valid_node(i)]
 
         # generate partial bipartite matching between childNodes
-
-        #for (unmappedX, mapped, unmappedY) in self.getPartialBipartMatch (c1, c2):
         (unmappedX, mapped, unmappedY) = self.getPartialBipartMatch (c1, c2)
         dist = 0
         for childx in unmappedX:
-            dist = dist + self.costDelete(childx) #self.disttable[(childx, None)]
+            dist = dist + self.costDelete(childx)
 
         for childy in unmappedY:
-            dist = dist + self.costInsert(childy) #self.disttable[(None, childy)]
+            dist = dist + self.costInsert(childy)
 
         for (childx, childy) in mapped:
             if (childx, childy) in self.disttable.keys():
@@ -221,14 +205,11 @@ class Xmldiff:
                 for (mat1, mat2) in self.M_min[(childx, childy)]:
                     self.M_min[(x, y)].add((mat1, mat2))
 
+
     def updatedisttable(self, x, y, dist):
         self.disttable[(x, y)] =  dist
 
     def computedist (self, x, y):
-        '''
-        Computes distance between two nodes of two diffenent XML docs.
-        Uses 'computemindist', 'costInsert', 'costDelete'
-        '''
         # leaf node
         if self.isleafnode(x) and self.isleafnode(y):
             if self.signature(x) == self.signature(y):
@@ -361,9 +342,9 @@ import graph
 
 
 if __name__ == '__main__':
-    print "testing xdiff_core..."
-    xd = Xmldiff();
-    xd.readxml('tests/test1/a.xml', 'tests/test1/b.xml')
-    xd.xdiff()
-
-    #_test_signature()
+    # print "testing xdiff_core..."
+    # xd = Xmldiff();
+    # xd.readxml('tests/test3/a.xml', 'tests/test3/b.xml')
+    # xd.xdiff()
+    
+    _test_signature('tests/test3/a.xml')
