@@ -12,17 +12,21 @@ class Xmldiff:
     root2     = 0
     disttable = {}
     M_min     = {}
+    signhash  = {}
 
-    @classmethod
     def signature (self, elem):
-        if elem.nodeType == minidom.Node.DOCUMENT_NODE:
-            return ''
-        elif elem.nodeType == minidom.Node.ATTRIBUTE_NODE:
-            return self.signature (elem.ownerElement) + '/' + elem.nodeName + '/#attr'
+        if elem in self.signhash:
+            return self.signhash[elem]
         else:
-            if elem.parentNode == None:
-                print elem.nodeName, elem.nodeValue
-            return self.signature(elem.parentNode) + '/' + elem.nodeName
+            retval = None
+            if elem.nodeType == minidom.Node.DOCUMENT_NODE:
+                retval = ''
+            elif elem.nodeType == minidom.Node.ATTRIBUTE_NODE:
+                retval = self.signature (elem.ownerElement) + '/' + elem.nodeName + '/#attr'
+            else:
+                retval =  self.signature(elem.parentNode) + '/' + elem.nodeName
+        self.signhash[elem] = retval
+        return retval
 
     @classmethod
     def valid_node (self, node):
@@ -122,6 +126,7 @@ class Xmldiff:
         self.root2     = 0
         self.disttable = {}
         self.M_min     = {}
+        self.signhash  = {}
 
     def computehash (self, elem, hashdict):
         # [0]. is valid node
@@ -188,7 +193,7 @@ class Xmldiff:
             dist = dist + self.costInsert(childy)
 
         for (childx, childy) in mapped:
-            if (childx, childy) in self.disttable.keys():
+            if (childx, childy) in self.disttable:
                 dist = dist + self.disttable[(childx, childy)]
             else:
                 dist = dist + self.costDelete(childx) + self.costInsert(childy)
@@ -199,7 +204,7 @@ class Xmldiff:
         # set the min cost matching
         self.M_min[(x, y)] = set([(x, y)])
         for (childx, childy) in mapped:
-            if (childx, childy) in self.M_min.keys():
+            if (childx, childy) in self.M_min:
                 for (mat1, mat2) in self.M_min[(childx, childy)]:
                     self.M_min[(x, y)].add((mat1, mat2))
 
@@ -211,17 +216,20 @@ class Xmldiff:
 
     def computedist (self, x, y):
         #print 'computing distance (', x.nodeName, ',', x.nodeValue,')','(', y.nodeName, y.nodeValue, ')'
+        if (x, y) in self.disttable:
+            return None
 
-        if self.signature(x) == self.signature(y):
-            if self.isleafnode(x) and self.isleafnode(y):
-                if x.nodeValue == y.nodeValue:
-                    self.updatedisttable(x, y, 0)
+        else:
+            if self.signature(x) == self.signature(y):
+                if self.isleafnode(x) and self.isleafnode(y):
+                    if x.nodeValue == y.nodeValue:
+                        self.updatedisttable(x, y, 0)
+                    else:
+                        self.updatedisttable(x, y, 1)
+                    self.M_min[(x, y)] = set([(x, y)])
+
                 else:
-                    self.updatedisttable(x, y, 1)
-                self.M_min[(x, y)] = set([(x, y)])
-
-            else:
-                self.computemindist(x, y)
+                    self.computemindist(x, y)
 
                 
 
@@ -263,23 +271,23 @@ class Xmldiff:
 
     def generatescript(self, root1, root2):
         # print '---------------------------------'
-        # for (k1, k2) in self.M_min.keys():
+        # for (k1, k2) in self.M_min:
         #     print '[', k1.nodeName, k2.nodeName, '] --> ', [(n1.nodeName, n2.nodeName) for (n1, n2) in self.M_min[(k1, k2)]]
         # print '---------------------------------'
  
-        if  (root1, root2) not in self.M_min.keys():
+        if  (root1, root2) not in self.M_min:
             print "Delete ", root1.nodeName, "Insert ", root2.nodeName
         elif (root1, root2) not in self.M_min[(root1, root2)]:
             print "Delete ", root1.nodeName, "Inset ", root2.nodeName
         else:
-            if ((root1, root2) in self.disttable.keys()) and (self.disttable[(root1, root2)] == 0):
+            if ((root1, root2) in self.disttable) and (self.disttable[(root1, root2)] == 0):
                 pass
             else:
                 for x in self.child_nodes (root1):
                     for y in self.child_nodes (root2):
                         if (x, y) in self.M_min[(root1, root2)]:
                             if self.isleafnode(x) and self.isleafnode(y):
-                                if (x, y) in self.disttable.keys():
+                                if (x, y) in self.disttable:
                                     if self.disttable[(x, y)] == 0:
                                         pass
                                     else:

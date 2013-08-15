@@ -44,8 +44,8 @@ class BipartiteMatcher:
         xremaining = self.x[:]
         yremaining = self.y[:]
 
-        for k in groupsofx.keys():
-            if k in groupsofy.keys():
+        for k in groupsofx:
+            if k in groupsofy:
                 (umx, mat, umy) = self.createPotentialMatchList (groupsofx[k][:],
                                                                  groupsofy[k][:])
                 # remove from remaining list
@@ -70,10 +70,10 @@ class BipartiteMatcher:
 
         for x in listx:
             for y in listy:
-                if (x, y) not in self.xd.disttable.keys():
+                if (x, y) not in self.xd.disttable:
                     self.xd.computedist (x, y)
                     
-                if (x, y) in self.xd.disttable.keys():
+                if (x, y) in self.xd.disttable:
                     dist = self.xd.disttable[(x, y)]
                     distlist.append ((dist, x, y))
                 else:
@@ -88,11 +88,12 @@ class BipartiteMatcher:
         #print distlist
         sortedlist = sorted(distlist, key=itemgetter(0))
 
-        for item in sortedlist:
+        for (dist, x, y) in sortedlist:
             if len(listx) != 0 and len(listy) != 0:
-                matched.append((item[1], item[2]))
-                listx.remove(item[1])
-                listy.remove(item[2])
+                if x in listx and y in listy:
+                    matched.append((x, y))
+                    listx.remove(x)
+                    listy.remove(y)
 
         unmatchedx = listx
         unmatchedy = listy
