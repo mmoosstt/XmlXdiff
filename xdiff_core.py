@@ -13,6 +13,8 @@ class Xmldiff:
     disttable = {}
     M_min     = {}
     signhash  = {}
+    root1_matched = None
+    root2_matched = None
 
     def signature (self, elem):
         if elem in self.signhash:
@@ -127,6 +129,8 @@ class Xmldiff:
         self.disttable = {}
         self.M_min     = {}
         self.signhash  = {}
+        self.root1_matched = set()
+        self.root2_matched = set()
 
     def computehash (self, elem, hashdict):
         # [0]. is valid node
@@ -208,7 +212,7 @@ class Xmldiff:
                 for (mat1, mat2) in self.M_min[(childx, childy)]:
                     self.M_min[(x, y)].add((mat1, mat2))
 
-
+    
     def updatedisttable(self, x, y, dist):
         #print 'setting dist ', x.nodeName, y.nodeName, dist
         self.disttable[(x, y)] =  dist
@@ -238,13 +242,37 @@ class Xmldiff:
         compute the minimum edit distance (cost) between two nodes
         in two different xml files.
         '''
-        n1 = set()
-        for leaf1 in self.iterleafnodes (root1):
-            n1.add (leaf1)
+        c1 = [i for i in self.child_nodes(root1)]
+        c2 = [i for i in self.child_nodes(root2)]
+        
+        for x in c1:
+            for y in c2:
+                if self.dict1[x] == self.dict2[y]:
+                    self.root1_matched.add(x)
+                    self.root2_matched.add(y)
 
+                    self.M_min[(x, y)] = set([(x, y)])
+
+                    try:
+                        self.M_min[(root1, root2)].add((x, y))
+                    except KeyError:
+                        self.M_min[(root1, root2)] = set([(x, y)])
+                        self.M_min[(root1, root2)].add ((root1, root2))
+
+                    break
+                
+        n1 = set()
         n2 = set()
-        for leaf2 in self.iterleafnodes (root2):
-            n2.add (leaf2)
+
+        for i in c1:
+            if i not in self.root1_matched:
+                for l in self.iterleafnodes(i):
+                    n1.add(l)
+
+        for i in c2:
+            if i not in self.root2_matched:
+                for l in self.iterleafnodes(i):
+                    n2.add(l)
 
 
         while len(n1) != 0 or len(n2) != 0:
@@ -300,6 +328,39 @@ class Xmldiff:
                     if self.notPresentInFst (self.M_min[(root1, root2)], x):
                         print "delete ", self.signature(x) #x.toxml()
 
+
+    def generateoutput (self, root1, root2):
+        if (root1, root2) not in self.M_min or (root1, root2) not in self.M_min[(root1, root2)]:
+            print "Delete", root1.nodeName, "Insert", root2.nodeName
+
+        elif ((root1, root2) in self.disttable) and (self.disttable[(root1, root2)] == 0):
+            pass
+
+        else:
+            n1 = []
+            n2 = []
+
+            for i in self.child_nodes(root1):
+                if i not in self.root1_matched:
+                    n1.append(i)
+
+            for i in self.child_nodes(root2):
+                if i not in self.root2_matched:
+                    n2.append(i)
+
+            if len(n1) == 0:
+                for yr in n2:
+                    print "Insert", self.signature(yr)
+            elif len(n2) == 0:
+                for xr in n1:
+                    print "Delete", self.signature(xr)
+            else:
+                for xr in n1:
+                    for yr in n2:
+                        if (xr, yr) in self.M_min[(root1, root2)]:
+                            self.generatescript(xr, yr)
+            
+
     def xdiff(self):
         # check and filtering
         if self.checkroothash():
@@ -309,7 +370,7 @@ class Xmldiff:
             self.mincostmatching (self.root1, self.root2)
 
             # generate editscript
-            self.generatescript (self.root1, self.root2)
+            self.generateoutput (self.root1, self.root2)
 
 
 def _test_signature(file):
@@ -331,7 +392,7 @@ import graph
 if __name__ == '__main__':
     print "testing xdiff_core..."
     xd = Xmldiff();
-    xd.readxml('tests/test3/a.xml', 'tests/test3/b.xml')
+    xd.readxml('tests/test7/a.xml', 'tests/test7/b.xml')
     xd.xdiff()
     
     # _test_signature('tests/test3/a.xml')
