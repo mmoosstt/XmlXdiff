@@ -1,6 +1,6 @@
 <Books>
     <Book>
-	<Title>Harry Potter and the Sorcerer's Stone</Title>
+	<Title a="eins" b="zwei">Harry Potter and the Sorcerer's Stone</Title>
 	<Author>J.K. Rowling</Author>
 	<Seller>
 	    <ID>Mike</ID>
@@ -14,6 +14,7 @@
 	</Bidder>
     </Book>
     <Book>
+    <!-- oolly  -->
 	<Title>The Advantures of Tom Sawyer</Title>
 	<Author>Mark Twain</Author>
 	<Seller>
