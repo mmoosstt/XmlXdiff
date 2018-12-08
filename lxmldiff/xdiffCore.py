@@ -23,7 +23,7 @@ def getChildren(xml, element, pathes, hashes):
         getChildren(xml, _child, pathes, hashes)
         
 
-def updatePipe(pipe, element):
+def updatePipe(element):
     pipe += (element.tag,)
     if hasattr(element, "attrib"):
         for _name in sorted(element.attrib.keys()):
