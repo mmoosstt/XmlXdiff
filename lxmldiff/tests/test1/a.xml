@@ -5,7 +5,7 @@
 	<attribvaluechange a="a" name="name"/>
 	<tagnamechanged a="a" name="name"/>
     <Book>
-	<Title a="eins" b="zwei">Harry Potter and the Sorcerer's Stone</Title>
+	<Title>Harry Potter and the Sorcerer's Stone</Title>
 	<Author>J.K. Rowling</Author>
 	<Seller>
 	    <ID>Mike</ID>

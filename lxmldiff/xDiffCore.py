@@ -103,6 +103,7 @@ class xDiffExecutor(object):
         self.path1 = "{}\\tests\\test1\\a.xml".format(lxmldiff.getPath())
         self.path2 =  "{}\\tests\\test1\\b.xml".format(lxmldiff.getPath())
 
+    def run(self):
         self.xml1 = lxml.etree.parse(self.path1)
         self.xml2 = lxml.etree.parse(self.path2)
 
@@ -123,17 +124,69 @@ class xDiffExecutor(object):
         for _hash1 in self.hashes1.keys():
             _pathes1 = self.hashes1[_hash1]
             
-            for _path1 in _pathes1:
-                if _hash1 in self.hashes2.keys():
-                    _pathes2 = self.hashes2[_hash1]
+            if _hash1 in self.hashes2.keys():
+                _pathes2 = self.hashes2[_hash1]          
+                
+                # remove equals
+                for _path1 in _pathes1:
+                    if _path1 in _pathes2:
+                        _pathes2.remove(_path1)
+                        _pathes1.remove(_path1)
+                        
+                        print('unchanged', _path1)
+                        
+                # moved couple
+                for _path1 in _pathes1:
+                    if _pathes2:
+                        _moved_path2 = _pathes2[0]
+                        _moved_path1 = _path1
+                        
+                        _pathes1.remove(_moved_path1)
+                        _pathes2.remove(_moved_path2)
+                        
+                        print("moved {} -> {}".format(_moved_path1, _moved_path2))
+                        
+                # unmoved pathes
+                for _path1 in _pathes1:
+                    print("deleted dublicate {}".format(_path1))
                     
-                    for _path2 in _pathes2:
-                        if _path1 == _path2:
-                            print('element unchanged, path unchanged', _path1, _path2)
-                        else:
-                            print('element unchanged, path   changed', _path1, _path2)
-                else:
-                    print('element   changed,                    ', _path1)
+                # added pathes
+                for _path2 in _pathes2:
+                    print("copied {}".format(_path2))
+                        
+                        
+            else:
+                print("changed {}".format(_pathes1))
+                   
+                   
+                   
+                _element = self.root1.xpath(_pathes1[0])[0]
+                _hashes1 = {}
+                _hashes2 = {}
+                xDiff.getHashesElementBasedCustomised(self.xml1, _element,  _hashes1, xDiff.callbackHashValueConsitency)
+                xDiff.getHashesElementBasedCustomised(self.xml2, self.root2,  _hashes2, xDiff.callbackHashValueConsitency)
+                print(_hashes1, _hashes2)
+ 
+                _hashes1 = {}
+                _hashes2 = {}
+                xDiff.getHashesElementBasedCustomised(self.xml1, _element,  _hashes1, xDiff.callbackHashGrammerConsitency)
+                xDiff.getHashesElementBasedCustomised(self.xml2, self.root2,  _hashes2, xDiff.callbackHashGrammerConsitency)
+                print(_hashes1, _hashes2)
+                        
+            
+            if 0:
+            
+                for _path1 in _pathes1:
+                    if _hash1 in self.hashes2.keys():
+                        _pathes2 = self.hashes2[_hash1]
+                        
+                        for _path2 in _pathes2:
+                            if _path1 == _path2:
+                                print('element unchanged, path unchanged', _path1, _path2)
+                            else:
+                                print('element unchanged, path   changed', _path1, _path2)
+                    else:
+                        print('element   changed,                    ', _path1)
            
 
 
