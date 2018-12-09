@@ -15,7 +15,7 @@ _root1 = _xml1.getroot()
 _root2 = _xml2.getroot()
 
 
-def customElementHash(element, hashpipe):
+def customElementHashAll(element, hashpipe):
   
     hashpipe.update(bytes(str(element.tag), 'utf-8'))
     
@@ -31,7 +31,30 @@ def customElementHash(element, hashpipe):
         hashpipe.update(bytes(element.tail.strip(), 'utf-8'))
             
     for child in element.getchildren():
-        hashpipe.update(customElementHash(child, hashpipe))
+        hashpipe.update(customElementHashAll(child, hashpipe))
+        
+        
+    return bytes(hashpipe.hexdigest(), 'utf-8')
+
+def customElementHashIgnoreTag(element, hashpipe):
+    # check path consentiently  and attribute consentiently
+    
+    hashpipe.update(bytes(str(element.tag), 'utf-8'))
+    
+    if hasattr(element, "attrib"):
+        for _name in sorted(element.attrib.keys()):
+            _attrib_value = element.attrib[_name]
+            #hashpipe.update(bytes(_name + _attrib_value, 'utf-8'))
+            hashpipe.update(bytes(_name, 'utf-8'))
+            
+    #if element.text is not None:
+    #    #hashpipe.update(bytes(element.text.strip(),'utf-8'))
+    
+    #if element.tail is not None:
+    #    #hashpipe.update(bytes(element.tail.strip(), 'utf-8'))
+            
+    for child in element.getchildren():
+        hashpipe.update(customElementHashIgnoreTag(child, hashpipe))
         
         
     return bytes(hashpipe.hexdigest(), 'utf-8')
@@ -51,42 +74,49 @@ def getChildren(xml, element, pathes, hashes):
         
 
            
-def getChildren2(xml, element, pathes, hashes):
+def getChildren2(xml, element, pathes, hashes, callbackHashCalculation):
     
     _hash = hashlib.sha1()
-    customElementHash(element, _hash)
+    callbackHashCalculation(element, _hash)
     _path = xml.getpath(element)
+    
     pathes[_path] = _hash.hexdigest()
-    hashes[_hash.hexdigest()] = _path
+    
+    if _hash.hexdigest() not in hashes.keys():
+        hashes[_hash.hexdigest()] = (_path,)
+    else:
+        hashes[_hash.hexdigest()] += (_path,)
     
     
     for _child in element.getchildren():
-        getChildren2(xml, _child, pathes, hashes)
+        getChildren2(xml, _child, pathes, hashes, callbackHashCalculation)
               
 _pathes1 = {}
 _hashes1 = {}
 _pipe = ()
-getChildren2(_xml1, _root1,  _pathes1, _hashes1)
+getChildren2(_xml1, _root1,  _pathes1, _hashes1, customElementHashAll)
 
 _pathes2 = {}
 _hashes2 = {}
 _pipe = ()
-getChildren2(_xml2, _root2,  _pathes2, _hashes2)
+getChildren2(_xml2, _root2,  _pathes2, _hashes2, customElementHashAll)
 
 
 def report(hashes1, hashes2):
     for _hash1 in hashes1.keys():
-        _path1 = hashes1[_hash1]
+        _pathes1 = hashes1[_hash1]
         
-        if _hash1 in hashes2.keys():
-            _path2 = hashes2[_hash1]
-            
-            if _path1 == _path2:
-                print('element unchanged, element unchanged', _path1, _path2)
+        for _path1 in _pathes1:
+            if _hash1 in hashes2.keys():
+                _pathes2 = hashes2[_hash1]
+                
+                for _path2 in _pathes2:
+                    if _path1 == _path2:
+                        print('element unchanged, path unchanged', _path1, _path2)
+                    else:
+                        print('element unchanged, path   changed', _path1, _path2)
             else:
-                print('path      changed,   element unchanged', _path1, _path2)
-        else:
-            print('element   changed,                    ', _path1)
+                print('element   changed,                    ', _path1)
            
 print('source -> target') 
 report(_hashes1, _hashes2)

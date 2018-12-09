@@ -1,7 +1,16 @@
 <Books>
+	<unchanged a="a" b="b"/>
+	<textchanged>text</textchanged>
+	<attribnamechange a="a" name="name"/>
+	<attribvaluechange a="a" name="name"/>
+	<tagnamechanged a="a" name="name"/>
     <Book>
 	<Title a="eins" b="zwei">Harry Potter and the Sorcerer's Stone</Title>
 	<Author>J.K. Rowling</Author>
+	<Seller>
+	    <ID>Mike</ID>
+	    <Rating>30</Rating>
+	</Seller>
 	<Seller>
 	    <ID>Mike</ID>
 	    <Rating>30</Rating>

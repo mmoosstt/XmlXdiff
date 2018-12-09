@@ -1,4 +1,9 @@
 <Books>
+	<unchanged  b="b" a="a"/>
+	<textchanged>change</textchanged>
+	<attribnamechange a="a" b="name"/>
+	<attribvaluechange a="hun" name="name"/>
+	<tagchangedname a="a" name="name"/>
     <Book>
 	<Title>The Advantures of Tom Sawyer</Title>
 	<Author>Mark Twain</Author>
