@@ -1,9 +1,9 @@
 <Books>
 	<unchanged a="a" b="b"/>
 	<textchanged>text</textchanged>
-	<attribnamechange a="a" name="name"/>
+	<attribnamechange a="a" name="mo"/>
 	<attribvaluechange a="a" name="name"/>
-	<tagnamechanged a="a" name="name"/>
+	<tagnamechanged a="a" name="max"/>
     <Book>
 	<Title>Harry Potter and the Sorcerer's Stone</Title>
 	<Author>J.K. Rowling</Author>

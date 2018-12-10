@@ -1,9 +1,9 @@
 <Books>
 	<unchanged  b="b" a="a"/>
 	<textchanged>change</textchanged>
-	<attribnamechange a="a" b="name"/>
+	<attribnamechange a="a" b="mo"/>
 	<attribvaluechange a="hun" name="name"/>
-	<tagchangedname a="a" name="name"/>
+	<tagchangedname a="a" name="max"/>
     <Book>
 	<Title>The Advantures of Tom Sawyer</Title>
 	<Author>Mark Twain</Author>
@@ -32,4 +32,5 @@
 	    <Rating>125</Rating>
 	</Bidder>
     </Book>
+    <added/>
 </Books>
