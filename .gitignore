@@ -1,12 +1,1 @@
-/.ropeproject/config.py
-/node_hash_dom.pyc
-/xdiff_core.pyc
-/graph.pyc
-/out5.log
-/out6.log
-/tests/test4/a.xml
-/tests/test4/b.xml
-/tests/test5/a.xml
-/tests/test5/b.xml
-/tests/test6/a.xml
-/tests/test6/b.xml
+*/__pycache__/*
