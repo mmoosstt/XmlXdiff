@@ -1,7 +1,7 @@
-#XmlXdiff
+#XmlXdiff#
 
- - Overall goal is a nice presenting !!!
- - Till now this is more a playgound
+ # Overall goal is a nice presenting !!!
+ # Till now this is more a playgound
 
 <img width="30%" src="./doc/example_xml_diff.svg">
 
