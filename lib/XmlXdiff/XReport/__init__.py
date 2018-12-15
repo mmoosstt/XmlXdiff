@@ -7,7 +7,7 @@ from svgwrite.container import Group
 from svgwrite.shapes import Rect
 from svgwrite.text import Text, TSpan, TextArea
 from importlib.resources import path
-from lxmldiff import getPath
+from XmlXdiff import getPath
 
 
 class DrawXml(object):
@@ -155,19 +155,19 @@ class DrawXml(object):
                  
 class DrawXmlDiff(object):
     
-    def __init__(self):
+    def __init__(self, path1, path2):
  
         self.report1 = DrawXml()
         self.report1.moveRight()
-        self.report1.loadFromFile(r'C:\Users\morit\git\xml-diff\lxmldiff\tests\test1\a.xml')
+        self.report1.loadFromFile(path1)
         self.report1.saveSvg()
     
         self.report2 = DrawXml()
         self.report2.moveRight()
-        self.report2.loadFromFile(r'C:\Users\morit\git\xml-diff\lxmldiff\tests\test1\b.xml')
+        self.report2.loadFromFile(path2)
         self.report2.saveSvg()
     
-        self.filepath = "{path}\\doc\\example_diff_{filename1}_{filename2}.svg".format(path=getPath(), 
+        self.filepath = "{path}\\..\\..\\doc\\example_diff_{filename1}_{filename2}.svg".format(path=getPath(), 
                                                                  filename1=self.report1.filename, 
                                                                  filename2=self.report2.filename)
         
@@ -185,16 +185,14 @@ class DrawXmlDiff(object):
         
         
 if __name__ == "__main__":
-    import lxmldiff.xDiffCore
+    import XmlXdiff.XDiffer
     
-    _diff = lxmldiff.xDiffCore.xDiffExecutor()
-    _diff.path1 = r'C:\Users\morit\git\xml-diff\lxmldiff\tests\test1\a.xml'
-    _diff.path2 = r'C:\Users\morit\git\xml-diff\lxmldiff\tests\test1\b.xml'
+    _diff = XmlXdiff.XDiffer.XDiffExecutor()
+    _diff.path1 = r'{path}\tests\test1\a.xml'.format(path=getPath())
+    _diff.path2 = r'{path}\tests\test1\b.xml'.format(path=getPath())
     _diff.run()
     
-    
-    
-    x = DrawXmlDiff()
+    x = DrawXmlDiff(_diff.path1, _diff.path2)
 
     def mark(pathes, report):
         for _path1 in pathes.keys():

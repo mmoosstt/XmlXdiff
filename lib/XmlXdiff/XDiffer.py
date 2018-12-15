@@ -1,9 +1,9 @@
-import lxmldiff
+import XmlXdiff
 import lxml.etree
 import hashlib
 
 
-class xDiff(object):
+class XDiffHasher(object):
 
     @classmethod
     def callbackHashAll(cls, element, hashpipe):
@@ -112,11 +112,11 @@ class xDiff(object):
             cls.getHashesElementBasedCustomised(xml, _child, hashes, pathes, callbackHashCalculation)
 
 
-class xDiffExecutor(object):
+class XDiffExecutor(object):
 
     def __init__(self):
-        self.path1 = "{}\\tests\\test1\\a.xml".format(lxmldiff.getPath())
-        self.path2 = "{}\\tests\\test1\\b.xml".format(lxmldiff.getPath())
+        self.path1 = "{}\\tests\\test1\\a.xml".format(XmlXdiff.getPath())
+        self.path2 = "{}\\tests\\test1\\b.xml".format(XmlXdiff.getPath())
 
     def run(self):
         self.xml1 = lxml.etree.parse(self.path1)
@@ -131,9 +131,9 @@ class xDiffExecutor(object):
         self.pathes1 = {}
         self.pathes2 = {}
 
-        xDiff.getHashesElementBasedCustomised(self.xml1, self.root1,  self.hashes1, self.pathes1, xDiff.callbackHashAll)
+        XDiffHasher.getHashesElementBasedCustomised(self.xml1, self.root1,  self.hashes1, self.pathes1, XDiffHasher.callbackHashAll)
         
-        xDiff.getHashesElementBasedCustomised(self.xml2, self.root2,  self.hashes2, self.pathes2, xDiff.callbackHashAll)
+        XDiffHasher.getHashesElementBasedCustomised(self.xml2, self.root2,  self.hashes2, self.pathes2, XDiffHasher.callbackHashAll)
 
         self._return = []
 
@@ -219,13 +219,13 @@ class xDiffExecutor(object):
         _pathes1 = {}
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
             _element1 = self.root1.xpath(_path1)[0]
-            xDiff.getHashesElementBasedCustomised(self.xml1,  _element1, _hashes1, _pathes1, xDiff.callbackHashTagNameConsitency)
+            XDiffHasher.getHashesElementBasedCustomised(self.xml1,  _element1, _hashes1, _pathes1, XDiffHasher.callbackHashTagNameConsitency)
 
         _hashes2 = {}
         _pathes2 = {}
         for _path2, _, _ in self.getChangedPathes(self.pathes2):
             _element2 = self.root2.xpath(_path2)[0]
-            xDiff.getHashesElementBasedCustomised(self.xml2,   _element2, _hashes2, _pathes2, xDiff.callbackHashTagNameConsitency)
+            XDiffHasher.getHashesElementBasedCustomised(self.xml2,   _element2, _hashes2, _pathes2, XDiffHasher.callbackHashTagNameConsitency)
 
         for _hash1 in _hashes1.keys():
 
@@ -253,13 +253,13 @@ class xDiffExecutor(object):
         _pathes1 = {}
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
             _element1 = self.root1.xpath(_path1)[0]
-            xDiff.getHashesElementBasedCustomised(self.xml1,  _element1, _hashes1, _pathes1, xDiff.callbackHashAttributeValueElementValueConsitency)
+            XDiffHasher.getHashesElementBasedCustomised(self.xml1,  _element1, _hashes1, _pathes1, XDiffHasher.callbackHashAttributeValueElementValueConsitency)
 
         _hashes2 = {}
         _pathes2 = {}
         for _path2, _, _ in self.getChangedPathes(self.pathes2):
             _element2 = self.root2.xpath(_path2)[0]
-            xDiff.getHashesElementBasedCustomised(self.xml2,   _element2, _hashes2, _pathes2, xDiff.callbackHashAttributeValueElementValueConsitency)
+            XDiffHasher.getHashesElementBasedCustomised(self.xml2,   _element2, _hashes2, _pathes2, XDiffHasher.callbackHashAttributeValueElementValueConsitency)
 
         for _hash1 in _hashes1.keys():
 
@@ -287,13 +287,13 @@ class xDiffExecutor(object):
         _pathes1 = {}
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
             _element1 = self.root1.xpath(_path1)[0]
-            xDiff.getHashesElementBasedCustomised(self.xml1,  _element1, _hashes1, _pathes1, xDiff.callbackHashTagNameAttributeNameConsitency)
+            XDiffHasher.getHashesElementBasedCustomised(self.xml1,  _element1, _hashes1, _pathes1, XDiffHasher.callbackHashTagNameAttributeNameConsitency)
 
         _hashes2 = {}
         _pathes2 = {}
         for _path2, _, _ in self.getChangedPathes(self.pathes2):
             _element2 = self.root2.xpath(_path2)[0]
-            xDiff.getHashesElementBasedCustomised(self.xml2,   _element2, _hashes2, _pathes2, xDiff.callbackHashTagNameAttributeNameConsitency)
+            XDiffHasher.getHashesElementBasedCustomised(self.xml2,   _element2, _hashes2, _pathes2, XDiffHasher.callbackHashTagNameAttributeNameConsitency)
 
         for _hash1 in _hashes1.keys():
             _pathes1 = iter(sorted(_hashes1[_hash1]))
@@ -381,5 +381,5 @@ class xDiffExecutor(object):
 
 
 if __name__ == "__main__":
-    _x = xDiffExecutor()
+    _x = XDiffExecutor()
     _x.run()

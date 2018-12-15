@@ -1,8 +1,0 @@
-1. Add full support of attributes.
-2. Create more testcases.
-3. Refactor signature method - so that it could be
-   configured from outside.
-4. Remove unused code.
-5. Write comments.
-6. Check for more meaningful method names.
-7. Learn how to use issues in github
