@@ -3,7 +3,7 @@
  - Overall goal is a nice presenting !!!
  - Till now this is more a playgound
 
-<img src="./lxmldiff/doc/example_xml_diff.svg">
+<img width="30%" src="./doc/example_xml_diff.svg">
 
 Inspired From - Thanks !!:
 
