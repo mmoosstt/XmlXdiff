@@ -9,5 +9,5 @@ manner.
 
 
 ![example_diff](https://raw.githubusercontent.com/mmoosstt/xml-diff/development/lxml-unittest/lxmldiff/doc/example_xml_diff.svg)
-<img src="https://raw.githubusercontent.com/mmoosstt/xml-diff/development/lxml-unittest/lxmldiff/doc/example_xml_diff.svg">
+<img src="./lxmldiff/doc/example_xml_diff.svg">
 # License #
