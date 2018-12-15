@@ -9,9 +9,12 @@ class xDiff(object):
     def callbackHashAll(cls, element, hashpipe):
 
         _element_childes = element.getchildren()
+
+        
         for child in _element_childes:
             hashpipe.update(cls.callbackHashAll(child, hashpipe))        
 
+        
         hashpipe.update(bytes(str(element.tag) + "#tag", 'utf-8'))
         
         # attributes and text are only taken into account for leaf nodes
@@ -86,7 +89,7 @@ class xDiff(object):
         _hash = hashlib.sha1()
         _hash.update(lxml.etree.tostring(element))
         _path = xml.getpath(element)
-        pathes[_path] = [_hash.hexdigest(), 'unchanged']
+        pathes[_path] = [_hash.hexdigest(), 'ElementUnchanged']
         hashes[_hash.hexdigest()] = _path
 
         for _child in element.getchildren():
@@ -99,13 +102,12 @@ class xDiff(object):
         callbackHashCalculation(element, _hash)
         _path = xml.getpath(element)
 
-        pathes[_path] = [_hash.hexdigest(), 'unchanged']
+        pathes[_path] = [_hash.hexdigest(), 'ElementUnchanged']
 
         if _hash.hexdigest() not in hashes.keys():
             hashes[_hash.hexdigest()] = [_path]
         else:
             hashes[_hash.hexdigest()].append(_path)
-
         for _child in element.getchildren():
             cls.getHashesElementBasedCustomised(xml, _child, hashes, pathes, callbackHashCalculation)
 
@@ -130,8 +132,10 @@ class xDiffExecutor(object):
         self.pathes2 = {}
 
         xDiff.getHashesElementBasedCustomised(self.xml1, self.root1,  self.hashes1, self.pathes1, xDiff.callbackHashAll)
+        
         xDiff.getHashesElementBasedCustomised(self.xml2, self.root2,  self.hashes2, self.pathes2, xDiff.callbackHashAll)
 
+        self._return = []
 
         self.findChangedElements()
 
@@ -151,7 +155,7 @@ class xDiffExecutor(object):
         for _path in pathes:
             _hash, _state = pathes[_path]
 
-            if _state == "changed":
+            if _state == "ElementChanged":
                 _changed_pathes.append((_path, _hash, _state))
 
         return sorted(_changed_pathes)
@@ -167,41 +171,47 @@ class xDiffExecutor(object):
 
                 _hash, _state = pathes[_child_path]
 
-                if _state == "changed":
+                if _state == "ElementChanged":
                     _state = checkNoChange(_child_path, pathes, root, xml)
 
-                    if _state == "changed":
+                    if _state == "ElementChanged":
                         return _state
 
             return _state
 
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
             if _path1 not in self.pathes2.keys():
-                self.pathes1[_path1][1] = "deleted"
-                print("deleted", _path1)
+                self.pathes1[_path1][1] = "ElementDeleted"
+                print("ElementDeleted", _path1)
+                self._return.append(("ElementDeleted", _path1, None))
 
         for _path2, _, _ in self.getChangedPathes(self.pathes2):
             if _path2 not in self.pathes1.keys():
-                self.pathes2[_path2][1] = "added"
-                print("added", _path2)
-
+                self.pathes2[_path2][1] = "ElementAdded"
+                print("ElementAdded", _path2)
+                self._return.append(("ElementDeleted", None, _path2))
+                
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
             _state1 = checkNoChange(_path1, self.pathes1, self.root1, self.xml1)
-            if _state1 != "changed":
-                self.pathes1[_path1][1] = "verify"
-                print('verified', _path1)
+            if _state1 != "ElementChanged":
+                self.pathes1[_path1][1] = "ElementVerified"
+                print('ElementVerified', _path1)
+                self._return.append(("ElementVerified", None, _path2))
 
         for _path2, _, _ in self.getChangedPathes(self.pathes2):
             _state2 = checkNoChange(_path2, self.pathes2, self.root2, self.xml2)
-            if _state2 != "changed":
-                self.pathes2[_path2][1] = "verify"
-                print('verified', _path2)
+            if _state2 != "ElementChanged":
+                self.pathes2[_path2][1] = "ElementVerified"
+                print('ElementVerified', _path2)
+                self._return.append(("ElementVerified", None, _path2))
 
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
-            print("unknown1 {}".format(_path1))
+            print("Unknown {}".format(_path1))
+            self._return.append(("Unknown", _path1, None))
 
         for _path2, _, _ in self.getChangedPathes(self.pathes2):
-            print("unknown2 {}".format(_path2))
+            print("Unknown {}".format(_path2))
+            self._return.append(("Unknown", None, _path2))
 
     def findTagNameConsitency(self):
 
@@ -228,13 +238,14 @@ class xDiffExecutor(object):
                         _path2 = _pathes2[0]
                         _pathes2 = _pathes2[1:]
 
-                        if (self.pathes1[_path1][1] == "changed" and
-                                self.pathes2[_path2][1] == "changed"):
+                        if (self.pathes1[_path1][1] == "ElementChanged" and
+                                self.pathes2[_path2][1] == "ElementChanged"):
 
-                            self.pathes1[_path1][1] = 'attributesandvalues'
-                            self.pathes2[_path2][1] = 'attributesandvalues'
+                            self.pathes1[_path1][1] = 'TagNameConsitency'
+                            self.pathes2[_path2][1] = 'TagNameConsitency'
 
-                            print("attributesandvalues {}, {}".format(_path1, _path2))
+                            print("TagNameConsitency {}, {}".format(_path1, _path2))
+                            self._return.append(('TagNameConsitency', _path1, _path2))
                             
     def findAttributeValueElementValueConsitency(self):
 
@@ -261,13 +272,14 @@ class xDiffExecutor(object):
                         _path2 = _pathes2[0]
                         _pathes2 = _pathes2[1:]
 
-                        if (self.pathes1[_path1][1] == "changed" and
-                                self.pathes2[_path2][1] == "changed"):
+                        if (self.pathes1[_path1][1] == "ElementChanged" and
+                                self.pathes2[_path2][1] == "ElementChanged"):
 
-                            self.pathes1[_path1][1] = 'structurechanged'
-                            self.pathes2[_path2][1] = 'structurechanged'
+                            self.pathes1[_path1][1] = 'AttributeValueElementValueConsitency'
+                            self.pathes2[_path2][1] = 'AttributeValueElementValueConsitency'
 
-                            print("structurechanged {}, {}".format(_path1, _path2))
+                            print("AttributeValueElementValueConsitency {}, {}".format(_path1, _path2))
+                            self._return.append(('AttributeValueElementValueConsitency', _path1, _path2))
 
     def findTagNameAttributeNameConsitency(self):
 
@@ -294,14 +306,15 @@ class xDiffExecutor(object):
                         _path2 = _pathes2[0]
                         _pathes2 = _pathes2[1:]
 
-                        if (self.pathes1[_path1][1] == "changed" and
-                                self.pathes2[_path2][1] == "changed"):
+                        if (self.pathes1[_path1][1] == "ElementChanged" and
+                                self.pathes2[_path2][1] == "ElementChanged"):
 
-                            self.pathes1[_path1][1] = 'valueschanged'
-                            self.pathes2[_path2][1] = 'valueschanged'
+                            self.pathes1[_path1][1] = 'TagNameAttributeNameConsitency'
+                            self.pathes2[_path2][1] = 'TagNameAttributeNameConsitency'
 
-                            print("valueschanged {}, {}".format(_path1, _path2))
-
+                            print("TagNameAttributeNameConsitency {}, {}".format(_path1, _path2))
+                            self._return.append(('TagNameAttributeNameConsitency', _path1, _path2))
+                                
     def findMovedElements(self):
 
         _hashes1 = {}
@@ -332,10 +345,11 @@ class xDiffExecutor(object):
                         _path2 = _pathes2[0]
                         _pathes2 = _pathes2[1:]
 
-                        print("moved {} -> {}".format(_path1, _path2))
+                        print("ElementMoved {} -> {}".format(_path1, _path2))
+                        self._return.append(('ElementMoved', _path1, _path2))
 
-                        self.pathes1[_path1][1] = 'moved'
-                        self.pathes2[_path2][1] = 'moved'
+                        self.pathes1[_path1][1] = 'ElementMoved'
+                        self.pathes2[_path2][1] = 'ElementMoved'
 
     def findChangedElements(self):
 
@@ -347,10 +361,10 @@ class xDiffExecutor(object):
 
                 for _path1 in _pathes1:
                     if _path1 not in _pathes2:
-                        self.pathes1[_path1][1] = 'changed'
+                        self.pathes1[_path1][1] = 'ElementChanged'
             else:
                 for _path1 in _pathes1:
-                    self.pathes1[_path1][1] = 'changed'
+                    self.pathes1[_path1][1] = 'ElementChanged'
 
         for _hash2 in self.hashes2.keys():
             _pathes2 = self.hashes2[_hash2]
@@ -360,10 +374,10 @@ class xDiffExecutor(object):
 
                 for _path2 in _pathes2:
                     if _path2 not in _pathes1:
-                        self.pathes2[_path2][1] = 'changed'
+                        self.pathes2[_path2][1] = 'ElementChanged'
             else:
                 for _path2 in _pathes2:
-                    self.pathes2[_path2][1] = 'changed'
+                    self.pathes2[_path2][1] = 'ElementChanged'
 
 
 if __name__ == "__main__":

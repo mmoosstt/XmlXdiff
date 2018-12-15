@@ -7,4 +7,7 @@ The [X-Diff](http://pages.cs.wisc.edu/~yuanwang/xdiff.html) algorithm
 describes how two XML documents can be effectively compared in an unordered
 manner.
 
+
+![example_diff](https://raw.githubusercontent.com/mmoosstt/xml-diff/development/lxml-unittest/lxmldiff/doc/example_xml_diff.svg)
+
 # License #
