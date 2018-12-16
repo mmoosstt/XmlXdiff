@@ -9,6 +9,7 @@
  - each element is identified by it's xml path and a hash
 
 |comparison results|test no|   |
+|---|---|---|
 |ElementUnchanged|test5|   |
 |ElementAdded|test2|   |
 |ElementDeleted|test4|   |
