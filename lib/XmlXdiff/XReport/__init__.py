@@ -113,6 +113,13 @@ class ElementTagAttributeNameConsitency(ElementMarker):
         super(self.__class__, self).__init__()
 
 
+class ElementNameConsitency(ElementMarker):
+    fill = rgb(150, 0, 50)
+
+    def __init__(self):
+        super(self.__class__, self).__init__()
+
+
 class DrawLegend(object):
 
     def __init__(self):
