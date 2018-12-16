@@ -15,20 +15,20 @@ class XDiffHasher(object):
             hashpipe.update(cls.callbackHashAll(child, hashpipe))        
 
         
-        hashpipe.update(bytes(str(element.tag) + "#tag", 'utf-8'))
+        hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
         
         # attributes and text are only taken into account for leaf nodes
         if not _element_childes:
-            if hasattr(element, "attrib"):
+            if hasattr(element, 'attrib'):
                 for _name in sorted(element.attrib.keys()):
                     _attrib_value = element.attrib[_name]
-                    hashpipe.update(bytes(_name + _attrib_value + "#att", 'utf-8'))
+                    hashpipe.update(bytes(_name + _attrib_value + '#att', 'utf-8'))
 
             if element.text is not None:
-                hashpipe.update(bytes(element.text.strip() + "#txt", 'utf-8'))
+                hashpipe.update(bytes(element.text.strip() + '#txt', 'utf-8'))
 
             if element.tail is not None:
-                hashpipe.update(bytes(element.tail.strip() + "#txt", 'utf-8'))
+                hashpipe.update(bytes(element.tail.strip() + '#txt', 'utf-8'))
 
         return bytes(hashpipe.hexdigest(), 'utf-8')
 
@@ -41,18 +41,18 @@ class XDiffHasher(object):
 
         # attributes and text are only taken into account for leaf nodes
         if _element_childes:
-            hashpipe.update(bytes(str(element.tag) + "#tag", 'utf-8'))
+            hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
         else:
-            if hasattr(element, "attrib"):
+            if hasattr(element, 'attrib'):
                 for _name in sorted(element.attrib.keys()):
                     _attrib_value = element.attrib[_name]
-                    hashpipe.update(bytes(_attrib_value + "#att", 'utf-8'))
+                    hashpipe.update(bytes(_attrib_value + '#att', 'utf-8'))
 
             if element.text is not None:
-                hashpipe.update(bytes(element.text.strip() + "#txt", 'utf-8'))
+                hashpipe.update(bytes(element.text.strip() + '#txt', 'utf-8'))
 
             if element.tail is not None:
-                hashpipe.update(bytes(element.tail.strip() + "#txt", 'utf-8'))
+                hashpipe.update(bytes(element.tail.strip() + '#txt', 'utf-8'))
 
         return bytes(hashpipe.hexdigest(), 'utf-8')
 
@@ -63,12 +63,12 @@ class XDiffHasher(object):
         for child in _element_childes:
             hashpipe.update(cls.callbackHashAll(child, hashpipe))        
 
-        hashpipe.update(bytes(str(element.tag) + "#tag", 'utf-8'))
+        hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
         # attributes and text are only taken into account for leaf nodes
         if not _element_childes:
-            if hasattr(element, "attrib"):
+            if hasattr(element, 'attrib'):
                 for _name in sorted(element.attrib.keys()):
-                    hashpipe.update(bytes(_name + "#att", 'utf-8'))
+                    hashpipe.update(bytes(_name + '#att', 'utf-8'))
 
         return bytes(hashpipe.hexdigest(), 'utf-8')
     
@@ -79,7 +79,7 @@ class XDiffHasher(object):
         for child in _element_childes:
             hashpipe.update(cls.callbackHashAll(child, hashpipe))        
 
-        hashpipe.update(bytes(str(element.tag) + "#tag", 'utf-8'))
+        hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
 
         return bytes(hashpipe.hexdigest(), 'utf-8')
     
@@ -115,8 +115,8 @@ class XDiffHasher(object):
 class XDiffExecutor(object):
 
     def __init__(self):
-        self.path1 = "{}\\tests\\test1\\a.xml".format(XmlXdiff.getPath())
-        self.path2 = "{}\\tests\\test1\\b.xml".format(XmlXdiff.getPath())
+        self.path1 = '{}\\tests\\test1\\a.xml'.format(XmlXdiff.getPath())
+        self.path2 = '{}\\tests\\test1\\b.xml'.format(XmlXdiff.getPath())
 
     def run(self):
         self.xml1 = lxml.etree.parse(self.path1)
@@ -155,7 +155,7 @@ class XDiffExecutor(object):
         for _path in pathes:
             _hash, _state = pathes[_path]
 
-            if _state == "ElementChanged":
+            if _state == 'ElementChanged':
                 _changed_pathes.append((_path, _hash, _state))
 
         return sorted(_changed_pathes)
@@ -171,47 +171,47 @@ class XDiffExecutor(object):
 
                 _hash, _state = pathes[_child_path]
 
-                if _state == "ElementChanged":
+                if _state == 'ElementChanged':
                     _state = checkNoChange(_child_path, pathes, root, xml)
 
-                    if _state == "ElementChanged":
+                    if _state == 'ElementChanged':
                         return _state
 
             return _state
 
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
             if _path1 not in self.pathes2.keys():
-                self.pathes1[_path1][1] = "ElementDeleted"
-                print("ElementDeleted", _path1)
-                self._return.append(("ElementDeleted", _path1, None))
+                self.pathes1[_path1][1] = 'ElementDeleted'
+                print('ElementDeleted', _path1)
+                self._return.append(('ElementDeleted', _path1, None))
 
         for _path2, _, _ in self.getChangedPathes(self.pathes2):
             if _path2 not in self.pathes1.keys():
-                self.pathes2[_path2][1] = "ElementAdded"
-                print("ElementAdded", _path2)
-                self._return.append(("ElementDeleted", None, _path2))
+                self.pathes2[_path2][1] = 'ElementAdded'
+                print('ElementAdded', _path2)
+                self._return.append(('ElementDeleted', None, _path2))
                 
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
             _state1 = checkNoChange(_path1, self.pathes1, self.root1, self.xml1)
-            if _state1 != "ElementChanged":
-                self.pathes1[_path1][1] = "ElementVerified"
+            if _state1 != 'ElementChanged':
+                self.pathes1[_path1][1] = 'ElementVerified'
                 print('ElementVerified', _path1)
-                self._return.append(("ElementVerified", None, _path2))
+                self._return.append(('ElementVerified', None, _path2))
 
         for _path2, _, _ in self.getChangedPathes(self.pathes2):
             _state2 = checkNoChange(_path2, self.pathes2, self.root2, self.xml2)
-            if _state2 != "ElementChanged":
-                self.pathes2[_path2][1] = "ElementVerified"
+            if _state2 != 'ElementChanged':
+                self.pathes2[_path2][1] = 'ElementVerified'
                 print('ElementVerified', _path2)
-                self._return.append(("ElementVerified", None, _path2))
+                self._return.append(('ElementVerified', None, _path2))
 
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
-            print("Unknown {}".format(_path1))
-            self._return.append(("Unknown", _path1, None))
+            print('ElementUnknown {}'.format(_path1))
+            self._return.append(('ElementUnknown', _path1, None))
 
         for _path2, _, _ in self.getChangedPathes(self.pathes2):
-            print("Unknown {}".format(_path2))
-            self._return.append(("Unknown", None, _path2))
+            print('ElementUnknown {}'.format(_path2))
+            self._return.append(('ElementUnknown', None, _path2))
 
     def findTagNameConsitency(self):
 
@@ -238,14 +238,14 @@ class XDiffExecutor(object):
                         _path2 = _pathes2[0]
                         _pathes2 = _pathes2[1:]
 
-                        if (self.pathes1[_path1][1] == "ElementChanged" and
-                                self.pathes2[_path2][1] == "ElementChanged"):
+                        if (self.pathes1[_path1][1] == 'ElementChanged' and
+                                self.pathes2[_path2][1] == 'ElementChanged'):
 
-                            self.pathes1[_path1][1] = 'TagNameConsitency'
-                            self.pathes2[_path2][1] = 'TagNameConsitency'
+                            self.pathes1[_path1][1] = 'ElementNameConsitency'
+                            self.pathes2[_path2][1] = 'ElementTagConsitency'
 
-                            print("TagNameConsitency {}, {}".format(_path1, _path2))
-                            self._return.append(('TagNameConsitency', _path1, _path2))
+                            print('ElementTagConsitency {}, {}'.format(_path1, _path2))
+                            self._return.append(('ElementTagConsitency', _path1, _path2))
                             
     def findAttributeValueElementValueConsitency(self):
 
@@ -272,14 +272,14 @@ class XDiffExecutor(object):
                         _path2 = _pathes2[0]
                         _pathes2 = _pathes2[1:]
 
-                        if (self.pathes1[_path1][1] == "ElementChanged" and
-                                self.pathes2[_path2][1] == "ElementChanged"):
+                        if (self.pathes1[_path1][1] == 'ElementChanged' and
+                                self.pathes2[_path2][1] == 'ElementChanged'):
 
-                            self.pathes1[_path1][1] = 'AttributeValueElementValueConsitency'
-                            self.pathes2[_path2][1] = 'AttributeValueElementValueConsitency'
+                            self.pathes1[_path1][1] = 'ElementTextAttributeValueConsitency'
+                            self.pathes2[_path2][1] = 'ElementTextAttributeValueConsitency'
 
-                            print("AttributeValueElementValueConsitency {}, {}".format(_path1, _path2))
-                            self._return.append(('AttributeValueElementValueConsitency', _path1, _path2))
+                            print('ElementTextAttributeValueConsitency {}, {}'.format(_path1, _path2))
+                            self._return.append(('ElementTextAttributeValueConsitency', _path1, _path2))
 
     def findTagNameAttributeNameConsitency(self):
 
@@ -306,14 +306,14 @@ class XDiffExecutor(object):
                         _path2 = _pathes2[0]
                         _pathes2 = _pathes2[1:]
 
-                        if (self.pathes1[_path1][1] == "ElementChanged" and
-                                self.pathes2[_path2][1] == "ElementChanged"):
+                        if (self.pathes1[_path1][1] == 'ElementChanged' and
+                                self.pathes2[_path2][1] == 'ElementChanged'):
 
-                            self.pathes1[_path1][1] = 'TagNameAttributeNameConsitency'
-                            self.pathes2[_path2][1] = 'TagNameAttributeNameConsitency'
+                            self.pathes1[_path1][1] = 'ElementTagAttributeNameConsitency'
+                            self.pathes2[_path2][1] = 'ElementTagAttributeNameConsitency'
 
-                            print("TagNameAttributeNameConsitency {}, {}".format(_path1, _path2))
-                            self._return.append(('TagNameAttributeNameConsitency', _path1, _path2))
+                            print('ElementTagAttributeNameConsitency {}, {}'.format(_path1, _path2))
+                            self._return.append(('ElementTagAttributeNameConsitency', _path1, _path2))
                                 
     def findMovedElements(self):
 
@@ -345,7 +345,7 @@ class XDiffExecutor(object):
                         _path2 = _pathes2[0]
                         _pathes2 = _pathes2[1:]
 
-                        print("ElementMoved {} -> {}".format(_path1, _path2))
+                        print('ElementMoved {} -> {}'.format(_path1, _path2))
                         self._return.append(('ElementMoved', _path1, _path2))
 
                         self.pathes1[_path1][1] = 'ElementMoved'
@@ -380,6 +380,6 @@ class XDiffExecutor(object):
                     self.pathes2[_path2][1] = 'ElementChanged'
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     _x = XDiffExecutor()
     _x.run()
