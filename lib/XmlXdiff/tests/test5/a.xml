@@ -8,6 +8,7 @@
 <Title>
 movie1
 </Title> 
+<Title>movie2</Title> 
 <Title>movie3</Title> 
 </Movies> 
 </Actor> 
@@ -20,7 +21,8 @@ Mike
 </Name> 
 <Movies> 
 <Title>movie1</Title> 
+<Title>movie2</Title> 
 <Title>movie3</Title> 
 </Movies> 
 </Actor> 
-</Actors>   
+</Actors>                                

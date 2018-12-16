@@ -1,6 +1,5 @@
 <top>
-  <item>1</item>
+  <new old="valueConst">TextConst</new>
+  <item>ElementTextAttributeValueConsitency</item>
   <item>2</item>
-  <item>3</item>
-  <item>4</item>
 </top>

@@ -9,6 +9,7 @@ from svgwrite.text import Text, TSpan, TextArea
 from importlib.resources import path
 from XmlXdiff import getPath
 from inspect import isclass
+from XmlXdiff import XDiffer
 
 
 class ElementMarker(object):
@@ -262,21 +263,30 @@ class DrawXmlDiff(object):
 
     def __init__(self, path1, path2):
 
+        _path = path1
+        _path = _path.replace("\\", "/")
+        _path = _path[:_path.rfind("/")].replace("/", "\\")
+
+        self.differ = XDiffer.XDiffExecutor()
+        self.differ.path1 = path1
+        self.differ.path2 = path2
+        self.differ.run()
+
         self.report1 = DrawXml()
         self.report1.moveRight()
-        self.report1.loadFromFile(path1)
+        self.report1.loadFromFile(self.differ.path1)
         self.report1.saveSvg()
 
         self.report2 = DrawXml()
         self.report2.moveRight()
-        self.report2.loadFromFile(path2)
+        self.report2.loadFromFile(self.differ.path2)
         self.report2.saveSvg()
 
         self.legend = DrawLegend()
 
-        self.filepath = "{path}\\..\\..\\doc\\example_diff_{filename1}_{filename2}.svg".format(path=getPath(),
-                                                                                               filename1=self.report1.filename,
-                                                                                               filename2=self.report2.filename)
+        self.filepath = "{path}\\xdiff_{filename1}_{filename2}.svg".format(path=_path,
+                                                                           filename1=self.report1.filename,
+                                                                           filename2=self.report2.filename)
 
         self.report2.dwg['x'] = self.report1.x_max * 2.0
         self.report2.dwg['y'] = 0
@@ -293,21 +303,14 @@ class DrawXmlDiff(object):
         self.dwg.add(self.report2.dwg)
         self.dwg.add(self.legend.dwg)
 
+        self._mark(self.differ.pathes1, self.report1)
+        self._mark(self.differ.pathes2, self.report2)
+
     def save(self):
+        print(self.filepath)
         self.dwg.save()
 
-
-if __name__ == "__main__":
-    import XmlXdiff.XDiffer
-
-    _diff = XmlXdiff.XDiffer.XDiffExecutor()
-    _diff.path1 = r'{path}\tests\test1\a.xml'.format(path=getPath())
-    _diff.path2 = r'{path}\tests\test1\b.xml'.format(path=getPath())
-    _diff.run()
-
-    x = DrawXmlDiff(_diff.path1, _diff.path2)
-
-    def mark(pathes, report):
+    def _mark(self, pathes, report):
         for _path1 in pathes.keys():
             _, _action1 = pathes[_path1]
             print(_action1)
@@ -316,9 +319,11 @@ if __name__ == "__main__":
 
             report.markAs(_path1, _marker_class)
 
-    mark(_diff.pathes1, x.report1)
-    mark(_diff.pathes2, x.report2)
 
+if __name__ == "__main__":
+
+    _path1 = r'{path}\tests\test1\a.xml'.format(path=getPath())
+    _path2 = r'{path}\tests\test1\b.xml'.format(path=getPath())
+
+    x = DrawXmlDiff(_path1, _path2)
     x.save()
-
-    DrawLegend()
