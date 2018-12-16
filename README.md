@@ -3,7 +3,7 @@
  - Overall goal is a nice plotting
  - Till now this is more a playground
 
-<img width="500" src="./doc/example_diff_a_b.svg">
+<img width="70%" src="./doc/example_diff_a_b.svg">
 
 Inspired From - Thanks !!:
 
