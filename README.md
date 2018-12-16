@@ -1,13 +1,40 @@
 # XmlXdiff #
+ - generating nice plots of differences between xml files
+ - general comparison without grammatical information
+ - playground for performance analysis
+ 
+# Used Prinziples #
 
- - Overall goal is a nice plotting
- - Till now this is more a playground
+## Implementation
+ - creating an hashed tree representation of each element
+ - each element is identified by it's xml path and a hash
 
-<img width="70%" src="./doc/example_diff_a_b.svg">
+|comparison results|xml1|xml2|
+|---|---|---|
+|ElementUnchanged|   |   |
+|ElementChanged|   |   |
+|ElementDeleted|   |   |
+|ElementAdded|   |   |
+|ElementMoved|   |   |
+|ElementTagConsitency|   |   |
+|ElementTextAttributeValueConsitency|   |   |
+|ElementTagAttributeNameConsitency|   |   |
+|ElementUnknown|   |   |   |   |
+|ElementVerified|   |   |
 
-Inspired From - Thanks !!:
+<figure>
+	<img src="./doc/example_diff_a_b.svg" alt="example svg output">
+	<figcaption>example showing differences between xml's</figcaption>
+</figure>
 
-# Compare two XML files in unordered manner #
+## To Be Investigated/Implemented
+ - xdiff cost rating for moved and deleted leafs
+ - gravity spline for moved elements
+ - performance analysis and improvements (different hash algorithms, ...)
+ - figure out how to create a general python package
+ 
+# Inspired by xml-diff #
+## Compare two XML files in unordered manner #
 
 XML has been used to transfer hierarchical data. 
 In most of those cases, the ordered relation between sibling 
@@ -20,4 +47,4 @@ manner.
 
 
 
-# License #
+## License #
