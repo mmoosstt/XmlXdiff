@@ -8,7 +8,7 @@
  - creating an hashed tree representation of each element
  - each element is identified by it's xml path and a hash
 
-|comparison results|test no|   |
+|test focus|test available|test result|
 |---|---|---|
 |ElementUnchanged|test5|   |
 |ElementAdded|test2|   |
@@ -20,6 +20,7 @@
 |ElementChanged|   |   |
 |ElementVerified|   |   |
 |ElementUnknown|   |   |   |   |
+|ElementWithNamespace|test8|   |   |xpath does not work with {ns}tag|
 
 <figure>
 	<img src="./doc/example_diff_a_b.svg" alt="example svg output">

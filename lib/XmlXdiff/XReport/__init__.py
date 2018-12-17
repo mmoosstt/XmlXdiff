@@ -195,14 +195,31 @@ class DrawXml(object):
 
         return "{tag}{attribs}: {text}".format(attribs=_attribs, tag=_tag, text=element.text)
 
-    def walkElementTree(self, element):
+    def walkElementTree(self, element, path="", path_dict={"": 0}):
 
-        _xml_path = self.xml.getpath(element)
-        self.svg_elements[_xml_path] = self.addLine(
+        # path building syntax has to be in line with XDiffer
+        if isinstance(element, lxml.etree._Comment):
+            _tag = "comment()"
+        else:
+            _tag = element.tag
+
+        _path_key = "{path}/{tag}".format(path=path, tag=_tag)
+
+        if _path_key in path_dict.keys():
+            path_dict[_path_key] = path_dict[_path_key] + 1
+        else:
+            path_dict[_path_key] = 1
+
+        _path = "{path}/{tag}[{cnt}]".format(path=path,
+                                             tag=_tag, cnt=path_dict[_path_key])
+
+        self.svg_elements[_path] = self.addLine(
             self.getElementText(element))
+
         self.moveRight()
+
         for _child in element.getchildren():
-            self.walkElementTree(_child)
+            self.walkElementTree(_child, _path, path_dict)
 
         self.moveLeft()
 
@@ -215,7 +232,7 @@ class DrawXml(object):
         self.filepath = _filepath[:_filepath.rfind("/")].replace("/", "\\")
         self.file_path_svg = "{}.svg".format(_filepath[:_filepath.rfind('.')])
         self.dwg = svgwrite.Drawing(filename=self.file_path_svg)
-        self.walkElementTree(self.root)
+        self.walkElementTree(self.root, "", {"": 0})
 
     def addLine(self, path):
         self.y = self.y + (0.6 * self.unit)

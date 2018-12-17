@@ -10,19 +10,18 @@ class XDiffHasher(object):
 
         _element_childes = element.getchildren()
 
-        
         for child in _element_childes:
-            hashpipe.update(cls.callbackHashAll(child, hashpipe))        
+            hashpipe.update(cls.callbackHashAll(child, hashpipe))
 
-        
         hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
-        
+
         # attributes and text are only taken into account for leaf nodes
         if not _element_childes:
             if hasattr(element, 'attrib'):
                 for _name in sorted(element.attrib.keys()):
                     _attrib_value = element.attrib[_name]
-                    hashpipe.update(bytes(_name + _attrib_value + '#att', 'utf-8'))
+                    hashpipe.update(
+                        bytes(_name + _attrib_value + '#att', 'utf-8'))
 
             if element.text is not None:
                 hashpipe.update(bytes(element.text.strip() + '#txt', 'utf-8'))
@@ -37,7 +36,7 @@ class XDiffHasher(object):
 
         _element_childes = element.getchildren()
         for child in _element_childes:
-            hashpipe.update(cls.callbackHashAll(child, hashpipe))        
+            hashpipe.update(cls.callbackHashAll(child, hashpipe))
 
         # attributes and text are only taken into account for leaf nodes
         if _element_childes:
@@ -61,7 +60,7 @@ class XDiffHasher(object):
 
         _element_childes = element.getchildren()
         for child in _element_childes:
-            hashpipe.update(cls.callbackHashAll(child, hashpipe))        
+            hashpipe.update(cls.callbackHashAll(child, hashpipe))
 
         hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
         # attributes and text are only taken into account for leaf nodes
@@ -71,18 +70,18 @@ class XDiffHasher(object):
                     hashpipe.update(bytes(_name + '#att', 'utf-8'))
 
         return bytes(hashpipe.hexdigest(), 'utf-8')
-    
+
     @classmethod
     def callbackHashTagNameConsitency(cls, element, hashpipe):
 
         _element_childes = element.getchildren()
         for child in _element_childes:
-            hashpipe.update(cls.callbackHashAll(child, hashpipe))        
+            hashpipe.update(cls.callbackHashAll(child, hashpipe))
 
         hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
 
         return bytes(hashpipe.hexdigest(), 'utf-8')
-    
+
     @classmethod
     def getHashesElementBased(cls, xml, element, hashes, pathes):
 
@@ -96,11 +95,25 @@ class XDiffHasher(object):
             cls.getHashesElementBased(xml, _child, hashes, pathes)
 
     @classmethod
-    def getHashesElementBasedCustomised(cls, xml, element, hashes, pathes, callbackHashCalculation):
+    def getHashesElementBasedCustomised(cls, element, hashes, pathes, callbackHashCalculation, path="", path_dict={"": 0}):
 
         _hash = hashlib.sha1()
         callbackHashCalculation(element, _hash)
-        _path = xml.getpath(element)
+
+        if isinstance(element, lxml.etree._Comment):
+            _tag = "comment()"
+        else:
+            _tag = element.tag
+
+        _path_key = "{path}/{tag}".format(path=path, tag=_tag)
+
+        if _path_key in path_dict.keys():
+            path_dict[_path_key] = path_dict[_path_key] + 1
+        else:
+            path_dict[_path_key] = 1
+
+        _path = "{path}/{tag}[{cnt}]".format(path=path,
+                                             tag=_tag, cnt=path_dict[_path_key])
 
         pathes[_path] = [_hash.hexdigest(), 'ElementUnchanged']
 
@@ -108,8 +121,11 @@ class XDiffHasher(object):
             hashes[_hash.hexdigest()] = [_path]
         else:
             hashes[_hash.hexdigest()].append(_path)
+
         for _child in element.getchildren():
-            cls.getHashesElementBasedCustomised(xml, _child, hashes, pathes, callbackHashCalculation)
+
+            cls.getHashesElementBasedCustomised(
+                _child, hashes, pathes, callbackHashCalculation, _path, path_dict)
 
 
 class XDiffExecutor(object):
@@ -131,9 +147,11 @@ class XDiffExecutor(object):
         self.pathes1 = {}
         self.pathes2 = {}
 
-        XDiffHasher.getHashesElementBasedCustomised(self.xml1, self.root1,  self.hashes1, self.pathes1, XDiffHasher.callbackHashAll)
-        
-        XDiffHasher.getHashesElementBasedCustomised(self.xml2, self.root2,  self.hashes2, self.pathes2, XDiffHasher.callbackHashAll)
+        XDiffHasher.getHashesElementBasedCustomised(
+            self.root1,  self.hashes1, self.pathes1, XDiffHasher.callbackHashAll, "", {"": 0})
+
+        XDiffHasher.getHashesElementBasedCustomised(
+            self.root2,  self.hashes2, self.pathes2, XDiffHasher.callbackHashAll, "", {"": 0})
 
         self._return = []
 
@@ -144,11 +162,10 @@ class XDiffExecutor(object):
         self.findTagNameAttributeNameConsitency()
 
         self.findAttributeValueElementValueConsitency()
-        
+
         self.findTagNameConsitency()
 
         self.findAddedDeletedElements()
-        
 
     def getChangedPathes(self, pathes):
         _changed_pathes = []
@@ -165,17 +182,22 @@ class XDiffExecutor(object):
         def checkNoChange(path, pathes, root, xml):
 
             _hash, _state = pathes[path]
+            for _path in pathes.keys():
 
-            for _child in root.xpath(path)[0].getchildren():
-                _child_path = xml.getpath(_child)
+                if (_path.find(path) == 0 and
+                        len(_path) > len(path)):
 
-                _hash, _state = pathes[_child_path]
+                    _found = True
+                    _child_path = _path
 
-                if _state == 'ElementChanged':
-                    _state = checkNoChange(_child_path, pathes, root, xml)
+                    _hash, _state = pathes[_child_path]
 
                     if _state == 'ElementChanged':
-                        return _state
+                        _state = checkNoChange(
+                            _child_path, pathes, root, xml)
+
+                        if _state == 'ElementChanged':
+                            return _state
 
             return _state
 
@@ -190,16 +212,18 @@ class XDiffExecutor(object):
                 self.pathes2[_path2][1] = 'ElementAdded'
                 print('ElementAdded', _path2)
                 self._return.append(('ElementDeleted', None, _path2))
-                
+
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
-            _state1 = checkNoChange(_path1, self.pathes1, self.root1, self.xml1)
+            _state1 = checkNoChange(
+                _path1, self.pathes1, self.root1, self.xml1)
             if _state1 != 'ElementChanged':
                 self.pathes1[_path1][1] = 'ElementVerified'
                 print('ElementVerified', _path1)
                 self._return.append(('ElementVerified', None, _path2))
 
         for _path2, _, _ in self.getChangedPathes(self.pathes2):
-            _state2 = checkNoChange(_path2, self.pathes2, self.root2, self.xml2)
+            _state2 = checkNoChange(
+                _path2, self.pathes2, self.root2, self.xml2)
             if _state2 != 'ElementChanged':
                 self.pathes2[_path2][1] = 'ElementVerified'
                 print('ElementVerified', _path2)
@@ -219,13 +243,15 @@ class XDiffExecutor(object):
         _pathes1 = {}
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
             _element1 = self.root1.xpath(_path1)[0]
-            XDiffHasher.getHashesElementBasedCustomised(self.xml1,  _element1, _hashes1, _pathes1, XDiffHasher.callbackHashTagNameConsitency)
+            XDiffHasher.getHashesElementBasedCustomised(
+                _element1, _hashes1, _pathes1, XDiffHasher.callbackHashTagNameConsitency, _path1[:_path1.rfind("/")], {"": 0})
 
         _hashes2 = {}
         _pathes2 = {}
         for _path2, _, _ in self.getChangedPathes(self.pathes2):
             _element2 = self.root2.xpath(_path2)[0]
-            XDiffHasher.getHashesElementBasedCustomised(self.xml2,   _element2, _hashes2, _pathes2, XDiffHasher.callbackHashTagNameConsitency)
+            XDiffHasher.getHashesElementBasedCustomised(
+                _element2, _hashes2, _pathes2, XDiffHasher.callbackHashTagNameConsitency, _path2[:_path2.rfind("/")], {"": 0})
 
         for _hash1 in _hashes1.keys():
 
@@ -244,22 +270,26 @@ class XDiffExecutor(object):
                             self.pathes1[_path1][1] = 'ElementNameConsitency'
                             self.pathes2[_path2][1] = 'ElementTagConsitency'
 
-                            print('ElementTagConsitency {}, {}'.format(_path1, _path2))
-                            self._return.append(('ElementTagConsitency', _path1, _path2))
-                            
+                            print('ElementTagConsitency {}, {}'.format(
+                                _path1, _path2))
+                            self._return.append(
+                                ('ElementTagConsitency', _path1, _path2))
+
     def findAttributeValueElementValueConsitency(self):
 
         _hashes1 = {}
         _pathes1 = {}
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
             _element1 = self.root1.xpath(_path1)[0]
-            XDiffHasher.getHashesElementBasedCustomised(self.xml1,  _element1, _hashes1, _pathes1, XDiffHasher.callbackHashAttributeValueElementValueConsitency)
+            XDiffHasher.getHashesElementBasedCustomised(
+                _element1, _hashes1, _pathes1, XDiffHasher.callbackHashAttributeValueElementValueConsitency, _path1[:_path1.rfind("/")], {"": 0})
 
         _hashes2 = {}
         _pathes2 = {}
         for _path2, _, _ in self.getChangedPathes(self.pathes2):
             _element2 = self.root2.xpath(_path2)[0]
-            XDiffHasher.getHashesElementBasedCustomised(self.xml2,   _element2, _hashes2, _pathes2, XDiffHasher.callbackHashAttributeValueElementValueConsitency)
+            XDiffHasher.getHashesElementBasedCustomised(
+                _element2, _hashes2, _pathes2, XDiffHasher.callbackHashAttributeValueElementValueConsitency, _path2[:_path2.rfind("/")], {"": 0})
 
         for _hash1 in _hashes1.keys():
 
@@ -278,8 +308,10 @@ class XDiffExecutor(object):
                             self.pathes1[_path1][1] = 'ElementTextAttributeValueConsitency'
                             self.pathes2[_path2][1] = 'ElementTextAttributeValueConsitency'
 
-                            print('ElementTextAttributeValueConsitency {}, {}'.format(_path1, _path2))
-                            self._return.append(('ElementTextAttributeValueConsitency', _path1, _path2))
+                            print('ElementTextAttributeValueConsitency {}, {}'.format(
+                                _path1, _path2))
+                            self._return.append(
+                                ('ElementTextAttributeValueConsitency', _path1, _path2))
 
     def findTagNameAttributeNameConsitency(self):
 
@@ -287,13 +319,15 @@ class XDiffExecutor(object):
         _pathes1 = {}
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
             _element1 = self.root1.xpath(_path1)[0]
-            XDiffHasher.getHashesElementBasedCustomised(self.xml1,  _element1, _hashes1, _pathes1, XDiffHasher.callbackHashTagNameAttributeNameConsitency)
+            XDiffHasher.getHashesElementBasedCustomised(
+                _element1, _hashes1, _pathes1, XDiffHasher.callbackHashTagNameAttributeNameConsitency, _path1[:_path1.rfind("/")], {"": 0})
 
         _hashes2 = {}
         _pathes2 = {}
         for _path2, _, _ in self.getChangedPathes(self.pathes2):
             _element2 = self.root2.xpath(_path2)[0]
-            XDiffHasher.getHashesElementBasedCustomised(self.xml2,   _element2, _hashes2, _pathes2, XDiffHasher.callbackHashTagNameAttributeNameConsitency)
+            XDiffHasher.getHashesElementBasedCustomised(
+                _element2, _hashes2, _pathes2, XDiffHasher.callbackHashTagNameAttributeNameConsitency, _path2[:_path2.rfind("/")], {"": 0})
 
         for _hash1 in _hashes1.keys():
             _pathes1 = iter(sorted(_hashes1[_hash1]))
@@ -306,15 +340,18 @@ class XDiffExecutor(object):
                         _path2 = _pathes2[0]
                         _pathes2 = _pathes2[1:]
 
+                        print(_path1)
                         if (self.pathes1[_path1][1] == 'ElementChanged' and
                                 self.pathes2[_path2][1] == 'ElementChanged'):
 
                             self.pathes1[_path1][1] = 'ElementTagAttributeNameConsitency'
                             self.pathes2[_path2][1] = 'ElementTagAttributeNameConsitency'
 
-                            print('ElementTagAttributeNameConsitency {}, {}'.format(_path1, _path2))
-                            self._return.append(('ElementTagAttributeNameConsitency', _path1, _path2))
-                                
+                            print('ElementTagAttributeNameConsitency {}, {}'.format(
+                                _path1, _path2))
+                            self._return.append(
+                                ('ElementTagAttributeNameConsitency', _path1, _path2))
+
     def findMovedElements(self):
 
         _hashes1 = {}
@@ -383,3 +420,6 @@ class XDiffExecutor(object):
 if __name__ == '__main__':
     _x = XDiffExecutor()
     _x.run()
+
+    for _i in sorted(_x.pathes1.keys()):
+        print(_i)
