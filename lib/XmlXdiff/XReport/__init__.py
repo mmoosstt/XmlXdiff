@@ -201,7 +201,22 @@ class DrawXml(object):
         if isinstance(element, lxml.etree._Comment):
             _tag = "comment()"
         else:
-            _tag = element.tag
+            if element.tag.find("{") > -1:
+                for _ns in element.nsmap.keys():
+
+                    _nslong = "{{{nslong}}}".format(
+                        nslong=element.nsmap[_ns])
+                    if _ns is None:
+                        _nsshort = ""
+                    else:
+                        _nsshort = "{nsshort}:".format(nsshort=_ns)
+
+                    _tag = element.tag.replace(_nslong, _nsshort)
+
+                    if _tag.find("{") < 0:
+                        break
+            else:
+                _tag = element.tag
 
         _path_key = "{path}/{tag}".format(path=path, tag=_tag)
 
@@ -210,8 +225,14 @@ class DrawXml(object):
         else:
             path_dict[_path_key] = 1
 
-        _path = "{path}/{tag}[{cnt}]".format(path=path,
-                                             tag=_tag, cnt=path_dict[_path_key])
+        if isinstance(element, lxml.etree._Comment):
+            _path = "{path}/{tag}[{cnt}]".format(path=path,
+                                                 tag=_tag, cnt=path_dict[_path_key])
+
+        else:
+            _path = "{path}/*[name()='{tag}'][{cnt}]".format(path=path,
+                                                             tag=_tag,
+                                                             cnt=path_dict[_path_key])
 
         self.svg_elements[_path] = self.addLine(
             self.getElementText(element))

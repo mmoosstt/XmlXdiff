@@ -103,7 +103,22 @@ class XDiffHasher(object):
         if isinstance(element, lxml.etree._Comment):
             _tag = "comment()"
         else:
-            _tag = element.tag
+            if element.tag.find("{") > -1:
+                for _ns in element.nsmap.keys():
+
+                    _nslong = "{{{nslong}}}".format(
+                        nslong=element.nsmap[_ns])
+                    if _ns is None:
+                        _nsshort = ""
+                    else:
+                        _nsshort = "{nsshort}:".format(nsshort=_ns)
+
+                    _tag = element.tag.replace(_nslong, _nsshort)
+
+                    if _tag.find("{") < 0:
+                        break
+            else:
+                _tag = element.tag
 
         _path_key = "{path}/{tag}".format(path=path, tag=_tag)
 
@@ -112,8 +127,13 @@ class XDiffHasher(object):
         else:
             path_dict[_path_key] = 1
 
-        _path = "{path}/{tag}[{cnt}]".format(path=path,
-                                             tag=_tag, cnt=path_dict[_path_key])
+        if isinstance(element, lxml.etree._Comment):
+            _path = "{path}/{tag}[{cnt}]".format(path=path,
+                                                 tag=_tag, cnt=path_dict[_path_key])
+
+        else:
+            _path = "{path}/*[name()='{tag}'][{cnt}]".format(path=path,
+                                                             tag=_tag, cnt=path_dict[_path_key])
 
         pathes[_path] = [_hash.hexdigest(), 'ElementUnchanged']
 
@@ -131,8 +151,8 @@ class XDiffHasher(object):
 class XDiffExecutor(object):
 
     def __init__(self):
-        self.path1 = '{}\\tests\\test1\\a.xml'.format(XmlXdiff.getPath())
-        self.path2 = '{}\\tests\\test1\\b.xml'.format(XmlXdiff.getPath())
+        self.path1 = '{}\\tests\\test8\\a.xml'.format(XmlXdiff.getPath())
+        self.path2 = '{}\\tests\\test8\\b.xml'.format(XmlXdiff.getPath())
 
     def run(self):
         self.xml1 = lxml.etree.parse(self.path1)
@@ -318,6 +338,7 @@ class XDiffExecutor(object):
         _hashes1 = {}
         _pathes1 = {}
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
+            print(_path1)
             _element1 = self.root1.xpath(_path1)[0]
             XDiffHasher.getHashesElementBasedCustomised(
                 _element1, _hashes1, _pathes1, XDiffHasher.callbackHashTagNameAttributeNameConsitency, _path1[:_path1.rfind("/")], {"": 0})
