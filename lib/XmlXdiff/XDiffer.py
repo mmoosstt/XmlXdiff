@@ -36,7 +36,8 @@ class XDiffHasher(object):
 
         _element_childes = element.getchildren()
         for child in _element_childes:
-            hashpipe.update(cls.callbackHashAll(child, hashpipe))
+            hashpipe.update(
+                cls.callbackHashAttributeValueElementValueConsitency(child, hashpipe))
 
         # attributes and text are only taken into account for leaf nodes
         if _element_childes:
@@ -60,7 +61,8 @@ class XDiffHasher(object):
 
         _element_childes = element.getchildren()
         for child in _element_childes:
-            hashpipe.update(cls.callbackHashAll(child, hashpipe))
+            hashpipe.update(
+                cls.callbackHashTagNameAttributeNameConsitency(child, hashpipe))
 
         hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
         # attributes and text are only taken into account for leaf nodes
@@ -76,7 +78,7 @@ class XDiffHasher(object):
 
         _element_childes = element.getchildren()
         for child in _element_childes:
-            hashpipe.update(cls.callbackHashAll(child, hashpipe))
+            hashpipe.update(cls.callbackHashTagNameConsitency(child, hashpipe))
 
         hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
 
@@ -361,7 +363,6 @@ class XDiffExecutor(object):
                         _path2 = _pathes2[0]
                         _pathes2 = _pathes2[1:]
 
-                        print(_path1)
                         if (self.pathes1[_path1][1] == 'ElementChanged' and
                                 self.pathes2[_path2][1] == 'ElementChanged'):
 
@@ -392,9 +393,9 @@ class XDiffExecutor(object):
                 _hashes2[_hash2] = [_path2]
 
         for _hash1 in _hashes1.keys():
+            _pathes1 = sorted(_hashes1[_hash1])
 
             if _hash1 in _hashes2.keys():
-                _pathes1 = sorted(_hashes1[_hash1])
                 _pathes2 = sorted(_hashes2[_hash1])
 
                 for _path1 in _pathes1:
