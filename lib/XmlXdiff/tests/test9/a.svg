@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<svg baseProfile="full" height="100%" version="1.1" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xlink="http://www.w3.org/1999/xlink"><defs /><text fill="rgb(0,0,25)" font-size="25%" x="12.0" y="6.0">spec {http://www.w3.org/XML/1998/namespace}lang='en': 
+ </text><text fill="rgb(0,0,50)" font-size="25%" x="24.0" y="12.0">!comment:  Notes on edit-in-place of Fourth Edition:
+- Eliminated all whitespace between &lt;quote&gt; and its contents, usually &lt;code&gt;
+- Eliminated a few other spurious spaces in mixed content
+- Added 'edited in place' note </text></svg>

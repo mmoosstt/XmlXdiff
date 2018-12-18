@@ -97,57 +97,60 @@ class XDiffHasher(object):
             cls.getHashesElementBased(xml, _child, hashes, pathes)
 
     @classmethod
-    def getHashesElementBasedCustomised(cls, element, hashes, pathes, callbackHashCalculation, path="", path_dict={"": 0}):
+    def getHashesElementBasedCustomised(cls, element, hashes, pathes, callbackHashCalculation, path="", path_dict={"": 0}, visited=[]):
 
-        _hash = hashlib.sha1()
-        callbackHashCalculation(element, _hash)
+        if path not in visited:
+            visited.append(path)
 
-        if isinstance(element, lxml.etree._Comment):
-            _tag = "comment()"
-        else:
-            if element.tag.find("{") > -1:
-                for _ns in element.nsmap.keys():
+            _hash = hashlib.sha1()
+            callbackHashCalculation(element, _hash)
 
-                    _nslong = "{{{nslong}}}".format(
-                        nslong=element.nsmap[_ns])
-                    if _ns is None:
-                        _nsshort = ""
-                    else:
-                        _nsshort = "{nsshort}:".format(nsshort=_ns)
-
-                    _tag = element.tag.replace(_nslong, _nsshort)
-
-                    if _tag.find("{") < 0:
-                        break
+            if isinstance(element, lxml.etree._Comment):
+                _tag = "comment()"
             else:
-                _tag = element.tag
+                if element.tag.find("{") > -1:
+                    for _ns in element.nsmap.keys():
 
-        _path_key = "{path}/{tag}".format(path=path, tag=_tag)
+                        _nslong = "{{{nslong}}}".format(
+                            nslong=element.nsmap[_ns])
+                        if _ns is None:
+                            _nsshort = ""
+                        else:
+                            _nsshort = "{nsshort}:".format(nsshort=_ns)
 
-        if _path_key in path_dict.keys():
-            path_dict[_path_key] = path_dict[_path_key] + 1
-        else:
-            path_dict[_path_key] = 1
+                        _tag = element.tag.replace(_nslong, _nsshort)
 
-        if isinstance(element, lxml.etree._Comment):
-            _path = "{path}/{tag}[{cnt}]".format(path=path,
-                                                 tag=_tag, cnt=path_dict[_path_key])
+                        if _tag.find("{") < 0:
+                            break
+                else:
+                    _tag = element.tag
 
-        else:
-            _path = "{path}/*[name()='{tag}'][{cnt}]".format(path=path,
-                                                             tag=_tag, cnt=path_dict[_path_key])
+            _path_key = "{path}/{tag}".format(path=path, tag=_tag)
 
-        pathes[_path] = [_hash.hexdigest(), 'ElementUnchanged']
+            if _path_key in path_dict.keys():
+                path_dict[_path_key] = path_dict[_path_key] + 1
+            else:
+                path_dict[_path_key] = 1
 
-        if _hash.hexdigest() not in hashes.keys():
-            hashes[_hash.hexdigest()] = [_path]
-        else:
-            hashes[_hash.hexdigest()].append(_path)
+            if isinstance(element, lxml.etree._Comment):
+                _path = "{path}/{tag}[{cnt}]".format(path=path,
+                                                     tag=_tag, cnt=path_dict[_path_key])
 
-        for _child in element.getchildren():
+            else:
+                _path = "{path}/*[name()='{tag}'][{cnt}]".format(path=path,
+                                                                 tag=_tag, cnt=path_dict[_path_key])
 
-            cls.getHashesElementBasedCustomised(
-                _child, hashes, pathes, callbackHashCalculation, _path, path_dict)
+            pathes[_path] = [_hash.hexdigest(), 'ElementUnchanged']
+
+            if _hash.hexdigest() not in hashes.keys():
+                hashes[_hash.hexdigest()] = [_path]
+            else:
+                hashes[_hash.hexdigest()].append(_path)
+
+            for _child in element.getchildren():
+
+                cls.getHashesElementBasedCustomised(
+                    _child, hashes, pathes, callbackHashCalculation, _path, path_dict)
 
 
 class XDiffExecutor(object):
@@ -169,11 +172,15 @@ class XDiffExecutor(object):
         self.pathes1 = {}
         self.pathes2 = {}
 
+        self.visited = []
+        self._leafs = {}
         XDiffHasher.getHashesElementBasedCustomised(
-            self.root1,  self.hashes1, self.pathes1, XDiffHasher.callbackHashAll, "", {"": 0})
+            self.root1,  self.hashes1, self.pathes1, XDiffHasher.callbackHashAll, "", self._leafs, self.visited)
 
+        self.visited = []
+        self._leafs = {}
         XDiffHasher.getHashesElementBasedCustomised(
-            self.root2,  self.hashes2, self.pathes2, XDiffHasher.callbackHashAll, "", {"": 0})
+            self.root2,  self.hashes2, self.pathes2, XDiffHasher.callbackHashAll, "", self._leafs, self.visited)
 
         self._return = []
 
@@ -263,17 +270,21 @@ class XDiffExecutor(object):
 
         _hashes1 = {}
         _pathes1 = {}
+        _visited = []
+        _leafs = {}
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
             _element1 = self.root1.xpath(_path1)[0]
             XDiffHasher.getHashesElementBasedCustomised(
-                _element1, _hashes1, _pathes1, XDiffHasher.callbackHashTagNameConsitency, _path1[:_path1.rfind("/")], {"": 0})
+                _element1, _hashes1, _pathes1, XDiffHasher.callbackHashTagNameConsitency, _path1[:_path1.rfind("/")], _leafs, _visited)
 
         _hashes2 = {}
         _pathes2 = {}
+        _visited = []
+        _leafs = {}
         for _path2, _, _ in self.getChangedPathes(self.pathes2):
             _element2 = self.root2.xpath(_path2)[0]
             XDiffHasher.getHashesElementBasedCustomised(
-                _element2, _hashes2, _pathes2, XDiffHasher.callbackHashTagNameConsitency, _path2[:_path2.rfind("/")], {"": 0})
+                _element2, _hashes2, _pathes2, XDiffHasher.callbackHashTagNameConsitency, _path2[:_path2.rfind("/")], _leafs, _visited)
 
         for _hash1 in _hashes1.keys():
 
@@ -301,22 +312,26 @@ class XDiffExecutor(object):
 
         _hashes1 = {}
         _pathes1 = {}
+        _visited = []
+        _leafs = {}
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
             _element1 = self.root1.xpath(_path1)[0]
             XDiffHasher.getHashesElementBasedCustomised(
-                _element1, _hashes1, _pathes1, XDiffHasher.callbackHashAttributeValueElementValueConsitency, _path1[:_path1.rfind("/")], {"": 0})
+                _element1, _hashes1, _pathes1, XDiffHasher.callbackHashAttributeValueElementValueConsitency, _path1[:_path1.rfind("/")], _leafs, _visited)
 
         _hashes2 = {}
         _pathes2 = {}
+        _visited = []
+        _leafs = {}
         for _path2, _, _ in self.getChangedPathes(self.pathes2):
             _element2 = self.root2.xpath(_path2)[0]
             XDiffHasher.getHashesElementBasedCustomised(
-                _element2, _hashes2, _pathes2, XDiffHasher.callbackHashAttributeValueElementValueConsitency, _path2[:_path2.rfind("/")], {"": 0})
+                _element2, _hashes2, _pathes2, XDiffHasher.callbackHashAttributeValueElementValueConsitency, _path2[:_path2.rfind("/")], _leafs, _visited)
 
         for _hash1 in _hashes1.keys():
+            _pathes1 = sorted(_hashes1[_hash1])
 
             if _hash1 in _hashes2.keys():
-                _pathes1 = sorted(_hashes1[_hash1])
                 _pathes2 = sorted(_hashes2[_hash1])
 
                 for _path1 in _pathes1:
@@ -339,18 +354,22 @@ class XDiffExecutor(object):
 
         _hashes1 = {}
         _pathes1 = {}
+        _visited = []
+        _leafs = {}
         for _path1, _, _ in self.getChangedPathes(self.pathes1):
             print(_path1)
             _element1 = self.root1.xpath(_path1)[0]
             XDiffHasher.getHashesElementBasedCustomised(
-                _element1, _hashes1, _pathes1, XDiffHasher.callbackHashTagNameAttributeNameConsitency, _path1[:_path1.rfind("/")], {"": 0})
+                _element1, _hashes1, _pathes1, XDiffHasher.callbackHashTagNameAttributeNameConsitency, _path1[:_path1.rfind("/")], _leafs, _visited)
 
         _hashes2 = {}
         _pathes2 = {}
+        _visited = []
+        _leafs = {}
         for _path2, _, _ in self.getChangedPathes(self.pathes2):
             _element2 = self.root2.xpath(_path2)[0]
             XDiffHasher.getHashesElementBasedCustomised(
-                _element2, _hashes2, _pathes2, XDiffHasher.callbackHashTagNameAttributeNameConsitency, _path2[:_path2.rfind("/")], {"": 0})
+                _element2, _hashes2, _pathes2, XDiffHasher.callbackHashTagNameAttributeNameConsitency, _path2[:_path2.rfind("/")], _leafs, _visited)
 
         for _hash1 in _hashes1.keys():
             _pathes1 = iter(sorted(_hashes1[_hash1]))

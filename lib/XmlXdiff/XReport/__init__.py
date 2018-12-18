@@ -172,6 +172,7 @@ class DrawXml(object):
         self.x = 0
         self.y = 0
         self.x_max = 0
+        self.y_max = 0
         self.unit = 10
         self.svg_elements = {}
         self.xml = "xml1"
@@ -195,54 +196,57 @@ class DrawXml(object):
 
         return "{tag}{attribs}: {text}".format(attribs=_attribs, tag=_tag, text=element.text)
 
-    def walkElementTree(self, element, path="", path_dict={"": 0}):
+    def walkElementTree(self, element, path="", path_dict={"": 0}, visited=[]):
 
-        # path building syntax has to be in line with XDiffer
-        if isinstance(element, lxml.etree._Comment):
-            _tag = "comment()"
-        else:
-            if element.tag.find("{") > -1:
-                for _ns in element.nsmap.keys():
+        if not(path in visited):
+            visited.append(path)
 
-                    _nslong = "{{{nslong}}}".format(
-                        nslong=element.nsmap[_ns])
-                    if _ns is None:
-                        _nsshort = ""
-                    else:
-                        _nsshort = "{nsshort}:".format(nsshort=_ns)
-
-                    _tag = element.tag.replace(_nslong, _nsshort)
-
-                    if _tag.find("{") < 0:
-                        break
+            # path building syntax has to be in line with XDiffer
+            if isinstance(element, lxml.etree._Comment):
+                _tag = "comment()"
             else:
-                _tag = element.tag
+                if element.tag.find("{") > -1:
+                    for _ns in element.nsmap.keys():
 
-        _path_key = "{path}/{tag}".format(path=path, tag=_tag)
+                        _nslong = "{{{nslong}}}".format(
+                            nslong=element.nsmap[_ns])
+                        if _ns is None:
+                            _nsshort = ""
+                        else:
+                            _nsshort = "{nsshort}:".format(nsshort=_ns)
 
-        if _path_key in path_dict.keys():
-            path_dict[_path_key] = path_dict[_path_key] + 1
-        else:
-            path_dict[_path_key] = 1
+                        _tag = element.tag.replace(_nslong, _nsshort)
 
-        if isinstance(element, lxml.etree._Comment):
-            _path = "{path}/{tag}[{cnt}]".format(path=path,
-                                                 tag=_tag, cnt=path_dict[_path_key])
+                        if _tag.find("{") < 0:
+                            break
+                else:
+                    _tag = element.tag
 
-        else:
-            _path = "{path}/*[name()='{tag}'][{cnt}]".format(path=path,
-                                                             tag=_tag,
-                                                             cnt=path_dict[_path_key])
+            _path_key = "{path}/{tag}".format(path=path, tag=_tag)
 
-        self.svg_elements[_path] = self.addLine(
-            self.getElementText(element))
+            if _path_key in path_dict.keys():
+                path_dict[_path_key] = path_dict[_path_key] + 1
+            else:
+                path_dict[_path_key] = 1
 
-        self.moveRight()
+            if isinstance(element, lxml.etree._Comment):
+                _path = "{path}/{tag}[{cnt}]".format(path=path,
+                                                     tag=_tag, cnt=path_dict[_path_key])
 
-        for _child in element.getchildren():
-            self.walkElementTree(_child, _path, path_dict)
+            else:
+                _path = "{path}/*[name()='{tag}'][{cnt}]".format(path=path,
+                                                                 tag=_tag,
+                                                                 cnt=path_dict[_path_key])
 
-        self.moveLeft()
+            self.svg_elements[_path] = self.addLine(
+                self.getElementText(element))
+
+            self.moveRight()
+
+            for _child in element.getchildren():
+                self.walkElementTree(_child, _path, path_dict)
+
+            self.moveLeft()
 
     def loadFromFile(self, _filepath):
         self.xml = lxml.etree.parse(_filepath)
@@ -253,10 +257,13 @@ class DrawXml(object):
         self.filepath = _filepath[:_filepath.rfind("/")].replace("/", "\\")
         self.file_path_svg = "{}.svg".format(_filepath[:_filepath.rfind('.')])
         self.dwg = svgwrite.Drawing(filename=self.file_path_svg)
-        self.walkElementTree(self.root, "", {"": 0})
+        self._d = {}
+        self._a = []
+        self.walkElementTree(self.root, "", self._d, self._a)
 
     def addLine(self, path):
         self.y = self.y + (0.6 * self.unit)
+        self.y_max = max(self.y_max, self.y)
 
         self.blue = self.blue + 25
 
@@ -333,7 +340,7 @@ class DrawXmlDiff(object):
         self.legend.dwg['y'] = 0
 
         self.dwg = svgwrite.Drawing(filename=self.filepath)
-        self.dwg['height'] = 250 * 3
+        self.dwg['height'] = max(self.report2.y_max, self.report1.y_max) * 3
         self.dwg['width'] = 350 * 3
         self.dwg.viewbox(0, 0, 350, 250)
 

@@ -51,3 +51,7 @@ class CompareAll(unittest.TestCase):
     def test8(self):
         name = inspect.currentframe().f_code.co_name
         self.__class__.execute(name)
+
+    def test9(self):
+        name = inspect.currentframe().f_code.co_name
+        self.__class__.execute(name)
