@@ -45,63 +45,63 @@ class ElementMarker(object):
 
 
 class ElementMoved(ElementMarker):
-    fill = rgb(200, 0, 0)
+    fill = rgb(0x1e, 0x2d, 0xd2)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
 class ElementUnchanged(ElementMarker):
-    fill = rgb(0, 200, 0)
+    fill = rgb(0x7e, 0x62, 0xa1)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
 class ElementChanged(ElementMarker):
-    fill = rgb(0, 0, 200)
+    fill = rgb(0xaa, 0xa6, 0x7f)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
 class ElementDeleted(ElementMarker):
-    fill = rgb(100, 100, 0)
+    fill = rgb(0xff, 0x00, 0xff)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
 class ElementAdded(ElementMarker):
-    fill = rgb(100, 0, 100)
+    fill = rgb(0x91, 0xdf, 0x4e)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
 class ElementVerified(ElementMarker):
-    fill = rgb(0, 100, 100)
+    fill = rgb(0xcd, 0x5d, 0x47)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
 class ElementTagConsitency(ElementMarker):
-    fill = rgb(150, 0, 0)
+    fill = rgb(0x55, 0x8d, 0x30)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
 class ElementTextAttributeValueConsitency(ElementMarker):
-    fill = rgb(0, 150, 0)
+    fill = rgb(0x66, 0xb2, 0x7e)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
 class ElementUnknown(ElementMarker):
-    fill = rgb(0, 0, 150)
+    fill = rgb(0x5c, 0xa3, 0x43)
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -115,7 +115,7 @@ class ElementTagAttributeNameConsitency(ElementMarker):
 
 
 class ElementNameConsitency(ElementMarker):
-    fill = rgb(150, 0, 50)
+    fill = rgb(0xec, 0x91, 0xf8)
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -128,6 +128,7 @@ class DrawLegend(object):
         self.dwg = None
         self.x = 0
         self.y = 0
+        self.y_max = 0
         self.x_max = 0
         self.unit = 10
 
@@ -151,6 +152,8 @@ class DrawLegend(object):
 
     def addLine(self, text):
         self.y = self.y + (0.6 * self.unit)
+
+        self.y_max = max(self.y_max, self.y)
 
         _text = Text(text, fill=rgb(0, 0, 0),
                      insert=(self.x, self.y), font_size="25%")
@@ -196,57 +199,57 @@ class DrawXml(object):
 
         return "{tag}{attribs}: {text}".format(attribs=_attribs, tag=_tag, text=element.text)
 
-    def walkElementTree(self, element, path="", path_dict={"": 0}, visited=[]):
+    def walkElementTree(self, element, path="", path_dict={"": 0}, visited={}):
 
-        if not(path in visited):
-            visited.append(path)
+        # path building syntax has to be in line with XDiffer
+        if isinstance(element, lxml.etree._Comment):
+            _tag = "comment()"
+        else:
+            if element.tag.find("{") > -1:
+                for _ns in element.nsmap.keys():
 
-            # path building syntax has to be in line with XDiffer
-            if isinstance(element, lxml.etree._Comment):
-                _tag = "comment()"
+                    _nslong = "{{{nslong}}}".format(
+                        nslong=element.nsmap[_ns])
+                    if _ns is None:
+                        _nsshort = ""
+                    else:
+                        _nsshort = "{nsshort}:".format(nsshort=_ns)
+
+                    _tag = element.tag.replace(_nslong, _nsshort)
+
+                    if _tag.find("{") < 0:
+                        break
             else:
-                if element.tag.find("{") > -1:
-                    for _ns in element.nsmap.keys():
+                _tag = element.tag
 
-                        _nslong = "{{{nslong}}}".format(
-                            nslong=element.nsmap[_ns])
-                        if _ns is None:
-                            _nsshort = ""
-                        else:
-                            _nsshort = "{nsshort}:".format(nsshort=_ns)
+        _path_key = "{path}/{tag}".format(path=path, tag=_tag)
 
-                        _tag = element.tag.replace(_nslong, _nsshort)
+        if _path_key in path_dict.keys():
+            path_dict[_path_key] = path_dict[_path_key] + 1
+        else:
+            path_dict[_path_key] = 1
 
-                        if _tag.find("{") < 0:
-                            break
-                else:
-                    _tag = element.tag
+        if isinstance(element, lxml.etree._Comment):
+            _path = "{path}/{tag}[{cnt}]".format(path=path,
+                                                 tag=_tag, cnt=path_dict[_path_key])
 
-            _path_key = "{path}/{tag}".format(path=path, tag=_tag)
+        else:
+            _path = "{path}/*[name()='{tag}'][{cnt}]".format(path=path,
+                                                             tag=_tag,
+                                                             cnt=path_dict[_path_key])
 
-            if _path_key in path_dict.keys():
-                path_dict[_path_key] = path_dict[_path_key] + 1
-            else:
-                path_dict[_path_key] = 1
+        self.svg_elements[_path] = self.addLine(
+            self.getElementText(element))
 
-            if isinstance(element, lxml.etree._Comment):
-                _path = "{path}/{tag}[{cnt}]".format(path=path,
-                                                     tag=_tag, cnt=path_dict[_path_key])
+        self.moveRight()
 
-            else:
-                _path = "{path}/*[name()='{tag}'][{cnt}]".format(path=path,
-                                                                 tag=_tag,
-                                                                 cnt=path_dict[_path_key])
+        if _path in visited.keys():
+            return
 
-            self.svg_elements[_path] = self.addLine(
-                self.getElementText(element))
+        for _child in element.getchildren():
+            self.walkElementTree(_child, _path, path_dict)
 
-            self.moveRight()
-
-            for _child in element.getchildren():
-                self.walkElementTree(_child, _path, path_dict)
-
-            self.moveLeft()
+        self.moveLeft()
 
     def loadFromFile(self, _filepath):
         self.xml = lxml.etree.parse(_filepath)
@@ -258,7 +261,7 @@ class DrawXml(object):
         self.file_path_svg = "{}.svg".format(_filepath[:_filepath.rfind('.')])
         self.dwg = svgwrite.Drawing(filename=self.file_path_svg)
         self._d = {}
-        self._a = []
+        self._a = {}
         self.walkElementTree(self.root, "", self._d, self._a)
 
     def addLine(self, path):
@@ -340,35 +343,40 @@ class DrawXmlDiff(object):
         self.legend.dwg['y'] = 0
 
         self.dwg = svgwrite.Drawing(filename=self.filepath)
-        self.dwg['height'] = max(self.report2.y_max, self.report1.y_max) * 3
+        self.dwg['height'] = max(
+            self.report2.y_max, self.report1.y_max, self.legend.y_max) * 3
         self.dwg['width'] = 350 * 3
-        self.dwg.viewbox(0, 0, 350, 250)
+        self.dwg.viewbox(0, 0, 350, max(
+            self.report2.y_max, self.report1.y_max))
 
         self.dwg.add(self.report1.dwg)
         self.dwg.add(self.report2.dwg)
         self.dwg.add(self.legend.dwg)
 
-        self._mark(self.differ.pathes1, self.report1)
-        self._mark(self.differ.pathes2, self.report2)
+        self._mark(self.differ.xelements1, self.report1)
+        self._mark(self.differ.xelements2, self.report2)
 
     def save(self):
         print(self.filepath)
         self.dwg.save()
 
-    def _mark(self, pathes, report):
-        for _path1 in pathes.keys():
-            _, _action1 = pathes[_path1]
-            print(_action1)
+    def _mark(self, xelements, report):
+        for x in xelements:
 
-            _marker_class = globals()[_action1]
+            _marker_class = globals()[x.type.__class__.__name__]
 
-            report.markAs(_path1, _marker_class)
+            report.markAs(x.xpath, _marker_class)
 
 
 if __name__ == "__main__":
 
-    _path1 = r'{path}\tests\test1\a.xml'.format(path=getPath())
-    _path2 = r'{path}\tests\test1\b.xml'.format(path=getPath())
+    import cProfile
 
-    x = DrawXmlDiff(_path1, _path2)
-    x.save()
+    def run():
+        _path1 = r'{path}\tests\test9\a.xml'.format(path=getPath())
+        _path2 = r'{path}\tests\test9\b.xml'.format(path=getPath())
+
+        x = DrawXmlDiff(_path1, _path2)
+        x.save()
+
+    cProfile.run('run()')

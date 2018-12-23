@@ -1,163 +1,12 @@
-import XmlXdiff
+from XmlXdiff import XTypes, XPath, XHash, getPath
 import lxml.etree
-import hashlib
-
-
-class XDiffHasher(object):
-
-    @classmethod
-    def callbackHashAll(cls, element, hashpipe):
-
-        _element_childes = element.getchildren()
-
-        for child in _element_childes:
-            hashpipe.update(cls.callbackHashAll(child, hashpipe))
-
-        hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
-
-        # attributes and text are only taken into account for leaf nodes
-        if not _element_childes:
-            if hasattr(element, 'attrib'):
-                for _name in sorted(element.attrib.keys()):
-                    _attrib_value = element.attrib[_name]
-                    hashpipe.update(
-                        bytes(_name + _attrib_value + '#att', 'utf-8'))
-
-            if element.text is not None:
-                hashpipe.update(bytes(element.text.strip() + '#txt', 'utf-8'))
-
-            if element.tail is not None:
-                hashpipe.update(bytes(element.tail.strip() + '#txt', 'utf-8'))
-
-        return bytes(hashpipe.hexdigest(), 'utf-8')
-
-    @classmethod
-    def callbackHashAttributeValueElementValueConsitency(cls, element, hashpipe):
-
-        _element_childes = element.getchildren()
-        for child in _element_childes:
-            hashpipe.update(
-                cls.callbackHashAttributeValueElementValueConsitency(child, hashpipe))
-
-        # attributes and text are only taken into account for leaf nodes
-        if _element_childes:
-            hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
-        else:
-            if hasattr(element, 'attrib'):
-                for _name in sorted(element.attrib.keys()):
-                    _attrib_value = element.attrib[_name]
-                    hashpipe.update(bytes(_attrib_value + '#att', 'utf-8'))
-
-            if element.text is not None:
-                hashpipe.update(bytes(element.text.strip() + '#txt', 'utf-8'))
-
-            if element.tail is not None:
-                hashpipe.update(bytes(element.tail.strip() + '#txt', 'utf-8'))
-
-        return bytes(hashpipe.hexdigest(), 'utf-8')
-
-    @classmethod
-    def callbackHashTagNameAttributeNameConsitency(cls, element, hashpipe):
-
-        _element_childes = element.getchildren()
-        for child in _element_childes:
-            hashpipe.update(
-                cls.callbackHashTagNameAttributeNameConsitency(child, hashpipe))
-
-        hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
-        # attributes and text are only taken into account for leaf nodes
-        if not _element_childes:
-            if hasattr(element, 'attrib'):
-                for _name in sorted(element.attrib.keys()):
-                    hashpipe.update(bytes(_name + '#att', 'utf-8'))
-
-        return bytes(hashpipe.hexdigest(), 'utf-8')
-
-    @classmethod
-    def callbackHashTagNameConsitency(cls, element, hashpipe):
-
-        _element_childes = element.getchildren()
-        for child in _element_childes:
-            hashpipe.update(cls.callbackHashTagNameConsitency(child, hashpipe))
-
-        hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
-
-        return bytes(hashpipe.hexdigest(), 'utf-8')
-
-    @classmethod
-    def getHashesElementBased(cls, xml, element, hashes, pathes):
-
-        _hash = hashlib.sha1()
-        _hash.update(lxml.etree.tostring(element))
-        _path = xml.getpath(element)
-        pathes[_path] = [_hash.hexdigest(), 'ElementUnchanged']
-        hashes[_hash.hexdigest()] = _path
-
-        for _child in element.getchildren():
-            cls.getHashesElementBased(xml, _child, hashes, pathes)
-
-    @classmethod
-    def getHashesElementBasedCustomised(cls, element, hashes, pathes, callbackHashCalculation, path="", path_dict={"": 0}, visited=[]):
-
-        if path not in visited:
-            visited.append(path)
-
-            _hash = hashlib.sha1()
-            callbackHashCalculation(element, _hash)
-
-            if isinstance(element, lxml.etree._Comment):
-                _tag = "comment()"
-            else:
-                if element.tag.find("{") > -1:
-                    for _ns in element.nsmap.keys():
-
-                        _nslong = "{{{nslong}}}".format(
-                            nslong=element.nsmap[_ns])
-                        if _ns is None:
-                            _nsshort = ""
-                        else:
-                            _nsshort = "{nsshort}:".format(nsshort=_ns)
-
-                        _tag = element.tag.replace(_nslong, _nsshort)
-
-                        if _tag.find("{") < 0:
-                            break
-                else:
-                    _tag = element.tag
-
-            _path_key = "{path}/{tag}".format(path=path, tag=_tag)
-
-            if _path_key in path_dict.keys():
-                path_dict[_path_key] = path_dict[_path_key] + 1
-            else:
-                path_dict[_path_key] = 1
-
-            if isinstance(element, lxml.etree._Comment):
-                _path = "{path}/{tag}[{cnt}]".format(path=path,
-                                                     tag=_tag, cnt=path_dict[_path_key])
-
-            else:
-                _path = "{path}/*[name()='{tag}'][{cnt}]".format(path=path,
-                                                                 tag=_tag, cnt=path_dict[_path_key])
-
-            pathes[_path] = [_hash.hexdigest(), 'ElementUnchanged']
-
-            if _hash.hexdigest() not in hashes.keys():
-                hashes[_hash.hexdigest()] = [_path]
-            else:
-                hashes[_hash.hexdigest()].append(_path)
-
-            for _child in element.getchildren():
-
-                cls.getHashesElementBasedCustomised(
-                    _child, hashes, pathes, callbackHashCalculation, _path, path_dict)
 
 
 class XDiffExecutor(object):
 
     def __init__(self):
-        self.path1 = '{}\\tests\\test8\\a.xml'.format(XmlXdiff.getPath())
-        self.path2 = '{}\\tests\\test8\\b.xml'.format(XmlXdiff.getPath())
+        self.path1 = '{}\\tests\\test1\\a.xml'.format(getPath())
+        self.path2 = '{}\\tests\\test1\\b.xml'.format(getPath())
 
     def run(self):
         self.xml1 = lxml.etree.parse(self.path1)
@@ -166,27 +15,19 @@ class XDiffExecutor(object):
         self.root1 = self.xml1.getroot()
         self.root2 = self.xml2.getroot()
 
-        self.hashes1 = {}
-        self.hashes2 = {}
+        _xpath = XPath.XDiffXmlPath()
 
-        self.pathes1 = {}
-        self.pathes2 = {}
+        self.xelements1 = _xpath.getXelements(self.root1, "", 1)
+        self.xelements2 = _xpath.getXelements(self.root2, "", 1)
 
-        self.visited = []
-        self._leafs = {}
-        XDiffHasher.getHashesElementBasedCustomised(
-            self.root1,  self.hashes1, self.pathes1, XDiffHasher.callbackHashAll, "", self._leafs, self.visited)
+        XHash.XDiffHasher.getHashes(
+            self.xelements1, XHash.XDiffHasher.callbackHashAll)
+        XHash.XDiffHasher.getHashes(
+            self.xelements2, XHash.XDiffHasher.callbackHashAll)
 
-        self.visited = []
-        self._leafs = {}
-        XDiffHasher.getHashesElementBasedCustomised(
-            self.root2,  self.hashes2, self.pathes2, XDiffHasher.callbackHashAll, "", self._leafs, self.visited)
-
-        self._return = []
+        self.findUnchangedMovedElements()
 
         self.findChangedElements()
-
-        self.findMovedElements()
 
         self.findTagNameAttributeNameConsitency()
 
@@ -194,273 +35,185 @@ class XDiffExecutor(object):
 
         self.findTagNameConsitency()
 
-        self.findAddedDeletedElements()
+        self.verifyElements(self.xelements1)
+        self.verifyElements(self.xelements2)
 
-    def getChangedPathes(self, pathes):
-        _changed_pathes = []
-        for _path in pathes:
-            _hash, _state = pathes[_path]
+        for _e in XTypes.loop(
+                self.xelements1, XTypes.ElementUnknown):
+            _e.setType(XTypes.ElementDeleted)
 
-            if _state == 'ElementChanged':
-                _changed_pathes.append((_path, _hash, _state))
+        for _e in XTypes.loop(
+                self.xelements2, XTypes.ElementUnknown):
+            _e.setType(XTypes.ElementAdded)
 
-        return sorted(_changed_pathes)
+    def verifyElements(self, elements=None):
 
-    def findAddedDeletedElements(self):
+        _xpaths = [[elements[0], None]]
 
-        def checkNoChange(path, pathes, root, xml):
+        for _element in elements[1:]:
 
-            _hash, _state = pathes[path]
-            for _path in pathes.keys():
+            if isinstance(_element.type, XTypes.ElementChanged):
 
-                if (_path.find(path) == 0 and
-                        len(_path) > len(path)):
+                if _element.xpath.find(_xpaths[-1:][0][0].xpath) == -1:
+                    _0, _1 = _xpaths.pop()
+                    if _1 is None:
+                        _xpaths[-1:][0][1] = False
+                    else:
+                        _xpaths[-1:][0][1] = _1
+                        _0.setType(XTypes.ElementVerified)
 
-                    _found = True
-                    _child_path = _path
+                    if _xpaths[-1:][0][1]:
+                        _xpaths[-1:][0][0].setType(XTypes.ElementVerified)
 
-                    _hash, _state = pathes[_child_path]
+                _xpaths.append([_element, None])
 
-                    if _state == 'ElementChanged':
-                        _state = checkNoChange(
-                            _child_path, pathes, root, xml)
+            else:
 
-                        if _state == 'ElementChanged':
-                            return _state
+                if _element.xpath.find(_xpaths[-1:][0][0].xpath) == -1:
+                    _0, _1 = _xpaths.pop()
+                    if _1 is None:
+                        _xpaths[-1:][0][1] = False
+                    else:
+                        _xpaths[-1:][0][1] = _1
+                        _0.setType(XTypes.ElementVerified)
 
-            return _state
+                    if _xpaths[-1:][0][1]:
+                        _xpaths[-1:][0][0].setType(XTypes.ElementVerified)
 
-        for _path1, _, _ in self.getChangedPathes(self.pathes1):
-            if _path1 not in self.pathes2.keys():
-                self.pathes1[_path1][1] = 'ElementDeleted'
-                print('ElementDeleted', _path1)
-                self._return.append(('ElementDeleted', _path1, None))
-
-        for _path2, _, _ in self.getChangedPathes(self.pathes2):
-            if _path2 not in self.pathes1.keys():
-                self.pathes2[_path2][1] = 'ElementAdded'
-                print('ElementAdded', _path2)
-                self._return.append(('ElementDeleted', None, _path2))
-
-        for _path1, _, _ in self.getChangedPathes(self.pathes1):
-            _state1 = checkNoChange(
-                _path1, self.pathes1, self.root1, self.xml1)
-            if _state1 != 'ElementChanged':
-                self.pathes1[_path1][1] = 'ElementVerified'
-                print('ElementVerified', _path1)
-                self._return.append(('ElementVerified', None, _path2))
-
-        for _path2, _, _ in self.getChangedPathes(self.pathes2):
-            _state2 = checkNoChange(
-                _path2, self.pathes2, self.root2, self.xml2)
-            if _state2 != 'ElementChanged':
-                self.pathes2[_path2][1] = 'ElementVerified'
-                print('ElementVerified', _path2)
-                self._return.append(('ElementVerified', None, _path2))
-
-        for _path1, _, _ in self.getChangedPathes(self.pathes1):
-            print('ElementUnknown {}'.format(_path1))
-            self._return.append(('ElementUnknown', _path1, None))
-
-        for _path2, _, _ in self.getChangedPathes(self.pathes2):
-            print('ElementUnknown {}'.format(_path2))
-            self._return.append(('ElementUnknown', None, _path2))
+                else:
+                    if _xpaths[-1:][0][1] is None:
+                        _xpaths[-1:][0][1] = True
 
     def findTagNameConsitency(self):
 
-        _hashes1 = {}
-        _pathes1 = {}
-        _visited = []
-        _leafs = {}
-        for _path1, _, _ in self.getChangedPathes(self.pathes1):
-            _element1 = self.root1.xpath(_path1)[0]
-            XDiffHasher.getHashesElementBasedCustomised(
-                _element1, _hashes1, _pathes1, XDiffHasher.callbackHashTagNameConsitency, _path1[:_path1.rfind("/")], _leafs, _visited)
+        _elements1 = XTypes.loop(
+            self.xelements1, XTypes.ElementChanged, XTypes.ElementUnknown)
+        XHash.XDiffHasher.getHashes(
+            _elements1, XHash.XDiffHasher.callbackHashTagNameConsitency)
 
-        _hashes2 = {}
-        _pathes2 = {}
-        _visited = []
-        _leafs = {}
-        for _path2, _, _ in self.getChangedPathes(self.pathes2):
-            _element2 = self.root2.xpath(_path2)[0]
-            XDiffHasher.getHashesElementBasedCustomised(
-                _element2, _hashes2, _pathes2, XDiffHasher.callbackHashTagNameConsitency, _path2[:_path2.rfind("/")], _leafs, _visited)
+        _elements2 = XTypes.loop(
+            self.xelements2, XTypes.ElementChanged, XTypes.ElementUnknown)
+        XHash.XDiffHasher.getHashes(
+            _elements2, XHash.XDiffHasher.callbackHashTagNameConsitency)
 
-        for _hash1 in _hashes1.keys():
+        for _xelement1 in XTypes.loop(
+                self.xelements1, XTypes.ElementChanged, XTypes.ElementUnknown):
+            for _xelement2 in XTypes.loop(
+                    self.xelements2, XTypes.ElementChanged, XTypes.ElementUnknown):
+                if (_xelement1.hash == _xelement2.hash):
+                    _xelement1.setType(
+                        XTypes.ElementTagConsitency)
+                    _xelement2.setType(
+                        XTypes.ElementTagConsitency)
 
-            if _hash1 in _hashes2.keys():
-                _pathes1 = sorted(_hashes1[_hash1])
-                _pathes2 = sorted(_hashes2[_hash1])
-
-                for _path1 in _pathes1:
-                    if _pathes2:
-                        _path2 = _pathes2[0]
-                        _pathes2 = _pathes2[1:]
-
-                        if (self.pathes1[_path1][1] == 'ElementChanged' and
-                                self.pathes2[_path2][1] == 'ElementChanged'):
-
-                            self.pathes1[_path1][1] = 'ElementNameConsitency'
-                            self.pathes2[_path2][1] = 'ElementTagConsitency'
-
-                            print('ElementTagConsitency {}, {}'.format(
-                                _path1, _path2))
-                            self._return.append(
-                                ('ElementTagConsitency', _path1, _path2))
+                    _xelement1.addXelement(_xelement2)
+                    _xelement2.addXelement(_xelement1)
+                    break
 
     def findAttributeValueElementValueConsitency(self):
 
-        _hashes1 = {}
-        _pathes1 = {}
-        _visited = []
-        _leafs = {}
-        for _path1, _, _ in self.getChangedPathes(self.pathes1):
-            _element1 = self.root1.xpath(_path1)[0]
-            XDiffHasher.getHashesElementBasedCustomised(
-                _element1, _hashes1, _pathes1, XDiffHasher.callbackHashAttributeValueElementValueConsitency, _path1[:_path1.rfind("/")], _leafs, _visited)
+        _elements1 = XTypes.loop(
+            self.xelements1, XTypes.ElementChanged, XTypes.ElementUnknown)
+        XHash.XDiffHasher.getHashes(
+            _elements1, XHash.XDiffHasher.callbackHashAttributeValueElementValueConsitency)
 
-        _hashes2 = {}
-        _pathes2 = {}
-        _visited = []
-        _leafs = {}
-        for _path2, _, _ in self.getChangedPathes(self.pathes2):
-            _element2 = self.root2.xpath(_path2)[0]
-            XDiffHasher.getHashesElementBasedCustomised(
-                _element2, _hashes2, _pathes2, XDiffHasher.callbackHashAttributeValueElementValueConsitency, _path2[:_path2.rfind("/")], _leafs, _visited)
+        _elements2 = XTypes.loop(
+            self.xelements2, XTypes.ElementChanged, XTypes.ElementUnknown)
+        XHash.XDiffHasher.getHashes(
+            _elements2, XHash.XDiffHasher.callbackHashAttributeValueElementValueConsitency)
 
-        for _hash1 in _hashes1.keys():
-            _pathes1 = sorted(_hashes1[_hash1])
+        for _xelement1 in XTypes.loop(
+                self.xelements1, XTypes.ElementChanged, XTypes.ElementUnknown):
+            for _xelement2 in XTypes.loop(
+                    self.xelements2, XTypes.ElementChanged, XTypes.ElementUnknown):
+                if (_xelement1.hash == _xelement2.hash):
+                    _xelement1.setType(
+                        XTypes.ElementTextAttributeValueConsitency)
+                    _xelement2.setType(
+                        XTypes.ElementTextAttributeValueConsitency)
 
-            if _hash1 in _hashes2.keys():
-                _pathes2 = sorted(_hashes2[_hash1])
-
-                for _path1 in _pathes1:
-                    if _pathes2:
-                        _path2 = _pathes2[0]
-                        _pathes2 = _pathes2[1:]
-
-                        if (self.pathes1[_path1][1] == 'ElementChanged' and
-                                self.pathes2[_path2][1] == 'ElementChanged'):
-
-                            self.pathes1[_path1][1] = 'ElementTextAttributeValueConsitency'
-                            self.pathes2[_path2][1] = 'ElementTextAttributeValueConsitency'
-
-                            print('ElementTextAttributeValueConsitency {}, {}'.format(
-                                _path1, _path2))
-                            self._return.append(
-                                ('ElementTextAttributeValueConsitency', _path1, _path2))
+                    _xelement1.addXelement(_xelement2)
+                    _xelement2.addXelement(_xelement1)
+                    break
 
     def findTagNameAttributeNameConsitency(self):
 
-        _hashes1 = {}
-        _pathes1 = {}
-        _visited = []
-        _leafs = {}
-        for _path1, _, _ in self.getChangedPathes(self.pathes1):
-            print(_path1)
-            _element1 = self.root1.xpath(_path1)[0]
-            XDiffHasher.getHashesElementBasedCustomised(
-                _element1, _hashes1, _pathes1, XDiffHasher.callbackHashTagNameAttributeNameConsitency, _path1[:_path1.rfind("/")], _leafs, _visited)
+        _elements1 = XTypes.loop(
+            self.xelements1, XTypes.ElementChanged, XTypes.ElementUnknown)
+        XHash.XDiffHasher.getHashes(
+            _elements1, XHash.XDiffHasher.callbackHashTagNameAttributeNameConsitency)
 
-        _hashes2 = {}
-        _pathes2 = {}
-        _visited = []
-        _leafs = {}
-        for _path2, _, _ in self.getChangedPathes(self.pathes2):
-            _element2 = self.root2.xpath(_path2)[0]
-            XDiffHasher.getHashesElementBasedCustomised(
-                _element2, _hashes2, _pathes2, XDiffHasher.callbackHashTagNameAttributeNameConsitency, _path2[:_path2.rfind("/")], _leafs, _visited)
+        _elements2 = XTypes.loop(
+            self.xelements2, XTypes.ElementChanged, XTypes.ElementUnknown)
+        XHash.XDiffHasher.getHashes(
+            _elements2, XHash.XDiffHasher.callbackHashTagNameAttributeNameConsitency)
 
-        for _hash1 in _hashes1.keys():
-            _pathes1 = iter(sorted(_hashes1[_hash1]))
+        for _xelement1 in XTypes.loop(
+                self.xelements1, XTypes.ElementChanged, XTypes.ElementUnknown):
+            for _xelement2 in XTypes.loop(
+                    self.xelements2, XTypes.ElementChanged, XTypes.ElementUnknown):
+                if (_xelement1.hash == _xelement2.hash):
+                    _xelement1.setType(
+                        XTypes.ElementTagAttributeNameConsitency)
+                    _xelement2.setType(
+                        XTypes.ElementTagAttributeNameConsitency)
 
-            if _hash1 in _hashes2.keys():
-                _pathes2 = sorted(_hashes2[_hash1])
+                    _xelement1.addXelement(_xelement2)
+                    _xelement2.addXelement(_xelement1)
+                    break
 
-                for _path1 in _pathes1:
-                    if _pathes2:
-                        _path2 = _pathes2[0]
-                        _pathes2 = _pathes2[1:]
+    def findUnchangedMovedElements(self):
 
-                        if (self.pathes1[_path1][1] == 'ElementChanged' and
-                                self.pathes2[_path2][1] == 'ElementChanged'):
+        def markSubElements(element, elements, elementType):
+            for _element in elements[elements.index(element):]:
+                if _element.xpath.find(element.xpath) == 0:
+                    _element.setType(elementType)
+                else:
+                    break
 
-                            self.pathes1[_path1][1] = 'ElementTagAttributeNameConsitency'
-                            self.pathes2[_path2][1] = 'ElementTagAttributeNameConsitency'
+        for _xelement2 in XTypes.loop(
+                self.xelements2, XTypes.ElementUnknown):
 
-                            print('ElementTagAttributeNameConsitency {}, {}'.format(
-                                _path1, _path2))
-                            self._return.append(
-                                ('ElementTagAttributeNameConsitency', _path1, _path2))
+            for _xelement1 in XTypes.loop(
+                    self.xelements1, XTypes.ElementUnknown):
 
-    def findMovedElements(self):
+                if (_xelement1.hash == _xelement2.hash):
+                    if(_xelement1.xpath == _xelement2.xpath):
+                        markSubElements(
+                            _xelement1, self.xelements1, XTypes.ElementUnchanged)
+                        markSubElements(
+                            _xelement2, self.xelements2, XTypes.ElementUnchanged)
 
-        _hashes1 = {}
-        for _path1, _hash1, _state1 in self.getChangedPathes(self.pathes1):
+                        break
 
-            if _hash1 in _hashes1.keys():
-                _hashes1[_hash1].append(_path1)
-            else:
-                _hashes1[_hash1] = [_path1]
+                    else:
 
-        _hashes2 = {}
-        for _path2, _hash2, _state2 in self.getChangedPathes(self.pathes2):
+                        markSubElements(
+                            _xelement1, self.xelements1, XTypes.ElementMoved)
+                        markSubElements(
+                            _xelement2, self.xelements2, XTypes.ElementMoved)
 
-            if _hash2 in _hashes2.keys():
-                _hashes2[_hash2].append(_path2)
-            else:
-                _hashes2[_hash2] = [_path2]
-
-        for _hash1 in _hashes1.keys():
-            _pathes1 = sorted(_hashes1[_hash1])
-
-            if _hash1 in _hashes2.keys():
-                _pathes2 = sorted(_hashes2[_hash1])
-
-                for _path1 in _pathes1:
-
-                    if _pathes2:
-                        _path2 = _pathes2[0]
-                        _pathes2 = _pathes2[1:]
-
-                        print('ElementMoved {} -> {}'.format(_path1, _path2))
-                        self._return.append(('ElementMoved', _path1, _path2))
-
-                        self.pathes1[_path1][1] = 'ElementMoved'
-                        self.pathes2[_path2][1] = 'ElementMoved'
+                        _xelement1.addXelement(_xelement2)
+                        _xelement2.addXelement(_xelement1)
+                        break
 
     def findChangedElements(self):
+        for _xelement2 in XTypes.loop(
+                self.xelements2, XTypes.ElementUnknown):
 
-        for _hash1 in self.hashes1.keys():
-            _pathes1 = self.hashes1[_hash1]
+            for _xelement1 in XTypes.loop(
+                    self.xelements1, XTypes.ElementUnknown):
 
-            if _hash1 in self.hashes2.keys():
-                _pathes2 = self.hashes2[_hash1]
+                if (_xelement1.xpath == _xelement2.xpath):
 
-                for _path1 in _pathes1:
-                    if _path1 not in _pathes2:
-                        self.pathes1[_path1][1] = 'ElementChanged'
-            else:
-                for _path1 in _pathes1:
-                    self.pathes1[_path1][1] = 'ElementChanged'
-
-        for _hash2 in self.hashes2.keys():
-            _pathes2 = self.hashes2[_hash2]
-
-            if _hash2 in self.hashes1.keys():
-                _pathes1 = self.hashes1[_hash2]
-
-                for _path2 in _pathes2:
-                    if _path2 not in _pathes1:
-                        self.pathes2[_path2][1] = 'ElementChanged'
-            else:
-                for _path2 in _pathes2:
-                    self.pathes2[_path2][1] = 'ElementChanged'
+                    _xelement1.setType(XTypes.ElementChanged)
+                    _xelement2.setType(XTypes.ElementChanged)
+                    break
 
 
 if __name__ == '__main__':
     _x = XDiffExecutor()
     _x.run()
 
-    for _i in sorted(_x.pathes1.keys()):
-        print(_i)
+    for _x in _x.xelements1:
+        print(_x.xpath, _x.type)
