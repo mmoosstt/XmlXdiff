@@ -21,6 +21,22 @@ class XDiffXmlPath(object):
         return cls.xelements
 
     @classmethod
+    def getXpathDistance(cls, path1, path2):
+
+        _arr1 = path1.split("/")
+        _arr2 = path2.split("/")
+
+        while True:
+            _el1 = _arr1[0]
+
+            if _arr1[0] == _arr2[0]:
+                _arr1 = _arr1[1:]
+                _arr2 = _arr2[1:]
+
+            else:
+                return len(_arr1) + len(_arr2)
+
+    @classmethod
     def getTag(cls, element, pos):
 
         if isinstance(element, lxml.etree._Comment):
@@ -76,12 +92,16 @@ class XDiffXmlPath(object):
 
 
 if __name__ == "__main__":
-    import lxml.etree
 
-    XDiffXmlPath
-    _xml = lxml.etree.parse("./tests/test9/a.xml")
-    XDiffXmlPath.setXmlValidation(_xml.getroot())
-    _pathes = XDiffXmlPath.getPathes(_xml.getroot(), "", 1)
+    print(XDiffXmlPath.getDistance("a/b/c/d/1/2/3", "a/b/c/d/1/3"))
 
-    for _path in _pathes:
-        print(_path)
+    if 0:
+        import lxml.etree
+
+        XDiffXmlPath
+        _xml = lxml.etree.parse("./tests/test9/a.xml")
+        XDiffXmlPath.setXmlValidation(_xml.getroot())
+        _pathes = XDiffXmlPath.getPathes(_xml.getroot(), "", 1)
+
+        for _path in _pathes:
+            print(_path)
