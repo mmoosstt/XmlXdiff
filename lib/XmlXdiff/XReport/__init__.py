@@ -10,6 +10,7 @@ from importlib.resources import path
 from XmlXdiff import getPath
 from inspect import isclass
 from XmlXdiff import XDiffer
+from XmlXdiff.XReport import XRender
 
 
 class ElementMarker(object):
@@ -131,6 +132,11 @@ class DrawLegend(object):
         self.y_max = 0
         self.x_max = 0
         self.unit = 10
+        self.font_size = 6
+        self.font_family = "Consolas"
+
+        XRender.Render.setFontFamily(self.font_family)
+        XRender.Render.setFontSize(self.font_size)
 
         self.filepath = "{path}\\..\\..\\doc\\legend.svg".format(
             path=getPath())
@@ -151,12 +157,14 @@ class DrawLegend(object):
         self.dwg.save()
 
     def addLine(self, text):
-        self.y = self.y + (0.6 * self.unit)
+        _x, _y = XRender.Render.getTextSize(text)
 
+        self.y = self.y + _y  # (0.6 * self.unit)
+        self.x_max = max(self.x_max, _x + self.x)
         self.y_max = max(self.y_max, self.y)
 
         _text = Text(text, fill=rgb(0, 0, 0),
-                     insert=(self.x, self.y), font_size="25%")
+                     insert=(self.x, self.y), font_size=self.font_size, font_family=self.font_family)
 
         return _text
 
@@ -183,6 +191,11 @@ class DrawXml(object):
         self.fill_blue = rgb(0, 0, 200)
         self.fill = self.fill_red
         self.blue = 0
+        self.font_size = 6
+        self.font_family = "Consolas"
+
+        XRender.Render.setFontFamily(self.font_family)
+        XRender.Render.setFontSize(self.font_size)
 
     def getElementText(self, element):
 
@@ -265,8 +278,12 @@ class DrawXml(object):
         self.walkElementTree(self.root, "", self._d, self._a)
 
     def addLine(self, path):
-        self.y = self.y + (0.6 * self.unit)
+
+        _x, _y = XRender.Render.getTextSize(path)
+
+        self.y = self.y + _y  # (0.6 * self.unit)
         self.y_max = max(self.y_max, self.y)
+        self.x_max = max(self.x_max, _x + self.x)
 
         self.blue = self.blue + 25
 
@@ -274,12 +291,13 @@ class DrawXml(object):
             self.blue = 0
 
         _text = Text(path, fill=rgb(0, 0, self.blue),
-                     insert=(self.x, self.y), font_size="25%")
+                     insert=(self.x, self.y), font_size=self.font_size, font_family=self.font_family)
 
         return _text
 
     def moveLeft(self):
         self.x = self.x - 1.2 * self.unit
+        self.x_max = max(self.x_max, self.x)
 
     def moveRight(self):
         self.x = self.x + 1.2 * self.unit
@@ -288,7 +306,7 @@ class DrawXml(object):
     def moveTop(self):
         self.fill = self.fill_blue
         self.y = 0.3 * self.unit
-        self.x = self.x_max + (5.5 * self.unit)
+        self.x = self.x_max  # + (5.5 * self.unit)
 
     def saveSvg(self):
         for _key in self.svg_elements.keys():
@@ -336,18 +354,27 @@ class DrawXmlDiff(object):
                                                                            filename1=self.report1.filename,
                                                                            filename2=self.report2.filename)
 
-        self.report2.dwg['x'] = self.report1.x_max * 2.0
+        self.report1.dwg['x'] = 0
+        self.report1.dwg['y'] = 0
+
+        self.report2.dwg['x'] = self.report1.x_max
         self.report2.dwg['y'] = 0
 
-        self.legend.dwg['x'] = self.report2.x_max * 4.0
+        self.legend.dwg['x'] = self.report2.x_max + self.report1.x_max
         self.legend.dwg['y'] = 0
 
+        _height = max(self.report2.y_max,
+                      self.report1.y_max,
+                      self.legend.y_max)
+
+        _width = (self.report1.x_max +
+                  self.report2.x_max +
+                  self.legend.x_max)
+
         self.dwg = svgwrite.Drawing(filename=self.filepath)
-        self.dwg['height'] = max(
-            self.report2.y_max, self.report1.y_max, self.legend.y_max) * 3
-        self.dwg['width'] = 350 * 3
-        self.dwg.viewbox(0, 0, 350, max(
-            self.report2.y_max, self.report1.y_max))
+        self.dwg['height'] = _height
+        self.dwg['width'] = _width
+        self.dwg.viewbox(0, 0, _width, _height)
 
         self.dwg.add(self.report1.dwg)
         self.dwg.add(self.report2.dwg)
