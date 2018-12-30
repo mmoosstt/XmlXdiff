@@ -9,8 +9,8 @@ class CompareAll(unittest.TestCase):
     @staticmethod
     def execute_old(folder_name):
         _i = XDiffer.XDiffExecutor()
-        _i.path1 = "{}\\tests\\{}\\a.xml".format(getPath(), folder_name)
-        _i.path2 = "{}\\tests\\{}\\b.xml".format(getPath(), folder_name)
+        _i.setPath1("{}\\tests\\{}\\a.xml".format(getPath(), folder_name))
+        _i.setPath2("{}\\tests\\{}\\b.xml".format(getPath(), folder_name))
         _i.run()
 
     @staticmethod

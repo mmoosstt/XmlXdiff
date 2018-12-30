@@ -27,7 +27,9 @@ class XDiffXmlPath(object):
         _arr2 = path2.split("/")
 
         while True:
-            _el1 = _arr1[0]
+
+            if _arr1 == [] or _arr2 == []:
+                return len(_arr1) + len(_arr2)
 
             if _arr1[0] == _arr2[0]:
                 _arr1 = _arr1[1:]

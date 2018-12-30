@@ -2,15 +2,32 @@ from XmlXdiff import XTypes, XPath, XHash, getPath
 import lxml.etree
 
 
+class XDiffPath(object):
+
+    def __init__(self, filepath):
+        _x = filepath.replace("\\", "/")
+
+        self.path = _x[:_x.rfind("/")].replace("/", "\\")
+        self.filename = _x[_x.rfind("/") + 1:_x.rfind('.')]
+        self.fileending = _x[_x.rfind('.') + 1:]
+        self.filepath = _x.replace("/", "\\")
+
+
 class XDiffExecutor(object):
 
     def __init__(self):
-        self.path1 = '{}\\tests\\test1\\a.xml'.format(getPath())
-        self.path2 = '{}\\tests\\test1\\b.xml'.format(getPath())
+        self.path1 = XDiffPath('{}\\tests\\test1\\a.xml'.format(getPath()))
+        self.path2 = XDiffPath('{}\\tests\\test1\\b.xml'.format(getPath()))
+
+    def setPath1(self, path):
+        self.path1 = XDiffPath(path)
+
+    def setPath2(self, path):
+        self.path2 = XDiffPath(path)
 
     def run(self):
-        self.xml1 = lxml.etree.parse(self.path1)
-        self.xml2 = lxml.etree.parse(self.path2)
+        self.xml1 = lxml.etree.parse(self.path1.filepath)
+        self.xml2 = lxml.etree.parse(self.path2.filepath)
 
         self.root1 = self.xml1.getroot()
         self.root2 = self.xml2.getroot()
@@ -212,6 +229,9 @@ class XDiffExecutor(object):
 
 
 if __name__ == '__main__':
+    path1 = '{}\\tests\\test1\\a.xml'.format(getPath())
+
+    y = XDiffPath(path1)
     _x = XDiffExecutor()
     _x.run()
 

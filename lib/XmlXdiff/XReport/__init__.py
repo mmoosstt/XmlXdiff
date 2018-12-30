@@ -13,6 +13,7 @@ from XmlXdiff import getPath
 from inspect import isclass
 from XmlXdiff import XDiffer
 from XmlXdiff.XReport import XRender
+from XmlXdiff.XPath import XDiffXmlPath
 
 
 class ElementMarker(object):
@@ -183,7 +184,7 @@ class DrawXml(object):
     def __init__(self):
         self.dwg = None
         self.x = 0
-
+        self.y = 0
         self.x_max = 0
         self.y_max = 0
         self.unit = 10
@@ -215,70 +216,35 @@ class DrawXml(object):
 
         return "{tag}{attribs}: {text}".format(attribs=_attribs, tag=_tag, text=element.text)
 
-    def walkElementTree(self, element, path="", path_dict={"": 0}, visited={}):
+    def loadFromXElements(self, xelements):
 
-        # path building syntax has to be in line with XDiffer
-        if isinstance(element, lxml.etree._Comment):
-            _tag = "comment()"
-        else:
-            if element.tag.find("{") > -1:
-                for _ns in element.nsmap.keys():
+        self.dwg = svgwrite.Drawing(filename="test.svg")
 
-                    _nslong = "{{{nslong}}}".format(
-                        nslong=element.nsmap[_ns])
-                    if _ns is None:
-                        _nsshort = ""
-                    else:
-                        _nsshort = "{nsshort}:".format(nsshort=_ns)
+        _root = xelements[0]
+        _node_level_z = 0
+        for _xelement in xelements:
+            _node_text = self.getElementText(_xelement.node)
+            _node_level = XDiffXmlPath.getXpathDistance(
+                _root.xpath, _xelement.xpath)
 
-                    _tag = element.tag.replace(_nslong, _nsshort)
+            _steps = _node_level - _node_level_z
 
-                    if _tag.find("{") < 0:
-                        break
-            else:
-                _tag = element.tag
+            if _steps > 0:
 
-        _path_key = "{path}/{tag}".format(path=path, tag=_tag)
+                for _x in range(abs(_steps)):
+                    self.moveRight()
 
-        if _path_key in path_dict.keys():
-            path_dict[_path_key] = path_dict[_path_key] + 1
-        else:
-            path_dict[_path_key] = 1
+            elif _steps < 0:
 
-        if isinstance(element, lxml.etree._Comment):
-            _path = "{path}/{tag}[{cnt}]".format(path=path,
-                                                 tag=_tag, cnt=path_dict[_path_key])
+                for _x in range(abs(_steps)):
+                    self.moveLeft()
 
-        else:
-            _path = "{path}/*[name()='{tag}'][{cnt}]".format(path=path,
-                                                             tag=_tag,
-                                                             cnt=path_dict[_path_key])
+            self.svg_elements[_xelement.xpath] = self.addTextBox(_node_text)
 
-        self.svg_elements[_path] = self.addTextBox(
-            self.getElementText(element).strip())
+            _marker_class = globals()[_xelement.type.__class__.__name__]
+            self.markAs(_xelement.xpath, _marker_class)
 
-        self.moveRight()
-
-        if _path in visited.keys():
-            return
-
-        for _child in element.getchildren():
-            self.walkElementTree(_child, _path, path_dict)
-
-        self.moveLeft()
-
-    def loadFromFile(self, _filepath):
-        self.xml = lxml.etree.parse(_filepath)
-        self.root = self.xml.getroot()
-        _filepath = _filepath.replace("\\", "/")
-        self.filename = _filepath[_filepath.rfind(
-            "/") + 1:_filepath.rfind('.')]
-        self.filepath = _filepath[:_filepath.rfind("/")].replace("/", "\\")
-        self.file_path_svg = "{}.svg".format(_filepath[:_filepath.rfind('.')])
-        self.dwg = svgwrite.Drawing(filename=self.file_path_svg)
-        self._d = {}
-        self._a = {}
-        self.walkElementTree(self.root, "", self._d, self._a)
+            _node_level_z = _node_level
 
     def addTextBox(self, text):
         _lines = XRender.Render.splitTextToLines(text)
@@ -341,30 +307,26 @@ class DrawXmlDiff(object):
 
     def __init__(self, path1, path2):
 
-        _path = path1
-        _path = _path.replace("\\", "/")
-        _path = _path[:_path.rfind("/")].replace("/", "\\")
-
         self.differ = XDiffer.XDiffExecutor()
-        self.differ.path1 = path1
-        self.differ.path2 = path2
+        self.differ.setPath1(path1)
+        self.differ.setPath2(path2)
         self.differ.run()
 
         self.report1 = DrawXml()
         self.report1.moveRight()
-        self.report1.loadFromFile(self.differ.path1)
+        self.report1.loadFromXElements(self.differ.xelements1)
         self.report1.saveSvg()
 
         self.report2 = DrawXml()
         self.report2.moveRight()
-        self.report2.loadFromFile(self.differ.path2)
+        self.report2.loadFromXElements(self.differ.xelements2)
         self.report2.saveSvg()
 
         self.legend = DrawLegend()
 
-        self.filepath = "{path}\\xdiff_{filename1}_{filename2}.svg".format(path=_path,
-                                                                           filename1=self.report1.filename,
-                                                                           filename2=self.report2.filename)
+        self.filepath = "{path}\\xdiff_{filename1}_{filename2}.svg".format(path=self.differ.path1.path,
+                                                                           filename1=self.differ.path1.filename,
+                                                                           filename2=self.differ.path2.filename)
 
         self.report1.dwg['x'] = 0
         self.report1.dwg['y'] = 0
@@ -392,12 +354,10 @@ class DrawXmlDiff(object):
         self.dwg.add(self.report2.dwg)
         self.dwg.add(self.legend.dwg)
 
-        self._mark(self.differ.xelements1, self.report1)
-        self._mark(self.differ.xelements2, self.report2)
-
     def save(self):
         print(self.filepath)
         self.dwg.save()
+        pass
 
     def _mark(self, xelements, report):
         for x in xelements:

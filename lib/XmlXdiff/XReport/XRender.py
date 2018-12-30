@@ -83,14 +83,8 @@ class Render(object):
 
         _width = cls.max_textbox_len + 10
         _text = []
-        _cnt = 0
 
         while _width > cls.max_textbox_len:
-
-            _cnt += 1
-
-            if _cnt > 100:
-                _cnt = 0
 
             _width, _height = cls.getTextSize(text)
 
