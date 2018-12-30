@@ -1,4 +1,5 @@
 import sys
+import copy
 from PySide2.QtWidgets import QApplication
 from PySide2.QtSvg import QSvgGenerator
 from PySide2.QtGui import QFontMetricsF, QFont
@@ -13,6 +14,7 @@ class Render(object):
     font_family = None
     font_generator = None
     font_metrics = None
+    max_textbox_len = 400
 
     @classmethod
     def _initFontInterface(cls):
@@ -35,17 +37,85 @@ class Render(object):
 
         return (cls.font_metrics.width(text), cls.font_metrics.height())
 
+    @classmethod
+    def splitTextToLines(cls, text):
+        """
+            Split Into Max TextBoxSize
+        """
 
-test_svg = """
- <svg>
-  <rect x="0" y="0" width="{width}" height="{height}" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" />
-  <text font-family="{font_family}" font-size="{font_size}" x="0" y="{y}" width="{width}" height="{height}" >{text}</text>
-</svg> 
-"""
+        def getTextSegment(text):
+            '''
+            find the first wigth space from the right side
+            '''
+
+            _len_text = len(text)
+
+            def valid_index(c):
+                _index = text.rfind(c)
+
+                # not found
+                if _index == -1:
+                    return False
+
+                # with zero the length will not be shortened
+                if _index == 0:
+                    return False
+
+                _delta = _len_text - _index
+
+                # the delta is to high for used text box size
+                if _delta > cls.max_textbox_len:
+                    return False
+
+                return _index
+
+            index = valid_index("\n")
+            if not index:
+
+                index = valid_index("\t")
+                if not index:
+
+                    index = valid_index(" ")
+                    if not index:
+                        index = abs(len(text) - 50)
+
+            return text[:index]
+
+        _width = cls.max_textbox_len + 10
+        _text = []
+        _cnt = 0
+
+        while _width > cls.max_textbox_len:
+
+            _cnt += 1
+
+            if _cnt > 100:
+                _cnt = 0
+
+            _width, _height = cls.getTextSize(text)
+
+            if _width > cls.max_textbox_len:
+
+                _line_x = copy.deepcopy(text)
+                _width2 = cls.max_textbox_len + 10
+                while _width2 > cls.max_textbox_len:
+                    _line_x = getTextSegment(_line_x)
+                    _width2, _height = cls.getTextSize(_line_x)
+
+                _text.append(_line_x)
+                text = text[len(_line_x):]
+            else:
+                _text.append(text)
+
+        return _text
 
 
 if __name__ == '__main__':
 
     Render.setFontFamily('AvantGarde')
     Render.setFontSize(30)
-    print(Render.getTextSize("hallo halli hallo halli"))
+    print(Render.splitTextToLines(
+        "hallo1 halli2 hallo3 halli4 hallo5 halli6 hallo7 halli8 hallo9 halli0 hallo1 halli2 hallo3 halli4 hallo5 halli6 hallo7 halli8 hallo9 halli0 hallo halli hallo halli"))
+
+    print(Render.splitTextToLines(
+        "hallo1 halli2 hallo3 halli4 "))

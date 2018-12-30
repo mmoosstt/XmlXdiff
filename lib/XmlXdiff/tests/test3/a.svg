@@ -1,5 +1,3 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<svg baseProfile="full" height="100%" version="1.1" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xlink="http://www.w3.org/1999/xlink"><defs /><text fill="rgb(0,0,25)" font-family="Consolas" font-size="6" x="12.0" y="8.0">top: 
-  </text><text fill="rgb(0,0,50)" font-family="Consolas" font-size="6" x="24.0" y="16.0">mid info='something': 
-    abcd
-  </text></svg>
+<svg baseProfile="full" height="100%" version="1.1" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xlink="http://www.w3.org/1999/xlink"><defs /><text font-family="Lucida Console" font-size="10" x="12.0" y="20.0"><tspan fill="rgb(0,0,0)" x="12.0" y="20.0">top:</tspan></text><text font-family="Lucida Console" font-size="10" x="24.0" y="30.0"><tspan fill="rgb(0,0,25)" x="24.0" y="30.0">mid info='something': 
+    abcd</tspan></text></svg>

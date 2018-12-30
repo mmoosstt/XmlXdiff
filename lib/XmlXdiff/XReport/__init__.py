@@ -1,5 +1,7 @@
 import lxml.etree
 import svgwrite
+import copy
+
 from svgwrite import cm, mm, rgb
 from svgwrite.data.full11 import elements
 
@@ -132,8 +134,8 @@ class DrawLegend(object):
         self.y_max = 0
         self.x_max = 0
         self.unit = 10
-        self.font_size = 6
-        self.font_family = "Consolas"
+        self.font_size = 10
+        self.font_family = "Lucida Console"
 
         XRender.Render.setFontFamily(self.font_family)
         XRender.Render.setFontSize(self.font_size)
@@ -181,7 +183,7 @@ class DrawXml(object):
     def __init__(self):
         self.dwg = None
         self.x = 0
-        self.y = 0
+
         self.x_max = 0
         self.y_max = 0
         self.unit = 10
@@ -191,11 +193,12 @@ class DrawXml(object):
         self.fill_blue = rgb(0, 0, 200)
         self.fill = self.fill_red
         self.blue = 0
-        self.font_size = 6
-        self.font_family = "Consolas"
+        self.font_size = 10
+        self.font_family = "Lucida Console"
 
         XRender.Render.setFontFamily(self.font_family)
         XRender.Render.setFontSize(self.font_size)
+        self.y = XRender.Render.font_metrics.height() * 2
 
     def getElementText(self, element):
 
@@ -251,8 +254,8 @@ class DrawXml(object):
                                                              tag=_tag,
                                                              cnt=path_dict[_path_key])
 
-        self.svg_elements[_path] = self.addLine(
-            self.getElementText(element))
+        self.svg_elements[_path] = self.addTextBox(
+            self.getElementText(element).strip())
 
         self.moveRight()
 
@@ -277,21 +280,30 @@ class DrawXml(object):
         self._a = {}
         self.walkElementTree(self.root, "", self._d, self._a)
 
+    def addTextBox(self, text):
+        _lines = XRender.Render.splitTextToLines(text)
+
+        _y = copy.deepcopy(self.y)
+
+        _t = Text('', insert=(self.x, self.y), font_size=self.font_size,
+                  font_family=self.font_family)
+
+        for _line in _lines:
+            _t.add(self.addLine(_line))
+
+        return _t
+
     def addLine(self, path):
-
-        _x, _y = XRender.Render.getTextSize(path)
-
-        self.y = self.y + _y  # (0.6 * self.unit)
-        self.y_max = max(self.y_max, self.y)
-        self.x_max = max(self.x_max, _x + self.x)
-
-        self.blue = self.blue + 25
 
         if self.blue > 250:
             self.blue = 0
 
-        _text = Text(path, fill=rgb(0, 0, self.blue),
-                     insert=(self.x, self.y), font_size=self.font_size, font_family=self.font_family)
+        _text = TSpan(path, fill=rgb(0, 0, self.blue), insert=(self.x, self.y))
+        self.y = self.y + XRender.Render.font_metrics.height()
+        self.y_max = max(self.y_max, self.y)
+        self.x_max = max(self.x_max, XRender.Render.max_textbox_len + self.x)
+
+        self.blue = self.blue + 25
 
         return _text
 
