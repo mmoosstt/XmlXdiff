@@ -5,8 +5,8 @@ import copy
 from svgwrite import cm, mm, rgb
 from svgwrite.data.full11 import elements
 
-from svgwrite.container import Group
-from svgwrite.shapes import Rect
+from svgwrite.container import Group, SVG
+from svgwrite.shapes import Rect, Polyline
 from svgwrite.text import Text, TSpan, TextArea
 from importlib.resources import path
 from XmlXdiff import getPath
@@ -14,6 +14,7 @@ from inspect import isclass
 from XmlXdiff import XDiffer
 from XmlXdiff.XReport import XRender
 from XmlXdiff.XPath import XDiffXmlPath
+from XmlXdiff import XTypes
 
 
 class ElementMarker(object):
@@ -239,10 +240,10 @@ class DrawXml(object):
                 for _x in range(abs(_steps)):
                     self.moveLeft()
 
-            self.svg_elements[_xelement.xpath] = self.addTextBox(_node_text)
+            _xelement.addSvgNode(self.addTextBox(_node_text))
 
             _marker_class = globals()[_xelement.type.__class__.__name__]
-            self.markAs(_xelement.xpath, _marker_class)
+            self.markAs(_xelement.svg_node, _marker_class)
 
             _node_level_z = _node_level
 
@@ -254,20 +255,28 @@ class DrawXml(object):
         _t = Text('', insert=(self.x, self.y), font_size=self.font_size,
                   font_family=self.font_family)
 
-        for _line in _lines:
-            _t.add(self.addLine(_line))
+        _h = 0
+        _w = 0
+        for _line, _width, _height in _lines:
+            _h += float(_height)
+            _w = max(_w, float(_width))
+
+            _t.add(self.addTextBoxLine(_line, _width, _height))
+
+        _t['textLength'] = _w
 
         return _t
 
-    def addLine(self, path):
+    def addTextBoxLine(self, text, width, height):
 
         if self.blue > 250:
             self.blue = 0
 
-        _text = TSpan(path, fill=rgb(0, 0, self.blue), insert=(self.x, self.y))
-        self.y = self.y + XRender.Render.font_metrics.height()
+        _text = TSpan(text, fill=rgb(0, 0, self.blue), insert=(self.x, self.y))
+
+        self.y = self.y + height
         self.y_max = max(self.y_max, self.y)
-        self.x_max = max(self.x_max, XRender.Render.max_textbox_len + self.x)
+        self.x_max = max(self.x_max, width + self.x)
 
         self.blue = self.blue + 25
 
@@ -286,9 +295,9 @@ class DrawXml(object):
         self.y = 0.3 * self.unit
         self.x = self.x_max  # + (5.5 * self.unit)
 
-    def saveSvg(self):
-        for _key in self.svg_elements.keys():
-            self.dwg.add(self.svg_elements[_key])
+    def saveSvg(self, xelements):
+        for _xelement in xelements:
+            self.dwg.add(_xelement.svg_node)
 
         self.dwg.save()
 
@@ -297,8 +306,7 @@ class DrawXml(object):
         if issubclass(mark, ElementMarker):
             _mark = mark()
 
-        _svg_element = self.svg_elements[path]
-        _svg_mark = _mark.markSvgElement(_svg_element)
+        _svg_mark = _mark.markSvgElement(path)
 
         self.dwg.add(_svg_mark)
 
@@ -312,29 +320,29 @@ class DrawXmlDiff(object):
         self.differ.setPath2(path2)
         self.differ.run()
 
-        self.report1 = DrawXml()
-        self.report1.moveRight()
-        self.report1.loadFromXElements(self.differ.xelements1)
-        self.report1.saveSvg()
-
-        self.report2 = DrawXml()
-        self.report2.moveRight()
-        self.report2.loadFromXElements(self.differ.xelements2)
-        self.report2.saveSvg()
-
-        self.legend = DrawLegend()
-
         self.filepath = "{path}\\xdiff_{filename1}_{filename2}.svg".format(path=self.differ.path1.path,
                                                                            filename1=self.differ.path1.filename,
                                                                            filename2=self.differ.path2.filename)
 
+        self.report1 = DrawXml()
+        self.report1.moveRight()
+        self.report1.loadFromXElements(self.differ.xelements1)
+        self.report1.saveSvg(self.differ.xelements1)
+
+        self.report2 = DrawXml()
+        self.report2.moveRight()
+        self.report2.loadFromXElements(self.differ.xelements2)
+        self.report2.saveSvg(self.differ.xelements2)
+
+        self.legend = DrawLegend()
+
         self.report1.dwg['x'] = 0
         self.report1.dwg['y'] = 0
 
-        self.report2.dwg['x'] = self.report1.x_max
+        self.report2.dwg['x'] = self.report1.x_max * 1.2
         self.report2.dwg['y'] = 0
 
-        self.legend.dwg['x'] = self.report2.x_max + self.report1.x_max
+        self.legend.dwg['x'] = self.report2.x_max * 1.2 + self.report1.x_max
         self.legend.dwg['y'] = 0
 
         _height = max(self.report2.y_max,
@@ -354,17 +362,51 @@ class DrawXmlDiff(object):
         self.dwg.add(self.report2.dwg)
         self.dwg.add(self.legend.dwg)
 
+        self.drawMoveSplines()
+
     def save(self):
         print(self.filepath)
         self.dwg.save()
         pass
 
-    def _mark(self, xelements, report):
-        for x in xelements:
+    def drawMoveSplines(self):
 
-            _marker_class = globals()[x.type.__class__.__name__]
+        def calcPolyLine(start, end):
 
-            report.markAs(x.xpath, _marker_class)
+            _x1, _y1 = start
+            _x2, _y2 = end
+
+            _dx = _x2 - _x1
+            _x11 = _x1 + (float(self.report1.x_max) * 1.1 - _x1)
+            _y11 = _y1
+
+            _x21 = _x2 - _dx * 0.1
+            _y21 = _y2
+
+            return [(_x1, _y1), (_x11, _y11), (_x21, _y21), (_x2, _y2)]
+
+        for _e in XTypes.LOOP(self.differ.xelements1, XTypes.ElementMoved):
+            _start_svg1 = _e.svg_node
+            if _e.xelements:
+                _stop_svg2 = _e.xelements[0].svg_node
+
+                _x1 = float(_start_svg1['x']) + \
+                    float(_start_svg1['textLength'])
+                _y1 = float(_start_svg1['y'])
+
+                _x2 = float(self.report2.dwg['x'])
+                _y2 = float(self.report2.dwg['y'])
+
+                _x3 = float(_stop_svg2['x'])
+                _y3 = float(_stop_svg2['y'])
+
+                _start = (_x1, _y1)
+                _end = (_x3 + _x2, _y3)
+
+                _line = Polyline(points=calcPolyLine(_start, _end), stroke_width="1",
+                                 stroke=rgb(0, 0, 255), fill="none", opacity=0.5)
+
+                self.dwg.add(_line)
 
 
 if __name__ == "__main__":
@@ -372,8 +414,8 @@ if __name__ == "__main__":
     import cProfile
 
     def run():
-        _path1 = r'{path}\tests\test9\a.xml'.format(path=getPath())
-        _path2 = r'{path}\tests\test9\b.xml'.format(path=getPath())
+        _path1 = r'{path}\tests\test1\a.xml'.format(path=getPath())
+        _path2 = r'{path}\tests\test1\b.xml'.format(path=getPath())
 
         x = DrawXmlDiff(_path1, _path2)
         x.save()

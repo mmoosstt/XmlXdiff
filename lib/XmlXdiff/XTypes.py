@@ -8,7 +8,11 @@ class XElement(object):
         self.xpath = None
         self.type = None
         self.node = None
+        self.svg_node = None
         self.xelements = []
+
+    def addSvgNode(self, inp):
+        self.svg_node = inp
 
     def addXelement(self, xelement):
         self.xelements.append(xelement)
@@ -111,7 +115,7 @@ class ElementNameConsitency(XType):
         super(self.__class__, self).__init__()
 
 
-def loop(elements, *element_types):
+def LOOP(elements, *element_types):
 
     for _element in elements:
         if isinstance(_element.type, element_types):

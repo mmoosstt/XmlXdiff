@@ -41,6 +41,8 @@ class Render(object):
     def splitTextToLines(cls, text):
         """
             Split Into Max TextBoxSize
+
+            return = [(text1:str, width1:int, height1:int), (text1, width2, height2), (..)]
         """
 
         def getTextSegment(text):
@@ -94,12 +96,12 @@ class Render(object):
                 _width2 = cls.max_textbox_len + 10
                 while _width2 > cls.max_textbox_len:
                     _line_x = getTextSegment(_line_x)
-                    _width2, _height = cls.getTextSize(_line_x)
+                    _width2, _height2 = cls.getTextSize(_line_x)
 
-                _text.append(_line_x)
+                _text.append((_line_x, _width2, _height2))
                 text = text[len(_line_x):]
             else:
-                _text.append(text)
+                _text.append((text, _width, _height))
 
         return _text
 

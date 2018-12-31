@@ -55,11 +55,11 @@ class XDiffExecutor(object):
         self.verifyElements(self.xelements1)
         self.verifyElements(self.xelements2)
 
-        for _e in XTypes.loop(
+        for _e in XTypes.LOOP(
                 self.xelements1, XTypes.ElementUnknown):
             _e.setType(XTypes.ElementDeleted)
 
-        for _e in XTypes.loop(
+        for _e in XTypes.LOOP(
                 self.xelements2, XTypes.ElementUnknown):
             _e.setType(XTypes.ElementAdded)
 
@@ -103,19 +103,19 @@ class XDiffExecutor(object):
 
     def findTagNameConsitency(self):
 
-        _elements1 = XTypes.loop(
+        _elements1 = XTypes.LOOP(
             self.xelements1, XTypes.ElementChanged, XTypes.ElementUnknown)
         XHash.XDiffHasher.getHashes(
             _elements1, XHash.XDiffHasher.callbackHashTagNameConsitency)
 
-        _elements2 = XTypes.loop(
+        _elements2 = XTypes.LOOP(
             self.xelements2, XTypes.ElementChanged, XTypes.ElementUnknown)
         XHash.XDiffHasher.getHashes(
             _elements2, XHash.XDiffHasher.callbackHashTagNameConsitency)
 
-        for _xelement1 in XTypes.loop(
+        for _xelement1 in XTypes.LOOP(
                 self.xelements1, XTypes.ElementChanged, XTypes.ElementUnknown):
-            for _xelement2 in XTypes.loop(
+            for _xelement2 in XTypes.LOOP(
                     self.xelements2, XTypes.ElementChanged, XTypes.ElementUnknown):
                 if (_xelement1.hash == _xelement2.hash):
                     _xelement1.setType(
@@ -129,19 +129,19 @@ class XDiffExecutor(object):
 
     def findAttributeValueElementValueConsitency(self):
 
-        _elements1 = XTypes.loop(
+        _elements1 = XTypes.LOOP(
             self.xelements1, XTypes.ElementChanged, XTypes.ElementUnknown)
         XHash.XDiffHasher.getHashes(
             _elements1, XHash.XDiffHasher.callbackHashAttributeValueElementValueConsitency)
 
-        _elements2 = XTypes.loop(
+        _elements2 = XTypes.LOOP(
             self.xelements2, XTypes.ElementChanged, XTypes.ElementUnknown)
         XHash.XDiffHasher.getHashes(
             _elements2, XHash.XDiffHasher.callbackHashAttributeValueElementValueConsitency)
 
-        for _xelement1 in XTypes.loop(
+        for _xelement1 in XTypes.LOOP(
                 self.xelements1, XTypes.ElementChanged, XTypes.ElementUnknown):
-            for _xelement2 in XTypes.loop(
+            for _xelement2 in XTypes.LOOP(
                     self.xelements2, XTypes.ElementChanged, XTypes.ElementUnknown):
                 if (_xelement1.hash == _xelement2.hash):
                     _xelement1.setType(
@@ -155,19 +155,19 @@ class XDiffExecutor(object):
 
     def findTagNameAttributeNameConsitency(self):
 
-        _elements1 = XTypes.loop(
+        _elements1 = XTypes.LOOP(
             self.xelements1, XTypes.ElementChanged, XTypes.ElementUnknown)
         XHash.XDiffHasher.getHashes(
             _elements1, XHash.XDiffHasher.callbackHashTagNameAttributeNameConsitency)
 
-        _elements2 = XTypes.loop(
+        _elements2 = XTypes.LOOP(
             self.xelements2, XTypes.ElementChanged, XTypes.ElementUnknown)
         XHash.XDiffHasher.getHashes(
             _elements2, XHash.XDiffHasher.callbackHashTagNameAttributeNameConsitency)
 
-        for _xelement1 in XTypes.loop(
+        for _xelement1 in XTypes.LOOP(
                 self.xelements1, XTypes.ElementChanged, XTypes.ElementUnknown):
-            for _xelement2 in XTypes.loop(
+            for _xelement2 in XTypes.LOOP(
                     self.xelements2, XTypes.ElementChanged, XTypes.ElementUnknown):
                 if (_xelement1.hash == _xelement2.hash):
                     _xelement1.setType(
@@ -188,10 +188,10 @@ class XDiffExecutor(object):
                 else:
                     break
 
-        for _xelement2 in XTypes.loop(
+        for _xelement2 in XTypes.LOOP(
                 self.xelements2, XTypes.ElementUnknown):
 
-            for _xelement1 in XTypes.loop(
+            for _xelement1 in XTypes.LOOP(
                     self.xelements1, XTypes.ElementUnknown):
 
                 if (_xelement1.hash == _xelement2.hash):
@@ -215,10 +215,10 @@ class XDiffExecutor(object):
                         break
 
     def findChangedElements(self):
-        for _xelement2 in XTypes.loop(
+        for _xelement2 in XTypes.LOOP(
                 self.xelements2, XTypes.ElementUnknown):
 
-            for _xelement1 in XTypes.loop(
+            for _xelement1 in XTypes.LOOP(
                     self.xelements1, XTypes.ElementUnknown):
 
                 if (_xelement1.xpath == _xelement2.xpath):
