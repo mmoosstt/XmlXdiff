@@ -1,16 +1,13 @@
 import lxml.etree
-import svgwrite
 import copy
 
+import svgwrite
 from svgwrite import cm, mm, rgb
-from svgwrite.data.full11 import elements
-
 from svgwrite.container import Group, SVG
 from svgwrite.shapes import Rect, Polyline
 from svgwrite.text import Text, TSpan, TextArea
-from importlib.resources import path
+
 from XmlXdiff import getPath
-from inspect import isclass
 from XmlXdiff import XDiffer
 from XmlXdiff.XReport import XRender
 from XmlXdiff.XPath import XDiffXmlPath
@@ -49,83 +46,6 @@ class ElementMarker(object):
             self.svg_mark['x']) - 1.2 * self.__class__.unit
 
 
-class ElementMoved(ElementMarker):
-    fill = rgb(0x1e, 0x2d, 0xd2)
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ElementUnchanged(ElementMarker):
-    fill = rgb(0x7e, 0x62, 0xa1)
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ElementChanged(ElementMarker):
-    fill = rgb(0xaa, 0xa6, 0x7f)
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ElementDeleted(ElementMarker):
-    fill = rgb(0xff, 0x00, 0xff)
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ElementAdded(ElementMarker):
-    fill = rgb(0x91, 0xdf, 0x4e)
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ElementVerified(ElementMarker):
-    fill = rgb(0xcd, 0x5d, 0x47)
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ElementTagConsitency(ElementMarker):
-    fill = rgb(0x55, 0x8d, 0x30)
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ElementTextAttributeValueConsitency(ElementMarker):
-    fill = rgb(0x66, 0xb2, 0x7e)
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ElementUnknown(ElementMarker):
-    fill = rgb(0x5c, 0xa3, 0x43)
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ElementTagAttributeNameConsitency(ElementMarker):
-    fill = rgb(150, 50, 0)
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ElementNameConsitency(ElementMarker):
-    fill = rgb(0xec, 0x91, 0xf8)
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
 class DrawLegend(object):
 
     def __init__(self):
@@ -150,13 +70,20 @@ class DrawLegend(object):
         self.moveRight()
         self.moveRight()
 
-        for _class in ElementMarker.__subclasses__():
-            _text = self.addLine(_class.name())
+        for _class in XTypes.LOOP_XTYPES():
+            _text, _width, _height = self.addLine(_class.name())
             _mark = _class()
-            _mark = _mark.markSvgElement(_text)
+
+            _rect = Rect()
+            _rect['x'] = _text['x']
+            _rect['y'] = float(_text['y']) - _height
+            _rect['height'] = _height
+            _rect['width'] = _width
+            _rect['fill'] = _mark.fill
+            _rect['opacity'] = 0.3
 
             self.dwg.add(_text)
-            self.dwg.add(_mark)
+            self.dwg.add(_rect)
 
         self.dwg.save()
 
@@ -170,7 +97,7 @@ class DrawLegend(object):
         _text = Text(text, fill=rgb(0, 0, 0),
                      insert=(self.x, self.y), font_size=self.font_size, font_family=self.font_family)
 
-        return _text
+        return _text, _x, _y
 
     def moveLeft(self):
         self.x = self.x - 1.2 * self.unit
@@ -260,7 +187,7 @@ class DrawXml(object):
             _h = _h + float(_height)
             _w = max(_w, float(_width))
 
-            _text = TSpan(_line, fill=rgb(0, 0, 255), insert=(0, _h))
+            _text = TSpan(_line, fill="black", insert=(0, _h))
             _t.add(_text)
 
         self.y = self.y + _h
@@ -274,21 +201,6 @@ class DrawXml(object):
         _svg.add(_t)
 
         return _svg
-
-    def addTextBoxLine(self, text, width, height):
-
-        if self.blue > 250:
-            self.blue = 0
-
-        _text = TSpan(text, fill=rgb(0, 0, self.blue), insert=(self.x, self.y))
-
-        self.y = self.y + height
-        self.y_max = max(self.y_max, self.y)
-        self.x_max = max(self.x_max, width + self.x)
-
-        self.blue = self.blue + 25
-
-        return _text
 
     def moveLeft(self):
         self.x = self.x - 1.2 * self.unit
@@ -374,11 +286,19 @@ class DrawXmlDiff(object):
         self.drawMovePattern(XTypes.ElementMoved)
         self.drawMovePattern(XTypes.ElementUnchanged)
         self.drawMovePattern(XTypes.ElementTagAttributeNameConsitency)
+        self.drawMovePattern(XTypes.ElementTextAttributeValueConsitency)
+        self.drawMovePattern(XTypes.ElementTagConsitency)
 
-        self.drawChangedPattern(XTypes.ElementAdded, self.differ.xelements2)
-        self.drawChangedPattern(XTypes.ElementDeleted, self.differ.xelements1)
-        self.drawChangedPattern(XTypes.ElementVerified, self.differ.xelements2)
-        self.drawChangedPattern(XTypes.ElementVerified, self.differ.xelements1)
+        self.drawChangedPattern(XTypes.ElementAdded,
+                                self.differ.xelements2,
+                                self.report1.x_max * 1.2)
+        self.drawChangedPattern(XTypes.ElementDeleted,
+                                self.differ.xelements1)
+        self.drawChangedPattern(XTypes.ElementVerified,
+                                self.differ.xelements2,
+                                self.report1.x_max * 1.2)
+        self.drawChangedPattern(XTypes.ElementVerified,
+                                self.differ.xelements1)
 
     def save(self):
         print(self.filepath)
@@ -386,8 +306,6 @@ class DrawXmlDiff(object):
         pass
 
     def drawMovePattern(self, xtype):
-
-        _color = globals()[xtype.__name__].fill
 
         for _e in XTypes.LOOP(self.differ.xelements1, xtype):
             _start_svg1 = _e.svg_node
@@ -417,21 +335,19 @@ class DrawXmlDiff(object):
                 _p08 = (_x1, _y1 + _h1)
 
                 _line = Polyline(points=[_p01, _p02, _p03, _p04, _p05, _p06, _p07, _p08, _p01],
-                                 stroke_width="1",
-                                 stroke=_color,
-                                 fill=_color,
-                                 opacity=0.1)
+                                 stroke_width="0.5",
+                                 stroke=xtype.fill,
+                                 fill=xtype.fill,
+                                 opacity=xtype.opacity)
 
                 self.dwg.add(_line)
 
-    def drawChangedPattern(self, xtype, xelements):
-
-        _color = globals()[xtype.__name__].fill
+    def drawChangedPattern(self, xtype, xelements, x_offset=0):
 
         for _e in XTypes.LOOP(xelements, xtype):
             _start_svg1 = _e.svg_node
 
-            _x1 = float(_start_svg1['x'])
+            _x1 = float(_start_svg1['x']) + x_offset
             _y1 = float(_start_svg1['y'])
 
             _p01 = (_x1, _y1)
@@ -443,9 +359,9 @@ class DrawXmlDiff(object):
 
             _line = Polyline(points=[_p01, _p02, _p03, _p04, _p01],
                              stroke_width="1",
-                             stroke=_color,
-                             fill=_color,
-                             opacity=0.1)
+                             stroke=xtype.fill,
+                             fill=xtype.fill,
+                             opacity=xtype.opacity)
 
             self.dwg.add(_line)
 
