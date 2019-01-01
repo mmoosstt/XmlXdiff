@@ -181,12 +181,11 @@ class XDiffExecutor(object):
 
     def findUnchangedMovedElements(self):
 
-        def markSubElements(element, elements, elementType):
+        def subElements(element, elements):
+
             for _element in elements[elements.index(element):]:
                 if _element.xpath.find(element.xpath) == 0:
-                    _element.setType(elementType)
-                else:
-                    break
+                    yield _element
 
         for _xelement2 in XTypes.LOOP(
                 self.xelements2, XTypes.ElementUnknown):
@@ -196,25 +195,31 @@ class XDiffExecutor(object):
 
                 if (_xelement1.hash == _xelement2.hash):
                     if(_xelement1.xpath == _xelement2.xpath):
-                        markSubElements(
-                            _xelement1, self.xelements1, XTypes.ElementUnchanged)
-                        markSubElements(
-                            _xelement2, self.xelements2, XTypes.ElementUnchanged)
 
-                        _xelement1.addXelement(_xelement2)
-                        _xelement2.addXelement(_xelement1)
+                        _gen1 = subElements(_xelement1, self.xelements1)
+                        _gen2 = subElements(_xelement2, self.xelements2)
+
+                        for _xelement11 in _gen1:
+                            _xelement22 = next(_gen2)
+                            _xelement11.setType(XTypes.ElementUnchanged)
+                            _xelement22.setType(XTypes.ElementUnchanged)
+                            _xelement11.addXelement(_xelement22)
+                            _xelement22.addXelement(_xelement11)
 
                         break
 
                     else:
 
-                        markSubElements(
-                            _xelement1, self.xelements1, XTypes.ElementMoved)
-                        markSubElements(
-                            _xelement2, self.xelements2, XTypes.ElementMoved)
+                        _gen1 = subElements(_xelement1, self.xelements1)
+                        _gen2 = subElements(_xelement2, self.xelements2)
 
-                        _xelement1.addXelement(_xelement2)
-                        _xelement2.addXelement(_xelement1)
+                        for _xelement11 in _gen1:
+                            _xelement22 = next(_gen2)
+                            _xelement11.setType(XTypes.ElementMoved)
+                            _xelement22.setType(XTypes.ElementMoved)
+                            _xelement11.addXelement(_xelement22)
+                            _xelement22.addXelement(_xelement11)
+
                         break
 
     def findChangedElements(self):
