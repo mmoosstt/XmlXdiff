@@ -1,3 +1,10 @@
+# coding:utf-8
+# Author:  mmoosstt -- github
+# Purpose: build more suitable xpathes
+# Created: 01.01.2019
+# Copyright (C) 2019, Moritz Ost
+# License: TBD
+
 import lxml.etree
 from XmlXdiff import XTypes
 

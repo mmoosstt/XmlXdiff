@@ -1,3 +1,10 @@
+# coding:utf-8
+# Author:  mmoosstt -- github
+# Purpose: get size of text within svg
+# Created: 01.01.2019
+# Copyright (C) 2019, Moritz Ost
+# License: TBD
+
 import sys
 import copy
 from PySide2.QtWidgets import QApplication

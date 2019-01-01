@@ -1,3 +1,11 @@
+# coding:utf-8
+# Author:  mmoosstt -- github
+# Purpose: data types used within XmlXdiff
+# Created: 01.01.2019
+# Copyright (C) 2019, Moritz Ost
+# License: TBD
+
+
 from inspect import isclass
 from svgwrite import rgb
 

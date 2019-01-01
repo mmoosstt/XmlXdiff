@@ -1,3 +1,10 @@
+# coding:utf-8
+# Author:  mmoosstt -- github
+# Purpose: calculate difference between source and target file (inspired from xdiff algorithm)
+# Created: 01.01.2019
+# Copyright (C) 2019, Moritz Ost
+# License: TBD
+
 from XmlXdiff import XTypes, XPath, XHash, getPath
 import lxml.etree
 
