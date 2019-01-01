@@ -1,4 +1,5 @@
 from inspect import isclass
+from svgwrite import rgb
 
 
 class XElement(object):
@@ -34,82 +35,79 @@ class XElement(object):
 
 
 class XType(object):
-    pass
+
+    opacity = 0.3
+
+    @classmethod
+    def name(cls):
+        return cls.__name__.replace("Element", "")
 
 
-class ElementCopied(XType):
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ElementUntouched(XType):
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ElementMoved(XType):
+class ElementUnknown(XType):
+    fill = rgb(0xd0, 0xd0, 0xd0)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
 class ElementUnchanged(XType):
+    fill = rgb(0x7e, 0x62, 0xa1)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
 class ElementChanged(XType):
+    fill = rgb(0xff, 0x00, 0x80)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
 class ElementDeleted(XType):
+    fill = rgb(0xff, 0x00, 0xff)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
 class ElementAdded(XType):
+    fill = rgb(0x0f, 0xff, 0x00)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
 class ElementVerified(XType):
+    fill = rgb(0xff, 0xff, 0x00)
+
+    def __init__(self):
+        super(self.__class__, self).__init__()
+
+
+class ElementMoved(XType):
+    fill = rgb(0x1e, 0x2d, 0xd2)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
 class ElementTagConsitency(XType):
+    fill = rgb(0x00, 0xa0, 0x70)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
 class ElementTextAttributeValueConsitency(XType):
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ElementUnknown(XType):
+    fill = rgb(0x00, 0x70, 0xa0)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
 class ElementTagAttributeNameConsitency(XType):
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ElementNameConsitency(XType):
+    fill = rgb(0x00, 0xd0, 0xe0)
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -120,3 +118,8 @@ def LOOP(elements, *element_types):
     for _element in elements:
         if isinstance(_element.type, element_types):
             yield _element
+
+
+def LOOP_XTYPES():
+    for _xtype in XType.__subclasses__():
+        yield _xtype
