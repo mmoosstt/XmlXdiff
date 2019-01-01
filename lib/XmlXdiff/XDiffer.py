@@ -201,6 +201,9 @@ class XDiffExecutor(object):
                         markSubElements(
                             _xelement2, self.xelements2, XTypes.ElementUnchanged)
 
+                        _xelement1.addXelement(_xelement2)
+                        _xelement2.addXelement(_xelement1)
+
                         break
 
                     else:

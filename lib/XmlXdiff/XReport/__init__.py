@@ -363,6 +363,7 @@ class DrawXmlDiff(object):
         self.dwg.add(self.legend.dwg)
 
         self.drawMoveSplines()
+        self.drawUnchangedSplines()
 
     def save(self):
         print(self.filepath)
@@ -371,27 +372,12 @@ class DrawXmlDiff(object):
 
     def drawMoveSplines(self):
 
-        def calcPolyLine(start, end):
-
-            _x1, _y1 = start
-            _x2, _y2 = end
-
-            _dx = _x2 - _x1
-            _x11 = _x1 + (float(self.report1.x_max) * 1.1 - _x1)
-            _y11 = _y1
-
-            _x21 = _x2 - _dx * 0.1
-            _y21 = _y2
-
-            return [(_x1, _y1), (_x11, _y11), (_x21, _y21), (_x2, _y2)]
-
         for _e in XTypes.LOOP(self.differ.xelements1, XTypes.ElementMoved):
             _start_svg1 = _e.svg_node
             if _e.xelements:
                 _stop_svg2 = _e.xelements[0].svg_node
 
-                _x1 = float(_start_svg1['x']) + \
-                    float(_start_svg1['textLength'])
+                _x1 = float(_start_svg1['x'])
                 _y1 = float(_start_svg1['y'])
 
                 _x2 = float(self.report2.dwg['x'])
@@ -400,11 +386,39 @@ class DrawXmlDiff(object):
                 _x3 = float(_stop_svg2['x'])
                 _y3 = float(_stop_svg2['y'])
 
-                _start = (_x1, _y1)
-                _end = (_x3 + _x2, _y3)
+                _p01 = (_x1, _y1)
+                _p12 = (self.report1.x_max, _y1)
+                _p21 = (float(self.report2.dwg['x']), _y3)
+                _p02 = (_x3 + _x2 + float(_stop_svg2['textLength']), _y3)
 
-                _line = Polyline(points=calcPolyLine(_start, _end), stroke_width="1",
+                _line = Polyline(points=[_p01, _p12, _p21, _p02], stroke_width="1",
                                  stroke=rgb(0, 0, 255), fill="none", opacity=0.5)
+
+                self.dwg.add(_line)
+
+    def drawUnchangedSplines(self):
+
+        for _e in XTypes.LOOP(self.differ.xelements1, XTypes.ElementUnchanged):
+            _start_svg1 = _e.svg_node
+            if _e.xelements:
+                _stop_svg2 = _e.xelements[0].svg_node
+
+                _x1 = float(_start_svg1['x'])
+                _y1 = float(_start_svg1['y'])
+
+                _x2 = float(self.report2.dwg['x'])
+                _y2 = float(self.report2.dwg['y'])
+
+                _x3 = float(_stop_svg2['x'])
+                _y3 = float(_stop_svg2['y'])
+
+                _p01 = (_x1, _y1)
+                _p12 = (self.report1.x_max, _y1)
+                _p21 = (float(self.report2.dwg['x']), _y3)
+                _p02 = (_x3 + _x2 + float(_stop_svg2['textLength']), _y3)
+
+                _line = Polyline(points=[_p01, _p12, _p21, _p02], stroke_width="1",
+                                 stroke=rgb(0, 255, 0), fill="none", opacity=0.5)
 
                 self.dwg.add(_line)
 
@@ -414,8 +428,8 @@ if __name__ == "__main__":
     import cProfile
 
     def run():
-        _path1 = r'{path}\tests\test1\a.xml'.format(path=getPath())
-        _path2 = r'{path}\tests\test1\b.xml'.format(path=getPath())
+        _path1 = r'{path}\tests\test9\a.xml'.format(path=getPath())
+        _path2 = r'{path}\tests\test9\b.xml'.format(path=getPath())
 
         x = DrawXmlDiff(_path1, _path2)
         x.save()
