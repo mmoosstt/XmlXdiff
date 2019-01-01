@@ -14,7 +14,7 @@ class Render(object):
     font_family = None
     font_generator = None
     font_metrics = None
-    max_textbox_len = 400
+    max_textbox_len = 700
 
     @classmethod
     def _initFontInterface(cls):

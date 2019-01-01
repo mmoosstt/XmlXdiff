@@ -225,10 +225,13 @@ class DrawXml(object):
         _node_level_z = 0
         for _xelement in xelements:
             _node_text = self.getElementText(_xelement.node)
+
             _node_level = XDiffXmlPath.getXpathDistance(
                 _root.xpath, _xelement.xpath)
 
             _steps = _node_level - _node_level_z
+
+            _node_level_z = _node_level
 
             if _steps > 0:
 
@@ -242,30 +245,35 @@ class DrawXml(object):
 
             _xelement.addSvgNode(self.addTextBox(_node_text))
 
-            _marker_class = globals()[_xelement.type.__class__.__name__]
-            self.markAs(_xelement.svg_node, _marker_class)
-
-            _node_level_z = _node_level
-
     def addTextBox(self, text):
         _lines = XRender.Render.splitTextToLines(text)
 
         _y = copy.deepcopy(self.y)
 
-        _t = Text('', insert=(self.x, self.y), font_size=self.font_size,
+        _svg = SVG(insert=(self.x, self.y))
+        _t = Text('', insert=(0, 0), font_size=self.font_size,
                   font_family=self.font_family)
 
         _h = 0
         _w = 0
         for _line, _width, _height in _lines:
-            _h += float(_height)
+            _h = _h + float(_height)
             _w = max(_w, float(_width))
 
-            _t.add(self.addTextBoxLine(_line, _width, _height))
+            _text = TSpan(_line, fill=rgb(0, 0, 255), insert=(0, _h))
+            _t.add(_text)
 
-        _t['textLength'] = _w
+        self.y = self.y + _h
+        self.y_max = max(self.y_max, self.y)
+        self.x_max = max(self.x_max, _w + self.x)
 
-        return _t
+        _svg['height'] = _h
+        _svg['width'] = _w
+        _svg.viewbox(0, 0, _w, _h)
+
+        _svg.add(_t)
+
+        return _svg
 
     def addTextBoxLine(self, text, width, height):
 
@@ -301,14 +309,15 @@ class DrawXml(object):
 
         self.dwg.save()
 
-    def markAs(self, path, mark):
+    def markAs(self, svg_node, mark):
 
-        if issubclass(mark, ElementMarker):
-            _mark = mark()
+        _r = Rect(insert=(0, 0),
+                  width=svg_node['width'],
+                  height=svg_node['height'],
+                  fill=mark.fill,
+                  opacity=0.2)
 
-        _svg_mark = _mark.markSvgElement(path)
-
-        self.dwg.add(_svg_mark)
+        svg_node.add(_r)
 
 
 class DrawXmlDiff(object):
@@ -362,18 +371,27 @@ class DrawXmlDiff(object):
         self.dwg.add(self.report2.dwg)
         self.dwg.add(self.legend.dwg)
 
-        self.drawMoveSplines()
-        self.drawUnchangedSplines()
+        self.drawMovePattern(XTypes.ElementMoved)
+        self.drawMovePattern(XTypes.ElementUnchanged)
+        self.drawMovePattern(XTypes.ElementTagAttributeNameConsitency)
+
+        self.drawChangedPattern(XTypes.ElementAdded, self.differ.xelements2)
+        self.drawChangedPattern(XTypes.ElementDeleted, self.differ.xelements1)
+        self.drawChangedPattern(XTypes.ElementVerified, self.differ.xelements2)
+        self.drawChangedPattern(XTypes.ElementVerified, self.differ.xelements1)
 
     def save(self):
         print(self.filepath)
         self.dwg.save()
         pass
 
-    def drawMoveSplines(self):
+    def drawMovePattern(self, xtype):
 
-        for _e in XTypes.LOOP(self.differ.xelements1, XTypes.ElementMoved):
+        _color = globals()[xtype.__name__].fill
+
+        for _e in XTypes.LOOP(self.differ.xelements1, xtype):
             _start_svg1 = _e.svg_node
+
             if _e.xelements:
                 _stop_svg2 = _e.xelements[0].svg_node
 
@@ -386,41 +404,50 @@ class DrawXmlDiff(object):
                 _x3 = float(_stop_svg2['x'])
                 _y3 = float(_stop_svg2['y'])
 
-                _p01 = (_x1, _y1)
-                _p12 = (self.report1.x_max, _y1)
-                _p21 = (float(self.report2.dwg['x']), _y3)
-                _p02 = (_x3 + _x2 + float(_stop_svg2['textLength']), _y3)
+                _h1 = float(_start_svg1['height'])
+                _h2 = float(_stop_svg2['height'])
 
-                _line = Polyline(points=[_p01, _p12, _p21, _p02], stroke_width="1",
-                                 stroke=rgb(0, 0, 255), fill="none", opacity=0.5)
+                _p01 = (_x1, _y1)
+                _p02 = (self.report1.x_max, _y1)
+                _p03 = (float(self.report2.dwg['x']), _y3)
+                _p04 = (_x3 + _x2 + float(_stop_svg2['width']), _y3)
+                _p05 = (_x3 + _x2 + float(_stop_svg2['width']), _y3 + _h2)
+                _p06 = (float(self.report2.dwg['x']), _y3 + _h2)
+                _p07 = (self.report1.x_max, _y1 + _h1)
+                _p08 = (_x1, _y1 + _h1)
+
+                _line = Polyline(points=[_p01, _p02, _p03, _p04, _p05, _p06, _p07, _p08, _p01],
+                                 stroke_width="1",
+                                 stroke=_color,
+                                 fill=_color,
+                                 opacity=0.1)
 
                 self.dwg.add(_line)
 
-    def drawUnchangedSplines(self):
+    def drawChangedPattern(self, xtype, xelements):
 
-        for _e in XTypes.LOOP(self.differ.xelements1, XTypes.ElementUnchanged):
+        _color = globals()[xtype.__name__].fill
+
+        for _e in XTypes.LOOP(xelements, xtype):
             _start_svg1 = _e.svg_node
-            if _e.xelements:
-                _stop_svg2 = _e.xelements[0].svg_node
 
-                _x1 = float(_start_svg1['x'])
-                _y1 = float(_start_svg1['y'])
+            _x1 = float(_start_svg1['x'])
+            _y1 = float(_start_svg1['y'])
 
-                _x2 = float(self.report2.dwg['x'])
-                _y2 = float(self.report2.dwg['y'])
+            _p01 = (_x1, _y1)
+            _p02 = (_x1 + _start_svg1['width'], _y1)
+            _p03 = (_x1 + _start_svg1['width'],
+                    _y1 + _start_svg1['height'])
+            _p04 = (_x1,
+                    _y1 + _start_svg1['height'])
 
-                _x3 = float(_stop_svg2['x'])
-                _y3 = float(_stop_svg2['y'])
+            _line = Polyline(points=[_p01, _p02, _p03, _p04, _p01],
+                             stroke_width="1",
+                             stroke=_color,
+                             fill=_color,
+                             opacity=0.1)
 
-                _p01 = (_x1, _y1)
-                _p12 = (self.report1.x_max, _y1)
-                _p21 = (float(self.report2.dwg['x']), _y3)
-                _p02 = (_x3 + _x2 + float(_stop_svg2['textLength']), _y3)
-
-                _line = Polyline(points=[_p01, _p12, _p21, _p02], stroke_width="1",
-                                 stroke=rgb(0, 255, 0), fill="none", opacity=0.5)
-
-                self.dwg.add(_line)
+            self.dwg.add(_line)
 
 
 if __name__ == "__main__":
@@ -428,8 +455,8 @@ if __name__ == "__main__":
     import cProfile
 
     def run():
-        _path1 = r'{path}\tests\test9\a.xml'.format(path=getPath())
-        _path2 = r'{path}\tests\test9\b.xml'.format(path=getPath())
+        _path1 = r'{path}\tests\test1\a.xml'.format(path=getPath())
+        _path2 = r'{path}\tests\test1\b.xml'.format(path=getPath())
 
         x = DrawXmlDiff(_path1, _path2)
         x.save()
