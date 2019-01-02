@@ -16,14 +16,16 @@ class CompareAll(unittest.TestCase):
     @staticmethod
     def execute_old(folder_name):
         _i = XDiffer.XDiffExecutor()
-        _i.setPath1("{}\\tests\\{}\\a.xml".format(getPath(), folder_name))
-        _i.setPath2("{}\\tests\\{}\\b.xml".format(getPath(), folder_name))
+        _i.setPath1("{}\\..\\..\\tests\\{}\\a.xml".format(
+            getPath(), folder_name))
+        _i.setPath2("{}\\..\\..\\tests\\{}\\b.xml".format(
+            getPath(), folder_name))
         _i.run()
 
     @classmethod
     def execute(cls, folder_name):
-        _path1 = "{}\\tests\\{}\\a.xml".format(getPath(), folder_name)
-        _path2 = "{}\\tests\\{}\\b.xml".format(getPath(), folder_name)
+        _path1 = "{}\\..\\..\\tests\\{}\\a.xml".format(getPath(), folder_name)
+        _path2 = "{}\\..\\..\\tests\\{}\\b.xml".format(getPath(), folder_name)
         cls.differ = DrawXmlDiff(_path1, _path2)
 
     def test1(self):
