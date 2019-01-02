@@ -5,10 +5,30 @@
 # Copyright (C) 2019, diponaut@gmx.de
 # License: TBD
 
+import time
 import unittest
 import inspect
 from XmlXdiff import getPath, XDiffer
 from XmlXdiff.XReport import DrawXmlDiff
+
+
+class Usability(unittest.TestCase):
+
+    def simpleExample(self):
+
+        from XmlXdiff.XReport import DrawXmlDiff
+
+        _xml1 = """<root><deleted>with content</deleted><unchanged/><changed name="test1" /></root>"""
+        _xml2 = """<root><unchanged/><changed name="test2" /><added/></root>"""
+
+        with open("test1.xml", "w") as f:
+            f.write(_xml1)
+
+        with open("test2.xml", "w") as f:
+            f.write(_xml2)
+
+        x = DrawXmlDiff("test1.xml", "test2.xml")
+        x.saveSvg('xdiff.svg')
 
 
 class CompareAll(unittest.TestCase):
@@ -24,9 +44,14 @@ class CompareAll(unittest.TestCase):
 
     @classmethod
     def execute(cls, folder_name):
+        _t = time.time()
         _path1 = "{}\\..\\..\\tests\\{}\\a.xml".format(getPath(), folder_name)
         _path2 = "{}\\..\\..\\tests\\{}\\b.xml".format(getPath(), folder_name)
         cls.differ = DrawXmlDiff(_path1, _path2)
+        cls.differ.save()
+        print("{name}: delta_t={time:.4f}s xml_elements={cnt}".format(name=folder_name,
+                                                                      time=time.time() - _t,
+                                                                      cnt=len(cls.differ.differ.xelements2) + len(cls.differ.differ.xelements1)))
 
     def test1(self):
         name = inspect.currentframe().f_code.co_name
