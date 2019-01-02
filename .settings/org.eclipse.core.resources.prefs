@@ -1,3 +1,5 @@
 eclipse.preferences.version=1
+encoding//lib/XmlXdiff/XDiffer.py=utf-8
+encoding//lib/XmlXdiff/XReport/XRender.py=utf-8
 encoding//lib/XmlXdiff/XReport/__init__.py=utf-8
 encoding//lib/XmlXdiff/tests/GeneralTests.py=utf-8

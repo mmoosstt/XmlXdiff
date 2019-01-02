@@ -12,7 +12,7 @@ VERSION = "0.1"
 REQUIRED = [
     'PySide2',
     'lxml',
-    'svgwriter'
+    'svgwrite'
 ]
 
 EXTRAS = {}
