@@ -69,10 +69,7 @@ class DrawLegend(object):
         XRender.Render.setFontFamily(self.font_family)
         XRender.Render.setFontSize(self.font_size)
 
-        self.filepath = "{path}\\..\\..\\doc\\legend.svg".format(
-            path=getPath())
-
-        self.dwg = svgwrite.Drawing(self.filepath)
+        self.dwg = svgwrite.Drawing()
 
         self.moveRight()
         self.moveRight()
@@ -91,8 +88,6 @@ class DrawLegend(object):
 
             self.dwg.add(_text)
             self.dwg.add(_rect)
-
-        self.dwg.save()
 
     def addLine(self, text):
         _x, _y = XRender.Render.getTextSize(text)
