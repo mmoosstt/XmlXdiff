@@ -308,9 +308,16 @@ class DrawXmlDiff(object):
                                 self.differ.xelements1)
 
     def save(self):
-        print(self.filepath)
         self.dwg.save()
         pass
+
+    def saveSvg(self, filepath=None):
+
+        if filepath is not None:
+            self.dwg.filename = filepath
+            self.filepath = filepath
+
+        self.dwg.save()
 
     def drawMovePattern(self, xtype):
 
