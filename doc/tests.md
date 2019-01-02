@@ -18,38 +18,38 @@
 ## Results ##
 
 <figure>
-	<img src="./tests/test1/xdiff_a_b.svg" alt="test1">
+	<img src="../tests/test1/xdiff_a_b.svg" alt="test1">
 </figure>
 
 <figure>
-	<img src="./tests/test2/xdiff_a_b.svg" alt="test2">
+	<img src="../tests/test2/xdiff_a_b.svg" alt="test2">
 </figure>
 
 <figure>
-	<img src="./tests/test3/xdiff_a_b.svg" alt="test3">
+	<img src="../tests/test3/xdiff_a_b.svg" alt="test3">
 </figure>
 
 <figure>
-	<img src="./tests/test4/xdiff_a_b.svg" alt="test4">
+	<img src="../tests/test4/xdiff_a_b.svg" alt="test4">
 </figure>
 
 <figure>
-	<img src="./tests/test5/xdiff_a_b.svg" alt="test5">
+	<img src="../tests/test5/xdiff_a_b.svg" alt="test5">
 </figure>
 
 <figure>
-	<img src="./tests/test6/xdiff_a_b.svg" alt="test6">
+	<img src="../tests/test6/xdiff_a_b.svg" alt="test6">
 </figure>
 
 <figure>
-	<img src="./tests/test7/xdiff_a_b.svg" alt="test7">
+	<img src="../tests/test7/xdiff_a_b.svg" alt="test7">
 </figure>
 
 <figure>
-	<img src="./tests/test8/xdiff_a_b.svg" alt="test8">
+	<img src="../tests/test8/xdiff_a_b.svg" alt="test8">
 </figure>
 
 <figure>
-	<img src="./tests/test9/xdiff_a_b.svg" alt="test9">
+	<img src="../tests/test9/xdiff_a_b.svg" alt="test9">
 </figure>
 
