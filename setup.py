@@ -17,17 +17,6 @@ REQUIRED = [
 
 EXTRAS = {}
 
-long_description = """# XmlXdiff #
- - generating nice plots of differences between xml files
- - general comparison without grammatical information
- - playground for performance analysis
- - principle works
- 
-# Implementation #
- - creating an hashed tree representation of each element
- - each element is identified by it's xml path and a hash
- """
-
 with open('README.md', 'r') as f:
     long_description = f.read()
 
@@ -39,6 +28,7 @@ setup(name=NAME,
       version=VERSION,
       description=DESCRIPTION,
       long_description=long_description,
+      long_description_content_type="text/markdown",
       url=URL,
       author=AUTHOR,
       author_email=EMAIL,

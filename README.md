@@ -1,97 +1,33 @@
 # XmlXdiff #
- - generating nice plots of differences between xml files
- - general comparison without grammatical information
- - playground for performance analysis
- - principle works
- 
-# Implementation #
- - creating an hashed tree representation of each element
- - each element is identified by it's xml path and a hash
+
+XmlXdiff was inspired by [X-Diff](http://www.inf.unibz.it/~nutt/Teaching/XMLDM1112/XMLDM1112Coursework/WangEtAl-ICDE2003.pdf "X-Diff: An Effective Change Detection Algorithm for XML Documents").
+
+This is not a bullet prove library (till now). It s more a playground to get in touch with comparing tree structures and presenting the resulting in a charming way.
 
 # Status Quo #
+![XmlXdiff example](https://github.com/mmoosstt/XmlXdiff/blob/master/tests/test1/xdiff_a_b.svg "XmlXdiff/tests/test1")
 
-<figure>
-	<img src="https://github.com/mmoosstt/XmlXdiff/tree/master/lib/XmlXdiff/tests/test1/xdiff_a_b.svg" alt="test1">
-</figure>
-
-<figure>
-	<img src="./lib/XmlXdiff/tests/test1/xdiff_a_b.svg" alt="test1">
-</figure>
-
-## To Be Investigated/Implemented
- - xdiff cost rating for moved and deleted leafs
- - gravity spline for moved elements
- - performance analysis and improvements (different hash algorithms, ...)
- - remove lxml path generation for more suitable paths (absolute tag[position]/tag[position]...
- - figure out how to create a general python package
  
-# Inspired by xml-diff #
-## Compare two XML files in unordered manner #
+# Implementation #
+ 
+ Each xml element is identified by it's xpath and a hash calculated by selecting relevant information.
+  
+ 1. mark all xml elements as changed
+ 1. mark unchanged xml elements
+ 1. mark moved xml elements
+ 1. mark xml elements identified by tag name and attribute names
+ 1. mark xml elements identified by attributes values and element text
+ 1. mark xml elements identified by tag name
+ 1. mark xml elements with xpath that do not exist in the other xml tree as added/deleted
+ 1. mark xml elements that have no child xml elements that are marked as changed as verified
+ 1. all xml elements that are still marked as changed have to be investigated
+ 
+The selected order may change in future. This is still under investigation. 
 
-XML has been used to transfer hierarchical data. 
-In most of those cases, the ordered relation between sibling 
-nodes not important - only ancestor relation is important.
+## To Be Implemented/Improved
+ - xdiff cost rating for matching couples
+ - performance analysis and improvements (different hash algorithms, ...)
+ - rework xml elements identification readability/performance issues
 
-The [X-Diff](http://pages.cs.wisc.edu/~yuanwang/xdiff.html) algorithm 
-describes how two XML documents can be effectively compared in an unordered
-manner.
-
-## License ##
-
-TBD
-
-# Tests #
-
-## Overview ##
-|test focus|test available|test result|
-|---|---|---|
-|ElementUnchanged|test5|   |
-|ElementAdded|test2|   |
-|ElementDeleted|test4|   |
-|ElementMoved|test5|   |
-|ElementTagConsitency|test3|   |
-|ElementTextAttributeValueConsitency|test7|   |
-|ElementTagAttributeNameConsitency|test6|   |
-|ElementChanged|   |   |
-|ElementVerified|   |   |
-|ElementUnknown|   |   |   |   |
-|ElementWithNamespace|test8|   |   |   |
-
-## Results ##
-
-<figure>
-	<img src="./lib/XmlXdiff/tests/test1/xdiff_a_b.svg" alt="test1">
-</figure>
-
-<figure>
-	<img src="./lib/XmlXdiff/tests/test2/xdiff_a_b.svg" alt="test2">
-</figure>
-
-<figure>
-	<img src="./lib/XmlXdiff/tests/test3/xdiff_a_b.svg" alt="test3">
-</figure>
-
-<figure>
-	<img src="./lib/XmlXdiff/tests/test4/xdiff_a_b.svg" alt="test4">
-</figure>
-
-<figure>
-	<img src="./lib/XmlXdiff/tests/test5/xdiff_a_b.svg" alt="test5">
-</figure>
-
-<figure>
-	<img src="./lib/XmlXdiff/tests/test6/xdiff_a_b.svg" alt="test6">
-</figure>
-
-<figure>
-	<img src="./lib/XmlXdiff/tests/test7/xdiff_a_b.svg" alt="test7">
-</figure>
-
-<figure>
-	<img src="./lib/XmlXdiff/tests/test8/xdiff_a_b.svg" alt="test8">
-</figure>
-
-<figure>
-	<img src="./lib/XmlXdiff/tests/test9/xdiff_a_b.svg" alt="test9">
-</figure>
-
+## Links ##
+![Tests](./doc/tests.md "Executed Tests")
