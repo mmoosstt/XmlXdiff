@@ -2,7 +2,7 @@
 # Author:  mmoosstt -- github
 # Purpose: basic tests XmlXdiff
 # Created: 01.01.2019
-# Copyright (C) 2019, Moritz Ost
+# Copyright (C) 2019, diponaut@gmx.de
 # License: TBD
 
 import unittest
@@ -20,12 +20,11 @@ class CompareAll(unittest.TestCase):
         _i.setPath2("{}\\tests\\{}\\b.xml".format(getPath(), folder_name))
         _i.run()
 
-    @staticmethod
-    def execute(folder_name):
+    @classmethod
+    def execute(cls, folder_name):
         _path1 = "{}\\tests\\{}\\a.xml".format(getPath(), folder_name)
         _path2 = "{}\\tests\\{}\\b.xml".format(getPath(), folder_name)
-        _i = DrawXmlDiff(_path1, _path2)
-        _i.save()
+        cls.differ = DrawXmlDiff(_path1, _path2)
 
     def test1(self):
         name = inspect.currentframe().f_code.co_name

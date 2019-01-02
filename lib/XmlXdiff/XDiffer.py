@@ -2,7 +2,7 @@
 # Author:  mmoosstt -- github
 # Purpose: calculate difference between source and target file (inspired from xdiff algorithm)
 # Created: 01.01.2019
-# Copyright (C) 2019, Moritz Ost
+# Copyright (C) 2019, diponaut@gmx.de
 # License: TBD
 
 from XmlXdiff import XTypes, XPath, XHash, getPath

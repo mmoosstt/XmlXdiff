@@ -2,7 +2,7 @@
 # Author:  mmoosstt -- github
 # Purpose: calculate hashes over etree
 # Created: 01.01.2019
-# Copyright (C) 2019, Moritz Ost
+# Copyright (C) 2019, diponaut@gmx.de
 # License: TBD
 
 import lxml.etree

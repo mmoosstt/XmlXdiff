@@ -20,11 +20,42 @@
 |ElementChanged|   |   |
 |ElementVerified|   |   |
 |ElementUnknown|   |   |   |   |
-|ElementWithNamespace|test8|   |   |xpath does not work with {ns}tag|
+|ElementWithNamespace|test8|   |   |   |
 
 <figure>
-	<img src="./doc/example_diff_a_b.svg" alt="example svg output">
-	<figcaption>example showing differences between xml's</figcaption>
+	<img src="./lib/XmlXdiff/test1/xdiff_a_b.svg" alt="example svg output">
+</figure>
+
+<figure>
+	<img src="./lib/XmlXdiff/test2/xdiff_a_b.svg" alt="example svg output">
+</figure>
+
+<figure>
+	<img src="./lib/XmlXdiff/test3/xdiff_a_b.svg" alt="example svg output">
+</figure>
+
+<figure>
+	<img src="./lib/XmlXdiff/test4/xdiff_a_b.svg" alt="example svg output">
+</figure>
+
+<figure>
+	<img src="./lib/XmlXdiff/test5/xdiff_a_b.svg" alt="example svg output">
+</figure>
+
+<figure>
+	<img src="./lib/XmlXdiff/test6/xdiff_a_b.svg" alt="example svg output">
+</figure>
+
+<figure>
+	<img src="./lib/XmlXdiff/test7/xdiff_a_b.svg" alt="example svg output">
+</figure>
+
+<figure>
+	<img src="./lib/XmlXdiff/test8/xdiff_a_b.svg" alt="example svg output">
+</figure>
+
+<figure>
+	<img src="./lib/XmlXdiff/test9/xdiff_a_b.svg" alt="example svg output">
 </figure>
 
 ## To Be Investigated/Implemented

@@ -2,7 +2,7 @@
 # Author:  mmoosstt -- github
 # Purpose: create diff report
 # Created: 01.01.2019
-# Copyright (C) 2019, Moritz Ost
+# Copyright (C) 2019, diponaut@gmx.de
 # License: TBD
 
 import lxml.etree
@@ -378,8 +378,8 @@ if __name__ == "__main__":
     import cProfile
 
     def run():
-        _path1 = r'{path}\tests\test1\a.xml'.format(path=getPath())
-        _path2 = r'{path}\tests\test1\b.xml'.format(path=getPath())
+        _path1 = r'{path}\tests\test9\a.xml'.format(path=getPath())
+        _path2 = r'{path}\tests\test9\b.xml'.format(path=getPath())
 
         x = DrawXmlDiff(_path1, _path2)
         x.save()

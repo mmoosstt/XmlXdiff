@@ -2,7 +2,7 @@
 # Author:  mmoosstt -- github
 # Purpose: root module
 # Created: 01.01.2019
-# Copyright (C) 2019, Moritz Ost
+# Copyright (C) 2019, diponaut@gmx.de
 # License: TBD
 
 import os
