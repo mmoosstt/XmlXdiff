@@ -7,12 +7,13 @@
 
 from XmlXdiff import XTypes, XPath, XHash, getPath
 import lxml.etree
+import os
 
 
 class XDiffPath(object):
 
     def __init__(self, filepath):
-        _x = filepath.replace("\\", "/")
+        _x = os.path.abspath(filepath).replace("\\", "/")
 
         self.path = _x[:_x.rfind("/")].replace("/", "\\")
         self.filename = _x[_x.rfind("/") + 1:_x.rfind('.')]
