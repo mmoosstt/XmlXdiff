@@ -19,12 +19,18 @@ python pip XmlXdiff
 ```
 from XmlXdiff.XReport import DrawXmlDiff
 
+_xml1 = """<root><deleted>with content</deleted><unchanged/><changed name="test1" /></root>"""
+_xml2 = """<root><unchanged/><changed name="test2" /><added/></root>"""
 
-_path1 = '<insert xml filepath 1>'
-_path2 = '<insert xml filepath 1>'
+with open("test1.xml", "w") as f:
+    f.write(_xml1)
 
-x = DrawXmlDiff(_path1, _path2)
-x.save()
+with open("test2.xml", "w") as f:
+    f.write(_xml2)
+
+x = DrawXmlDiff("test1.xml", "test2.xml")
+x.saveSvg('xdiff.svg')
+
 ```
 
 # status quo #
@@ -47,10 +53,25 @@ x.save()
  
 The selected order may change in future. This is still under investigation. 
 
+## performance ##
+
+```
+test1: delta_t=0.0469s xml_elements=63
+test2: delta_t=0.0156s xml_elements=5
+test3: delta_t=0.0156s xml_elements=4
+test4: delta_t=0.0312s xml_elements=32
+test5: delta_t=0.0312s xml_elements=34
+test6: delta_t=0.0313s xml_elements=34
+test7: delta_t=0.0156s xml_elements=8
+test8: delta_t=0.0625s xml_elements=67
+test9: delta_t=5.2019s xml_elements=6144
+```
+
 ## open issues ##
  * xdiff cost rating for matching couples
  * performance analysis and improvements (different hash algorithms, ...)
  * rework xml elements identification readability/performance issues
+ * if there are some users, improve interface
 
 ## documentation ##
 ![Tests](./doc/tests.md "Executed Tests")
