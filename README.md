@@ -4,11 +4,34 @@ XmlXdiff was inspired by [X-Diff](http://www.inf.unibz.it/~nutt/Teaching/XMLDM11
 
 This is not a bullet prove library (till now). It s more a playground to get in touch with comparing tree structures and presenting the resulting in a charming way.
 
-# Status Quo #
+## dependencies ##
+ * PySide2
+ * svgwrite
+ * lxml
+ 
+## installation ##
+
+```
+python pip XmlXdiff
+```
+
+## fist step ##
+```
+from XmlXdiff.XReport import DrawXmlDiff
+
+
+_path1 = '<insert xml filepath 1>'
+_path2 = '<insert xml filepath 1>'
+
+x = DrawXmlDiff(_path1, _path2)
+x.save()
+```
+
+# status quo #
 ![XmlXdiff example](https://github.com/mmoosstt/XmlXdiff/blob/master/tests/test1/xdiff_a_b.svg "XmlXdiff/tests/test1")
 
  
-# Implementation #
+# implementation #
  
  Each xml element is identified by it's xpath and a hash calculated by selecting relevant information.
   
@@ -24,10 +47,10 @@ This is not a bullet prove library (till now). It s more a playground to get in 
  
 The selected order may change in future. This is still under investigation. 
 
-## To Be Implemented/Improved
- - xdiff cost rating for matching couples
- - performance analysis and improvements (different hash algorithms, ...)
- - rework xml elements identification readability/performance issues
+## open issues ##
+ * xdiff cost rating for matching couples
+ * performance analysis and improvements (different hash algorithms, ...)
+ * rework xml elements identification readability/performance issues
 
-## Links ##
+## documentation ##
 ![Tests](./doc/tests.md "Executed Tests")
