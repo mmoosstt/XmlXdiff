@@ -23,39 +23,39 @@
 |ElementWithNamespace|test8|   |   |   |
 
 <figure>
-	<img src="./lib/XmlXdiff/test1/xdiff_a_b.svg" alt="example svg output">
+	<img src="./lib/XmlXdiff/tests/test1/xdiff_a_b.svg" alt="test1">
 </figure>
 
 <figure>
-	<img src="./lib/XmlXdiff/test2/xdiff_a_b.svg" alt="example svg output">
+	<img src="./lib/XmlXdiff/tests/test2/xdiff_a_b.svg" alt="test2">
 </figure>
 
 <figure>
-	<img src="./lib/XmlXdiff/test3/xdiff_a_b.svg" alt="example svg output">
+	<img src="./lib/XmlXdiff/tests/test3/xdiff_a_b.svg" alt="test3">
 </figure>
 
 <figure>
-	<img src="./lib/XmlXdiff/test4/xdiff_a_b.svg" alt="example svg output">
+	<img src="./lib/XmlXdiff/tests/test4/xdiff_a_b.svg" alt="test4">
 </figure>
 
 <figure>
-	<img src="./lib/XmlXdiff/test5/xdiff_a_b.svg" alt="example svg output">
+	<img src="./lib/XmlXdiff/tests/test5/xdiff_a_b.svg" alt="test5">
 </figure>
 
 <figure>
-	<img src="./lib/XmlXdiff/test6/xdiff_a_b.svg" alt="example svg output">
+	<img src="./lib/XmlXdiff/tests/test6/xdiff_a_b.svg" alt="test6">
 </figure>
 
 <figure>
-	<img src="./lib/XmlXdiff/test7/xdiff_a_b.svg" alt="example svg output">
+	<img src="./lib/XmlXdiff/tests/test7/xdiff_a_b.svg" alt="test7">
 </figure>
 
 <figure>
-	<img src="./lib/XmlXdiff/test8/xdiff_a_b.svg" alt="example svg output">
+	<img src="./lib/XmlXdiff/tests/test8/xdiff_a_b.svg" alt="test8">
 </figure>
 
 <figure>
-	<img src="./lib/XmlXdiff/test9/xdiff_a_b.svg" alt="example svg output">
+	<img src="./lib/XmlXdiff/tests/test9/xdiff_a_b.svg" alt="test9">
 </figure>
 
 ## To Be Investigated/Implemented
