@@ -98,19 +98,3 @@ class XDiffXmlPath(object):
                 _pos_dict[_child.tag] = 1
 
             cls.walk(_child, _path, _pos_dict[_child.tag], visited)
-
-
-if __name__ == "__main__":
-
-    print(XDiffXmlPath.getDistance("a/b/c/d/1/2/3", "a/b/c/d/1/3"))
-
-    if 0:
-        import lxml.etree
-
-        XDiffXmlPath
-        _xml = lxml.etree.parse("./tests/test9/a.xml")
-        XDiffXmlPath.setXmlValidation(_xml.getroot())
-        _pathes = XDiffXmlPath.getPathes(_xml.getroot(), "", 1)
-
-        for _path in _pathes:
-            print(_path)

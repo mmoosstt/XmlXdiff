@@ -10,6 +10,14 @@ import unittest
 import inspect
 from XmlXdiff import getPath, XDiffer
 from XmlXdiff.XReport import DrawXmlDiff
+from XmlXdiff.XPath import XDiffXmlPath
+
+
+class UnSorted(unittest.TestCase):
+
+    def calcDistance(self):
+        _res = XDiffXmlPath.getXpathDistance("a/b/c/d/1/2/3", "a/b/c/d/1/3")
+        self.assertEqual(_res, 3)
 
 
 class Usability(unittest.TestCase):

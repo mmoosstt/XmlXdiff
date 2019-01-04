@@ -111,14 +111,3 @@ class Render(object):
                 _text.append((text, _width, _height))
 
         return _text
-
-
-if __name__ == '__main__':
-
-    Render.setFontFamily('AvantGarde')
-    Render.setFontSize(30)
-    print(Render.splitTextToLines(
-        "hallo1 halli2 hallo3 halli4 hallo5 halli6 hallo7 halli8 hallo9 halli0 hallo1 halli2 hallo3 halli4 hallo5 halli6 hallo7 halli8 hallo9 halli0 hallo halli hallo halli"))
-
-    print(Render.splitTextToLines(
-        "hallo1 halli2 hallo3 halli4 "))

@@ -242,14 +242,3 @@ class XDiffExecutor(object):
                     _xelement1.setType(XTypes.ElementChanged)
                     _xelement2.setType(XTypes.ElementChanged)
                     break
-
-
-if __name__ == '__main__':
-    path1 = '{}\\tests\\test1\\a.xml'.format(getPath())
-
-    y = XDiffPath(path1)
-    _x = XDiffExecutor()
-    _x.run()
-
-    for _x in _x.xelements1:
-        print(_x.xpath, _x.type)
