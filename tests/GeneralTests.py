@@ -29,14 +29,18 @@ class Usability(unittest.TestCase):
         _xml1 = """<root><deleted>with content</deleted><unchanged/><changed name="test1" /></root>"""
         _xml2 = """<root><unchanged/><changed name="test2" /><added/></root>"""
 
-        with open("test1.xml", "w") as f:
+        _path1 = '{}\\..\\..\\tests\\simple\\xml1.xml'.format(getPath())
+        _path2 = '{}\\..\\..\\tests\\simple\\xml2.xml'.format(getPath())
+        _out = '{}\\..\\..\\tests\\simple\\xdiff.svg'.format(getPath())
+
+        with open(_path1, "w") as f:
             f.write(_xml1)
 
-        with open("test2.xml", "w") as f:
+        with open(_path2, "w") as f:
             f.write(_xml2)
 
-        x = DrawXmlDiff("test1.xml", "test2.xml")
-        x.saveSvg('xdiff.svg')
+        x = DrawXmlDiff(_path1, _path2)
+        x.saveSvg(_out)
 
 
 class CompareAll(unittest.TestCase):
