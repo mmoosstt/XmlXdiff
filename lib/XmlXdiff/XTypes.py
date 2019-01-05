@@ -121,6 +121,24 @@ class ElementTagAttributeNameConsitency(XType):
         super(self.__class__, self).__init__()
 
 
+class ElementTagAttributeNameValueConsitency(XType):
+    fill = rgb(0x00, 0xa0, 0xf0)
+
+    def __init__(self):
+        super(self.__class__, self).__init__()
+
+
+def LOOP_GRAVITY(elements, gravity_index=0, *element_types):
+
+    for _element in elements[gravity_index:]:
+        if isinstance(_element.type, element_types):
+            yield _element
+
+    for _element in elements[:gravity_index]:
+        if isinstance(_element.type, element_types):
+            yield _element
+
+
 def LOOP(elements, *element_types):
 
     for _element in elements:

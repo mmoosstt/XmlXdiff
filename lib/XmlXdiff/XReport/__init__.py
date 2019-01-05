@@ -174,6 +174,38 @@ class DrawXml(object):
 
             _xelement.addSvgNode(self.addTextBox(_node_text))
 
+    def addTextBox2(self, element):
+        _g = Group()
+
+        if isinstance(element, lxml.etree._Comment):
+            _tag = "COMMENT"
+        else:
+            _tag = element.tag[element.tag.find("}") + 1:]
+        _attribs = " "
+
+        _w, _h = XRender.Render.getTextSize(_tag)
+        _t = Text(_tag)
+
+        _tag = TSpan(_tag)
+        _tag['x'] = 0
+        _tag['y'] = 0
+        _tag['id'] = 'tag'
+
+        for _attrib_name in sorted(element.attrib.keys()):
+            _w1, _h1 = XRender.Render.getTextSize(_attrib_name)
+
+            _attrib_value = element.attrib[_attrib_name]
+            _w2, _h2 = XRender.Render.getTextSize(_attrib_name)
+
+            _attribs = " {name}='{value}' ".format(
+                name=_attrib_name, value=None)
+
+        _attribs = _attribs[:-1]
+
+        XRender.Render.splitTextToLines(element.text)
+
+        return "{tag}{attribs}: {text}".format(attribs=_attribs, tag=_tag, text=element.text)
+
     def addTextBox(self, text):
         _lines = XRender.Render.splitTextToLines(text)
 
@@ -290,6 +322,7 @@ class DrawXmlDiff(object):
         self.drawMovePattern(XTypes.ElementTagAttributeNameConsitency)
         self.drawMovePattern(XTypes.ElementTextAttributeValueConsitency)
         self.drawMovePattern(XTypes.ElementTagConsitency)
+        self.drawMovePattern(XTypes.ElementTagAttributeNameValueConsitency)
 
         self.drawChangedPattern(XTypes.ElementAdded,
                                 self.differ.xelements2,

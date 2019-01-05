@@ -15,12 +15,10 @@ class XDiffHasher(object):
     def callbackHashAll(cls, element, hashpipe):
 
         _element_childes = element.getchildren()
-
         for child in _element_childes:
             hashpipe.update(cls.callbackHashAll(child, hashpipe))
 
         hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
-
         # attributes and text are only taken into account for leaf nodes
         if not _element_childes:
             if hasattr(element, 'attrib'):
@@ -45,6 +43,7 @@ class XDiffHasher(object):
             hashpipe.update(
                 cls.callbackHashAttributeValueElementValueConsitency(child, hashpipe))
 
+        
         # attributes and text are only taken into account for leaf nodes
         if _element_childes:
             hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
@@ -59,6 +58,24 @@ class XDiffHasher(object):
 
             if element.tail is not None:
                 hashpipe.update(bytes(element.tail.strip() + '#txt', 'utf-8'))
+
+        return bytes(hashpipe.hexdigest(), 'utf-8')
+
+    @classmethod
+    def callbackHashTagNameAttributeNameValueConsitency(cls, element, hashpipe):
+
+        _element_childes = element.getchildren()
+        for child in _element_childes:
+            hashpipe.update(
+                cls.callbackHashTagNameAttributeNameValueConsitency(child, hashpipe))
+
+        hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
+        # attributes and text are only taken into account for leaf nodes
+        if not _element_childes:
+            if hasattr(element, 'attrib'):
+                for _name in sorted(element.attrib.keys()):
+                    _value = element.attrib[_name]
+                    hashpipe.update(bytes(_name + _value + '#att', 'utf-8'))
 
         return bytes(hashpipe.hexdigest(), 'utf-8')
 
