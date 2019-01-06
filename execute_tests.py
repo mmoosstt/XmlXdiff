@@ -26,9 +26,6 @@ res = test_runner.run(test_suite)
 sys.stdout.flush()
 sys.stdout.seek(0)
 
-sys.stderr.flush()
-sys.stderr.seek(0)
-
-f = open('out.txt', 'w')
+f = open('./tests/GeneralTests.CompareAll.txt', 'w')
 f.write(sys.stdout.read())
 f.close()

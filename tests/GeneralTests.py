@@ -9,7 +9,7 @@ import time
 import unittest
 import inspect
 from XmlXdiff import getPath, XDiffer
-from XmlXdiff.XReport import DrawXmlDiff
+from XmlXdiff.XReport import DrawXmlDiff, DrawXmlDiffBoxesOnly
 from XmlXdiff.XPath import XDiffXmlPath
 
 
@@ -60,6 +60,7 @@ class CompareAll(unittest.TestCase):
         _path1 = "{}\\..\\..\\tests\\{}\\a.xml".format(getPath(), folder_name)
         _path2 = "{}\\..\\..\\tests\\{}\\b.xml".format(getPath(), folder_name)
         cls.differ = DrawXmlDiff(_path1, _path2)
+        cls.differ.draw()
         cls.differ.save()
         print("{name}: delta_t={time:.4f}s xml_elements={cnt}".format(name=folder_name,
                                                                       time=time.time() - _t,

@@ -221,8 +221,11 @@ class DrawXml(object):
 
         return "{tag}{attribs}: {text}".format(attribs=_attribs, tag=_tag, text=element.text)
 
+    def linesCallback(self, text):
+        return XRender.Render.splitTextToLines(text)
+
     def addTextBox(self, text):
-        _lines = XRender.Render.splitTextToLines(text)
+        _lines = self.linesCallback(text)
 
         _y = copy.deepcopy(self.y)
 
@@ -285,21 +288,26 @@ class DrawXmlDiff(object):
 
     def __init__(self, path1, path2):
 
+        self.path1 = path1
+        self.path2 = path2
         self.differ = XDiffer.XDiffExecutor()
-        self.differ.setPath1(path1)
-        self.differ.setPath2(path2)
+        self.report1 = DrawXml()
+        self.report2 = DrawXml()
+
+    def draw(self):
+
+        self.differ.setPath1(self.path1)
+        self.differ.setPath2(self.path2)
         self.differ.run()
 
         self.filepath = "{path}\\xdiff_{filename1}_{filename2}.svg".format(path=self.differ.path1.path,
                                                                            filename1=self.differ.path1.filename,
                                                                            filename2=self.differ.path2.filename)
 
-        self.report1 = DrawXml()
         self.report1.moveRight()
         self.report1.loadFromXElements(self.differ.xelements1)
         self.report1.saveSvg(self.differ.xelements1)
 
-        self.report2 = DrawXml()
         self.report2.moveRight()
         self.report2.loadFromXElements(self.differ.xelements2)
         self.report2.saveSvg(self.differ.xelements2)
@@ -421,3 +429,22 @@ class DrawXmlDiff(object):
                              opacity=xtype.opacity)
 
             self.dwg.add(_line)
+
+# trial overload boxes only report
+
+
+class DrawXmlBoxesOnly(DrawXml):
+
+    def __init__(self):
+        DrawXml.__init__(self)
+
+    def linesCallback(self, text):
+        return [('', 40, 10)]
+
+
+class DrawXmlDiffBoxesOnly(DrawXmlDiff):
+
+    def __init__(self, path1, path2):
+        DrawXmlDiff.__init__(self, path1, path2)
+        self.report1 = DrawXmlBoxesOnly()
+        self.report2 = DrawXmlBoxesOnly()
