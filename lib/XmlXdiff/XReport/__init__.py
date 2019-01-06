@@ -138,18 +138,19 @@ class DrawXml(object):
         else:
             _tag = element.tag
 
-            for _ns in element.nsmap.keys():
-                _ns_long = element.nsmap[_ns]
-                _ns_long = "{{{}}}".format(_ns_long)
+            if _tag[0] == "{":
+                for _ns in element.nsmap.keys():
+                    _ns_long = element.nsmap[_ns]
+                    _ns_long = "{{{}}}".format(_ns_long)
 
-                if _ns is None:
-                    _ns = ""
-                else:
-                    _ns = "{}:".format(_ns)
+                    if _ns is None:
+                        _ns = ""
+                    else:
+                        _ns = "{}:".format(_ns)
 
-                if _tag.find(_ns_long) > -1:
-                    _tag = _tag.replace(_ns_long, _ns)
-                    break
+                    if _tag.find(_ns_long) > -1:
+                        _tag = _tag.replace(_ns_long, _ns)
+                        break
 
         _attribs = " "
         for _akey in sorted(element.attrib.keys()):

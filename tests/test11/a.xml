@@ -1,4 +1,4 @@
-<Actors xmlns:aa="www.namespacebb.de" xmlns:bb="www.namespacebb.de"> 
+<Actors xmlns:aa="namespace_aa" xmlns:bb="namespace_bb"> 
 <aa:Actor> 
 <Name> 
 <FirstName>Mike</FirstName> 
