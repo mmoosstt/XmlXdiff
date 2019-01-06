@@ -136,7 +136,21 @@ class DrawXml(object):
         if isinstance(element, lxml.etree._Comment):
             _tag = "!comment"
         else:
-            _tag = element.tag[element.tag.find("}") + 1:]
+            _tag = element.tag
+
+            for _ns in element.nsmap.keys():
+                _ns_long = element.nsmap[_ns]
+                _ns_long = "{{{}}}".format(_ns_long)
+
+                if _ns is None:
+                    _ns = ""
+                else:
+                    _ns = "{}:".format(_ns)
+
+                if _tag.find(_ns_long) > -1:
+                    _tag = _tag.replace(_ns_long, _ns)
+                    break
+
         _attribs = " "
         for _akey in sorted(element.attrib.keys()):
             _attribs = " {name}='{value}' ".format(
