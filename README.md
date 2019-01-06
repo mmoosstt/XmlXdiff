@@ -55,17 +55,23 @@ The selected order may change in future. This is still under investigation.
 
 ## performance ##
 
+[//]: # (insert_performance_start)
+
 ```
-test1: delta_t=0.0469s xml_elements=63
-test2: delta_t=0.0156s xml_elements=5
-test3: delta_t=0.0156s xml_elements=4
-test4: delta_t=0.0312s xml_elements=32
-test5: delta_t=0.0312s xml_elements=34
-test6: delta_t=0.0313s xml_elements=34
-test7: delta_t=0.0156s xml_elements=8
-test8: delta_t=0.0625s xml_elements=67
-test9: delta_t=5.2019s xml_elements=6144
+test1: delta_t=0.1219s xml_elements=63
+test2: delta_t=0.0224s xml_elements=5
+test3: delta_t=0.0196s xml_elements=4
+test4: delta_t=0.1023s xml_elements=32
+test5: delta_t=0.0728s xml_elements=34
+test6: delta_t=0.0721s xml_elements=34
+test7: delta_t=0.0189s xml_elements=8
+test8: delta_t=0.1271s xml_elements=67
+test9: delta_t=7.7058s xml_elements=6144
+test11: delta_t=0.0746s xml_elements=34
+
 ```
+
+[//]: # (insert_performance_end)
 
 ## open issues ##
  * xdiff cost rating for matching couples
