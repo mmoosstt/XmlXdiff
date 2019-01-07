@@ -19,6 +19,7 @@ test_suite.addTest(CompareAll('test7'))
 test_suite.addTest(CompareAll('test8'))
 test_suite.addTest(CompareAll('test9'))
 test_suite.addTest(CompareAll('test11'))
+test_suite.addTest(CompareAll('test12'))
 
 test_runner = unittest.TextTestRunner(verbosity=2)
 res = test_runner.run(test_suite)

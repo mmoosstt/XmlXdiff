@@ -58,16 +58,17 @@ The selected order may change in future. This is still under investigation.
 [//]: # (insert_performance_start)
 
 ```
-test1: delta_t=0.1219s xml_elements=63
-test2: delta_t=0.0224s xml_elements=5
-test3: delta_t=0.0196s xml_elements=4
-test4: delta_t=0.1023s xml_elements=32
-test5: delta_t=0.0728s xml_elements=34
-test6: delta_t=0.0721s xml_elements=34
-test7: delta_t=0.0189s xml_elements=8
-test8: delta_t=0.1271s xml_elements=67
-test9: delta_t=7.7058s xml_elements=6144
-test11: delta_t=0.0746s xml_elements=34
+test1: delta_t=0.0469s xml_elements=63
+test2: delta_t=0.0000s xml_elements=5
+test3: delta_t=0.0155s xml_elements=4
+test4: delta_t=0.0313s xml_elements=32
+test5: delta_t=0.0312s xml_elements=34
+test6: delta_t=0.0313s xml_elements=34
+test7: delta_t=0.0000s xml_elements=8
+test8: delta_t=0.0625s xml_elements=67
+test9: delta_t=5.4674s xml_elements=6144
+test11: delta_t=0.0216s xml_elements=34
+test12: delta_t=0.0469s xml_elements=45
 
 ```
 
@@ -85,10 +86,10 @@ lib\XmlXdiff\XHash.py                 74     17    77%
 lib\XmlXdiff\XPath.py                 54     17    69%
 lib\XmlXdiff\XReport\XRender.py       60     44    27%
 lib\XmlXdiff\XReport\__init__.py     277     93    66%
-lib\XmlXdiff\XTypes.py                86     50    42%
+lib\XmlXdiff\XTypes.py                90     50    44%
 lib\XmlXdiff\__init__.py               3      2    33%
 ------------------------------------------------------
-TOTAL                                743    246    67%
+TOTAL                                747    246    67%
 
 ```
 
