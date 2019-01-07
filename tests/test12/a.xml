@@ -1,0 +1,32 @@
+<Actors>   
+	<Movies genere="horror" sprache="englisch"> 
+		<Movie>eins</Movie>
+		<Movie>zwei</Movie>
+		<Movie>drei</Movie>
+		<Movie>vier</Movie>
+		<Movie>fuenf</Movie>
+		<Movie>sechs
+			<Actor> 
+				<Name> 
+					<FirstName>Mike</FirstName> 
+					<LastName>Johnson</LastName> 
+				</Name>
+			</Actor>
+		</Movie>
+	</Movies> 
+	<Movies genere="horror" sprache="deutsch"> 
+		<Movie>eins</Movie>
+		<Movie>zwei	
+			<Actor> 
+				<Name> 
+					<FirstName>Mike</FirstName> 
+					<LastName>Johnson</LastName> 
+				</Name>
+			</Actor>
+		</Movie>
+		<Movie>drei</Movie>
+		<Movie>vier</Movie>
+		<Movie>fuenf</Movie>
+		<Movie>sechs</Movie>
+	</Movies> 
+</Actors>                                

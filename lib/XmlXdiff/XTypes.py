@@ -141,7 +141,18 @@ def LOOP_GRAVITY(elements, gravity_index=0, *element_types):
 
 def LOOP(elements, *element_types):
 
+    # try to match shortest paths first - identification of biggest blocks
+    # /root
+    # /node1
+    # /node1/node2
+    # ...
+
+    _append = []
     for _element in elements:
+        if isinstance(_element.type, element_types):
+            _append.append((len(_element.xpath), _element.xpath, _element))
+
+    for _, _, _element in sorted(_append):
         if isinstance(_element.type, element_types):
             yield _element
 

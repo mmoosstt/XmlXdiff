@@ -154,7 +154,7 @@ class DrawXml(object):
 
         _attribs = " "
         for _akey in sorted(element.attrib.keys()):
-            _attribs = " {name}='{value}' ".format(
+            _attribs = _attribs + " {name}='{value}' ".format(
                 name=_akey, value=element.attrib[_akey])
 
         _attribs = _attribs[:-1]
@@ -212,7 +212,7 @@ class DrawXml(object):
             _attrib_value = element.attrib[_attrib_name]
             _w2, _h2 = XRender.Render.getTextSize(_attrib_name)
 
-            _attribs = " {name}='{value}' ".format(
+            _attribs = _attribs + " {name}='{value}' ".format(
                 name=_attrib_name, value=None)
 
         _attribs = _attribs[:-1]
