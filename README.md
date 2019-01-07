@@ -73,6 +73,27 @@ test11: delta_t=0.0746s xml_elements=34
 
 [//]: # (insert_performance_end)
 
+## coverage ##
+
+[//]: # (insert_coverage_start)
+
+```
+Name                               Stmts   Miss  Cover
+------------------------------------------------------
+lib\XmlXdiff\XDiffer.py              189     23    88%
+lib\XmlXdiff\XHash.py                 74     17    77%
+lib\XmlXdiff\XPath.py                 54     17    69%
+lib\XmlXdiff\XReport\XRender.py       60     44    27%
+lib\XmlXdiff\XReport\__init__.py     277     93    66%
+lib\XmlXdiff\XTypes.py                86     50    42%
+lib\XmlXdiff\__init__.py               3      2    33%
+------------------------------------------------------
+TOTAL                                743    246    67%
+
+```
+
+[//]: # (insert_coverage_end)
+
 ## open issues ##
  * xdiff cost rating for matching couples
  * performance analysis and improvements (different hash algorithms, ...)
