@@ -155,8 +155,8 @@ def LOOP_UNCHANGED_SEGMENTS(xelementsa, xelementsb):
             _stop_indexb = len(xelementsb)
             _stop_indexa = len(xelementsa)
 
-        _yield_b = xelementsb[_start_indexb:_stop_indexb]
-        _yield_a = xelementsa[_start_indexa:_stop_indexa]
+        _yield_b = xelementsb[_start_indexb:_stop_indexb + 1]
+        _yield_a = xelementsa[_start_indexa:_stop_indexa + 1]
 
         yield _yield_a, _yield_b
 
