@@ -8,23 +8,30 @@
 
 from inspect import isclass
 from svgwrite import rgb
+from numpy.distutils.mingw32ccompiler import _START
 
 
 class XElement(object):
+
+    child_cnt_median = 0
 
     def __init__(self):
         self.hash = None
         self.xpath = None
         self.type = None
         self.node = None
+        self.child_cnt = None
         self.svg_node = None
-        self.xelements = []
+        self.xelement_compared = None
+
+    def setChildCnt(self, inp):
+        self.child_cnt = inp
 
     def addSvgNode(self, inp):
         self.svg_node = inp
 
     def addXelement(self, xelement):
-        self.xelements.append(xelement)
+        self.xelement_compared = xelement
 
     def setNode(self, inp):
         self.node = inp
@@ -128,15 +135,78 @@ class ElementTagAttributeNameValueConsitency(XType):
         super(self.__class__, self).__init__()
 
 
-def LOOP_GRAVITY(elements, gravity_index=0, *element_types):
+def LOOP_UNCHANGED_SEGMENTS(xelementsa, xelementsb):
 
-    for _element in elements[gravity_index:]:
-        if isinstance(_element.type, element_types):
+    _start_indexb = xelementsb.index(xelementsb[0])
+    _start_indexa = xelementsa.index(xelementsa[0])
+
+    while True:
+
+        _stop_elementb = None
+        for _e in xelementsb[_start_indexb:]:
+            if isinstance(_e.type, ElementUnchanged):
+                _stop_elementb = _e
+                break
+
+        if _stop_elementb is not None:
+            _stop_indexb = xelementsb.index(_stop_elementb)
+            _stop_indexa = xelementsa.index(_stop_elementb.xelement_compared)
+        else:
+            _stop_indexb = len(xelementsb)
+            _stop_indexa = len(xelementsa)
+
+        _yield_b = xelementsb[_start_indexb:_stop_indexb]
+        _yield_a = xelementsa[_start_indexa:_stop_indexa]
+
+        yield _yield_a, _yield_b
+
+        for _e in xelementsb[_stop_indexb:]:
+
+            if isinstance(_e.type, ElementUnchanged):
+                _stop_elementb = _e
+
+            else:
+                break
+
+        if _stop_elementb is None:
+            break
+
+        _start_indexb = xelementsb.index(_stop_elementb) + 1
+        _start_indexa = xelementsa.index(_stop_elementb.xelement_compared) + 1
+
+
+def LOOP_GRAVITY(xelementsa, xelementsb, xelementb):
+
+    _g = None
+    for _g in reversed(xelementsb[:xelementsb.index(xelementb)]):
+        if _g.xelement_compared != None:
+            break
+
+    _index = 0
+    if _g is not None:
+        if _g.xelement_compared is not None:
+            _index = xelementsa.index(_g.xelement_compared)
+
+    for _element in xelementsa[_index:]:
+        yield _element
+
+    for _element in xelementsa[_index:]:
+        yield _element
+
+
+def LOOP_CHILD_ELEMENTS(elements, element):
+    for _element in elements[elements.index(element):]:
+        if _element.xpath.find(element.xpath) == 0:
             yield _element
 
-    for _element in elements[:gravity_index]:
-        if isinstance(_element.type, element_types):
-            yield _element
+
+def LOOP_CHILD_CNT(elements, child_cnt, *element_types):
+
+    for _element in elements:
+
+        if (_element.child_cnt == child_cnt):
+            if isinstance(_element.type, element_types):
+                yield _element
 
 
 def LOOP(elements, *element_types):
@@ -150,7 +220,8 @@ def LOOP(elements, *element_types):
     _append = []
     for _element in elements:
         if isinstance(_element.type, element_types):
-            _append.append((len(_element.xpath), _element.xpath, _element))
+            _append.append((len(elements) - _element.child_cnt,
+                            _element.xpath, _element))
 
     for _, _, _element in sorted(_append):
         if isinstance(_element.type, element_types):

@@ -375,8 +375,8 @@ class DrawXmlDiff(object):
         for _e in XTypes.LOOP(self.differ.xelements1, xtype):
             _start_svg1 = _e.svg_node
 
-            if _e.xelements:
-                _stop_svg2 = _e.xelements[0].svg_node
+            if _e.xelement_compared:
+                _stop_svg2 = _e.xelement_compared.svg_node
 
                 _x1 = float(_start_svg1['x'])
                 _y1 = float(_start_svg1['y'])
