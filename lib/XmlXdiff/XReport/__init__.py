@@ -347,6 +347,10 @@ class DrawXmlDiff(object):
         self.drawMovePattern(XTypes.ElementTagConsitency)
         self.drawMovePattern(XTypes.ElementTagAttributeNameValueConsitency)
 
+        self.drawChangedPattern(XTypes.ElementChanged,
+                                self.differ.xelements2,
+                                self.report1.x_max * 1.2)
+
         self.drawChangedPattern(XTypes.ElementAdded,
                                 self.differ.xelements2,
                                 self.report1.x_max * 1.2)
@@ -375,8 +379,8 @@ class DrawXmlDiff(object):
         for _e in XTypes.LOOP(self.differ.xelements1, xtype):
             _start_svg1 = _e.svg_node
 
-            if _e.xelement_compared:
-                _stop_svg2 = _e.xelement_compared.svg_node
+            if _e.getXelement(xtype):
+                _stop_svg2 = _e.getXelement(xtype).svg_node
 
                 _x1 = float(_start_svg1['x'])
                 _y1 = float(_start_svg1['y'])

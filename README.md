@@ -59,16 +59,16 @@ The selected order may change in future. This is still under investigation.
 
 ```
 test1: delta_t=0.0469s xml_elements=63
-test2: delta_t=0.0000s xml_elements=5
-test3: delta_t=0.0155s xml_elements=4
+test2: delta_t=0.0222s xml_elements=5
+test3: delta_t=0.0000s xml_elements=4
 test4: delta_t=0.0313s xml_elements=32
 test5: delta_t=0.0312s xml_elements=34
-test6: delta_t=0.0313s xml_elements=34
-test7: delta_t=0.0000s xml_elements=8
+test6: delta_t=0.0312s xml_elements=34
+test7: delta_t=0.0065s xml_elements=8
 test8: delta_t=0.0625s xml_elements=67
-test9: delta_t=5.4674s xml_elements=6144
-test11: delta_t=0.0216s xml_elements=34
-test12: delta_t=0.0469s xml_elements=45
+test9: delta_t=6.8799s xml_elements=6144
+test11: delta_t=0.0254s xml_elements=34
+test12: delta_t=0.0468s xml_elements=45
 
 ```
 
@@ -81,15 +81,15 @@ test12: delta_t=0.0469s xml_elements=45
 ```
 Name                               Stmts   Miss  Cover
 ------------------------------------------------------
-lib\XmlXdiff\XDiffer.py              189     23    88%
-lib\XmlXdiff\XHash.py                 74     17    77%
-lib\XmlXdiff\XPath.py                 54     17    69%
+lib\XmlXdiff\XDiffer.py              159     54    66%
+lib\XmlXdiff\XHash.py                 61      8    87%
+lib\XmlXdiff\XPath.py                 57     18    68%
 lib\XmlXdiff\XReport\XRender.py       60     44    27%
-lib\XmlXdiff\XReport\__init__.py     277     93    66%
-lib\XmlXdiff\XTypes.py                90     50    44%
+lib\XmlXdiff\XReport\__init__.py     278    102    63%
+lib\XmlXdiff\XTypes.py               144     71    51%
 lib\XmlXdiff\__init__.py               3      2    33%
 ------------------------------------------------------
-TOTAL                                747    246    67%
+TOTAL                                762    299    61%
 
 ```
 
@@ -101,5 +101,12 @@ TOTAL                                747    246    67%
  * rework xml elements identification readability/performance issues
  * if there are some users, improve interface
 
+## release notes ##
+
+v0.2.2:
+ * search areas are split into segments between unchanged xml nodes
+ * added/delted/verfied to be added
+ * overlapping search areas possible now (merge proposals)
+ 
 ## documentation ##
 ![Tests](./doc/tests.md "Executed Tests")

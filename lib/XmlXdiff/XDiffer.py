@@ -54,11 +54,10 @@ class XDiffExecutor(object):
         self.xelements2 = _xpath.getXelements(self.root2, "", 1)
 
         self.findUnchangedElements(self.xelements1, self.xelements2)
+        self.findMovedElements(self.xelements1, self.xelements2)
 
         for _xelements1, _xelements2 in XTypes.LOOP_UNCHANGED_SEGMENTS(self.xelements1,
                                                                        self.xelements2):
-
-            self.findMovedElements(_xelements1, _xelements2)
 
             _child_cnts = {}
             _ = [_child_cnts.update({_e.child_cnt: None})
@@ -127,6 +126,25 @@ class XDiffExecutor(object):
             if _verified:
                 xelements[_index].setType(XTypes.ElementVerified)
 
+    def setChildrenAndElementType(self, xelement1, xelement2, xtype):
+
+        _xelements1 = XTypes.LOOP_CHILD_ELEMENTS(self.xelements1, xelement1)
+        _xelements2 = XTypes.LOOP_CHILD_ELEMENTS(self.xelements2, xelement2)
+
+        for _xelement1 in _xelements1:
+            _xelement2 = next(_xelements2)
+            _xelement1.setType(xtype)
+            _xelement2.setType(xtype)
+            _xelement1.addXelement(_xelement2)
+            _xelement2.addXelement(_xelement1)
+
+    def setElementType(self, xelement1, xelement2, xtype):
+
+        xelement1.setType(xtype)
+        xelement2.setType(xtype)
+        xelement1.addXelement(xelement2)
+        xelement2.addXelement(xelement1)
+
     def findTagNameConsitency(self, child_cnt, xelements1, xelements2):
 
         def _getHash(callback):
@@ -147,9 +165,9 @@ class XDiffExecutor(object):
             for _xelement1 in XTypes.LOOP_CHILD_CNT(xelements1, child_cnt, XTypes.ElementChanged, XTypes.ElementUnknown):
                 if (_xelement1.hash == _xelement2.hash):
 
-                    self.setChildElementsType(_xelement1,
-                                              _xelement2,
-                                              XTypes.ElementTagConsitency)
+                    self.setChildrenAndElementType(_xelement1,
+                                                   _xelement2,
+                                                   XTypes.ElementTagConsitency)
 
                     break
 
@@ -173,9 +191,9 @@ class XDiffExecutor(object):
             for _xelement1 in XTypes.LOOP_CHILD_CNT(xelements1, child_cnt, XTypes.ElementChanged, XTypes.ElementUnknown):
                 if (_xelement1.hash == _xelement2.hash):
 
-                    self.setChildElementsType(_xelement1,
-                                              _xelement2,
-                                              XTypes.ElementTextAttributeValueConsitency)
+                    self.setChildrenAndElementType(_xelement1,
+                                                   _xelement2,
+                                                   XTypes.ElementTextAttributeValueConsitency)
 
                     break
 
@@ -202,9 +220,9 @@ class XDiffExecutor(object):
 
                 if (_xelement1.hash == _xelement2.hash):
 
-                    self.setChildElementsType(_xelement1,
-                                              _xelement2,
-                                              XTypes.ElementTagAttributeNameValueConsitency)
+                    self.setChildrenAndElementType(_xelement1,
+                                                   _xelement2,
+                                                   XTypes.ElementTagAttributeNameValueConsitency)
 
                     break
 
@@ -229,75 +247,113 @@ class XDiffExecutor(object):
 
                 if (_xelement1.hash == _xelement2.hash):
 
-                    self.setChildElementsType(_xelement1,
-                                              _xelement2,
-                                              XTypes.ElementTagAttributeNameConsitency)
+                    self.setChildrenAndElementType(_xelement1,
+                                                   _xelement2,
+                                                   XTypes.ElementTagAttributeNameConsitency)
 
                     break
 
-    def setChildElementsType(self, xelement1, xelement2, xtype):
-
-        _xelements1 = XTypes.LOOP_CHILD_ELEMENTS(self.xelements1, xelement1)
-        _xelements2 = XTypes.LOOP_CHILD_ELEMENTS(self.xelements2, xelement2)
-
-        for _xelement1 in _xelements1:
-            _xelement2 = next(_xelements2)
-            _xelement1.setType(xtype)
-            _xelement2.setType(xtype)
-            _xelement1.addXelement(_xelement2)
-            _xelement2.addXelement(_xelement1)
-
-    def findMovedElements(self, xelements1, xelements2):
+    def findMovedElementsChildCnt(self, child_cnt, xelements1, xelements2):
 
         def _getHash(callback):
-            _elements1 = XTypes.LOOP(
-                xelements1,  XTypes.ElementChanged, XTypes.ElementUnknown)
+
+            _elements1 = XTypes.LOOP_CHILD_CNT(xelements1,
+                                               child_cnt,
+                                               XTypes.ElementChanged,
+                                               XTypes.ElementUnknown)
 
             XHash.XDiffHasher.getHashes(_elements1, callback)
 
-            _elements2 = XTypes.LOOP(
-                xelements2, XTypes.ElementChanged, XTypes.ElementUnknown)
+            _elements2 = XTypes.LOOP_CHILD_CNT(xelements2,
+                                               child_cnt,
+                                               XTypes.ElementChanged,
+                                               XTypes.ElementUnknown)
 
             XHash.XDiffHasher.getHashes(_elements2, callback)
 
         _getHash(XHash.XDiffHasher.callbackHashAll)
 
-        for _xelement2 in XTypes.LOOP(xelements2, XTypes.ElementChanged, XTypes.ElementUnknown):
+        for _xelement2 in XTypes.LOOP_CHILD_CNT(xelements2,
+                                                child_cnt,
+                                                XTypes.ElementChanged,
+                                                XTypes.ElementUnknown):
 
-            for _xelement1 in XTypes.LOOP(xelements1, XTypes.ElementChanged, XTypes.ElementUnknown):
+            for _xelement1 in XTypes.LOOP_CHILD_CNT(xelements1,
+                                                    child_cnt,
+                                                    XTypes.ElementChanged,
+                                                    XTypes.ElementUnknown):
 
                 if (_xelement1.hash == _xelement2.hash):
                     if not(_xelement1.xpath == _xelement2.xpath):
 
-                        self.setChildElementsType(_xelement1,
-                                                  _xelement2,
-                                                  XTypes.ElementMoved)
+                        self.setChildrenAndElementType(_xelement1,
+                                                       _xelement2,
+                                                       XTypes.ElementMoved)
+                        break
+
+    def findMovedElements(self, xelements1, xelements2):
+
+        def _getHash(callback):
+            _elements1 = XTypes.LOOP(xelements1,
+                                     XTypes.ElementChanged,
+                                     XTypes.ElementUnknown)
+
+            XHash.XDiffHasher.getHashes(_elements1, callback)
+
+            _elements2 = XTypes.LOOP(xelements2,
+                                     XTypes.ElementChanged,
+                                     XTypes.ElementUnknown)
+
+            XHash.XDiffHasher.getHashes(_elements2, callback)
+
+        _getHash(XHash.XDiffHasher.callbackHashAll)
+
+        for _xelement2 in XTypes.LOOP(xelements2,
+                                      XTypes.ElementChanged,
+                                      XTypes.ElementUnknown):
+
+            for _xelement1 in XTypes.LOOP(xelements1,
+                                          XTypes.ElementChanged,
+                                          XTypes.ElementUnknown):
+
+                if (_xelement1.hash == _xelement2.hash):
+                    if not(_xelement1.xpath == _xelement2.xpath):
+
+                        self.setChildrenAndElementType(_xelement1,
+                                                       _xelement2,
+                                                       XTypes.ElementMoved)
                         break
 
     def findUnchangedElements(self, xelements1, xelements2):
 
         def _getHash(callback):
-            _elements1 = XTypes.LOOP(
-                xelements1,  XTypes.ElementChanged, XTypes.ElementUnknown)
+            _elements1 = XTypes.LOOP(xelements1,
+                                     XTypes.ElementChanged,
+                                     XTypes.ElementUnknown)
 
             XHash.XDiffHasher.getHashes(_elements1, callback)
 
-            _elements2 = XTypes.LOOP(
-                xelements2, XTypes.ElementChanged, XTypes.ElementUnknown)
+            _elements2 = XTypes.LOOP(xelements2,
+                                     XTypes.ElementChanged,
+                                     XTypes.ElementUnknown)
 
             XHash.XDiffHasher.getHashes(_elements2, callback)
 
         _getHash(XHash.XDiffHasher.callbackHashAll)
 
-        for _xelement2 in XTypes.LOOP(xelements2, XTypes.ElementChanged, XTypes.ElementUnknown):
+        for _xelement2 in XTypes.LOOP(xelements2,
+                                      XTypes.ElementChanged,
+                                      XTypes.ElementUnknown):
 
-            for _xelement1 in XTypes.LOOP(xelements1, XTypes.ElementChanged, XTypes.ElementUnknown):
+            for _xelement1 in XTypes.LOOP(xelements1,
+                                          XTypes.ElementChanged,
+                                          XTypes.ElementUnknown):
 
                 if (_xelement1.hash == _xelement2.hash):
                     if(_xelement1.xpath == _xelement2.xpath):
 
-                        self.setChildElementsType(_xelement1,
-                                                  _xelement2,
-                                                  XTypes.ElementUnchanged)
+                        self.setChildrenAndElementType(_xelement1,
+                                                       _xelement2,
+                                                       XTypes.ElementUnchanged)
 
                         break

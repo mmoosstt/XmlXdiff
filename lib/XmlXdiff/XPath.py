@@ -74,7 +74,6 @@ class XDiffXmlPath(object):
     @classmethod
     def walk(cls, element, parent_path, pos, child_cnt=0):
 
-        child_cnt = child_cnt + 1
         _path = "{parent}/{tag}".format(parent=parent_path,
                                         tag=cls.getTag(element, pos))
 
@@ -101,6 +100,7 @@ class XDiffXmlPath(object):
             child_cnt += cls.walk(
                 _child, _path, _pos_dict[_child.tag], 0)
 
+        child_cnt = child_cnt + 1
         _xelement.setChildCnt(child_cnt)
 
         return child_cnt
