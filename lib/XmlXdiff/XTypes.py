@@ -8,7 +8,6 @@
 
 from inspect import isclass
 from svgwrite import rgb
-from numpy.distutils.mingw32ccompiler import _START
 
 
 class XElement(object):
