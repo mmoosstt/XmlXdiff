@@ -16,7 +16,31 @@ class XDiffHasher(object):
         _element_childes = element.getchildren()
         if children:
             for child in _element_childes:
-                hashpipe.update(cls.callbackHashAll(child, hashpipe))
+                hashpipe.update(cls.callbackHashAllNoChilds(child, hashpipe))
+
+        hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
+
+        if hasattr(element, 'attrib'):
+            for _name in sorted(element.attrib.keys()):
+                _attrib_value = element.attrib[_name]
+                hashpipe.update(
+                    bytes(_name + _attrib_value + '#att', 'utf-8'))
+
+        if element.text is not None:
+            hashpipe.update(bytes(element.text.strip() + '#txt', 'utf-8'))
+
+        if element.tail is not None:
+            hashpipe.update(bytes(element.tail.strip() + '#txt', 'utf-8'))
+
+        return bytes(hashpipe.hexdigest(), 'utf-8')
+
+    @classmethod
+    def callbackHashAllNoChilds(cls, element, hashpipe, children=True):
+
+        _element_childes = element.getchildren()
+        if children:
+            for child in _element_childes:
+                hashpipe.update(cls.callbackHashAllNoChilds(child, hashpipe))
 
         hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
         # attributes and text are only taken into account for leaf nodes

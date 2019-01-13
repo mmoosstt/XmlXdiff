@@ -149,6 +149,13 @@ class ElementTagAttributeNameValueConsitency(XType):
         super(self.__class__, self).__init__()
 
 
+class ElementTagRed(XType):
+    fill = rgb(0xff, 0, 0)
+
+    def __init__(self):
+        super(self.__class__, self).__init__()
+
+
 def LOOP_UNCHANGED_SEGMENTS(xelementsa, xelementsb):
 
     _start_indexb = xelementsb.index(xelementsb[0])

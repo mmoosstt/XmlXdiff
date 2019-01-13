@@ -100,7 +100,7 @@ class XDiffXmlPath(object):
             child_cnt += cls.walk(
                 _child, _path, _pos_dict[_child.tag], 0)
 
-        child_cnt = child_cnt + 1
         _xelement.setChildCnt(child_cnt)
+        child_cnt = child_cnt + 1
 
         return child_cnt

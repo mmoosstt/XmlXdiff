@@ -341,6 +341,7 @@ class DrawXmlDiff(object):
         self.dwg.add(self.legend.dwg)
 
         self.drawMovePattern(XTypes.ElementMoved)
+        self.drawMovePattern(XTypes.ElementTagRed)
         self.drawMovePattern(XTypes.ElementUnchanged)
         self.drawMovePattern(XTypes.ElementTagAttributeNameConsitency)
         self.drawMovePattern(XTypes.ElementTextAttributeValueConsitency)

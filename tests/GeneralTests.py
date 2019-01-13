@@ -66,6 +66,10 @@ class CompareAll(unittest.TestCase):
                                                                       time=time.time() - _t,
                                                                       cnt=len(cls.differ.differ.xelements2) + len(cls.differ.differ.xelements1)))
 
+    def test13(self):
+        name = inspect.currentframe().f_code.co_name
+        self.__class__.execute(name)
+
     def test1(self):
         name = inspect.currentframe().f_code.co_name
         self.__class__.execute(name)

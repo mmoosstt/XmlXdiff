@@ -61,13 +61,15 @@ class XDiffExecutor(object):
 
         for _child_cnt in reversed(sorted(_child_cnts.keys())):
 
-            self.findUnchangedElementsChildCnt(_child_cnt,
+            self.findUnchangedElementsWithChildren(_child_cnt,
+                                                   self.xelements1,
+                                                   self.xelements2)
+
+            self.findMovedElementsWithChildren(_child_cnt,
                                                self.xelements1,
                                                self.xelements2)
 
-            self.findMovedElementsChildCnt(_child_cnt,
-                                           self.xelements1,
-                                           self.xelements2)
+        self.findAllWithAttributesAndChildren(self.xelements1, self.xelements2)
 
         for _xelements1, _xelements2 in XTypes.LOOP_UNCHANGED_SEGMENTS(self.xelements1,
                                                                        self.xelements2):
@@ -79,25 +81,25 @@ class XDiffExecutor(object):
                  for _e in _xelements2]
 
             for _child_cnt in reversed(sorted(_child_cnts.keys())):
-                self.findTagNameAttributeNameValueConsitency(
+                self.findTagNameAttributeNameValueConsitencyWithChildren(
                     _child_cnt, _xelements1, _xelements2)
 
-                self.findAttributeValueElementValueConsitency(
+                self.findAttributeValueElementValueConsitencyWithChildren(
                     _child_cnt, _xelements1, _xelements2)
 
-                self.findTagNameAttributeNameConsitency(
+                self.findTagNameAttributeNameConsitencyWithChildren(
                     _child_cnt,  _xelements1, _xelements2)
 
-                self.findTagNameConsitency(
+                self.findTagNameConsitencyWithChildren(
                     _child_cnt,  _xelements1, _xelements2)
 
         #.findUnchangedElements(1)
         # self.findChangedElements(1)
 
-        # self.findTagNameAttributeNameValueConsitency(1)
-        # self.findAttributeValueElementValueConsitency(1)
-        # self.findTagNameAttributeNameConsitency(1)
-        # self.findTagNameConsitency(1)
+        # self.findTagNameAttributeNameValueConsitencyWithChildren(1)
+        # self.findAttributeValueElementValueConsitencyWithChildren(1)
+        # self.findTagNameAttributeNameConsitencyWithChildren(1)
+        # self.findTagNameConsitencyWithChildren(1)
 
         # self.verifyChangedElements(self.xelements1)
         # self.verifyChangedElements(self.xelements2)
@@ -143,7 +145,6 @@ class XDiffExecutor(object):
 
         if child_cnt is None:
             _xelements_gen = XTypes.LOOP(xelements,
-                                         child_cnt,
                                          *xtypes)
 
         else:
@@ -153,13 +154,13 @@ class XDiffExecutor(object):
 
         XHash.XDiffHasher.getHashes(_xelements_gen, callback, children)
 
-    def _generatorXElements(self, xelements, child_cnt=None, children=True, xtypes=(XTypes.ElementChanged, XTypes.ElementUnknown)):
+    def _generatorXElements(self, xelements, hash_algorithm=XHash.XDiffHasher.callbackHashAllNoChilds, child_cnt=None, children=True, xtypes=(XTypes.ElementChanged, XTypes.ElementUnknown)):
 
-        self._calculateHashes(
-            xelements, XHash.XDiffHasher.callbackHashAll, child_cnt, children, xtypes)
+        self._calculateHashes(xelements, hash_algorithm,
+                              child_cnt, children, xtypes)
 
         if child_cnt is None:
-            _generator = XTypes.LOOP(xelements, child_cnt, *xtypes)
+            _generator = XTypes.LOOP(xelements, *xtypes)
 
         else:
             _generator = XTypes.LOOP_CHILD_CNT(xelements, child_cnt, *xtypes)
@@ -192,19 +193,54 @@ class XDiffExecutor(object):
         xelement1.addXelement(xelement2)
         xelement2.addXelement(xelement1)
 
-    def findTagNameConsitency(self, child_cnt, xelements1, xelements2):
+    def findAllWithAttributesAndChildren(self, xelements1, xelements2):
 
         _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
-        _xelements1_generator = self._generatorXElements(xelements=xelements1,
-                                                         xtypes=_xtypes,
-                                                         child_cnt=child_cnt)
 
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
+                                                         hash_algorithm=XHash.XDiffHasher.callbackHashAll,
+                                                         children=False,
+                                                         xtypes=_xtypes)
+
+        for _xelement2 in _xelements2_generator:
+
+            _xelements1_generator = self._generatorXElements(xelements=xelements1,
+                                                             hash_algorithm=XHash.XDiffHasher.callbackHashAll,
+                                                             children=False,
+                                                             xtypes=_xtypes)
+
+            for _xelement1 in _xelements1_generator:
+
+                # only nodes with attributes and
+                # nodes with children have to be used
+                if (
+                    _xelement1.node.attrib.keys() and
+                    _xelement2.node.attrib.keys() and
+                    _xelement1.child_cnt > 0 and
+                    _xelement2.child_cnt > 0
+                ):
+
+                    if (_xelement1.hash == _xelement2.hash):
+
+                        self.setElementType(
+                            _xelement1, _xelement2, XTypes.ElementTagRed)
+                        break
+
+    def findTagNameConsitencyWithChildren(self, child_cnt, xelements1, xelements2):
+
+        _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
+
+        _xelements2_generator = self._generatorXElements(xelements=xelements2,
+                                                         hash_algorithm=XHash.XDiffHasher.callbackHashTagNameConsitency,
                                                          xtypes=_xtypes,
                                                          child_cnt=child_cnt)
 
         for _xelement2 in _xelements2_generator:
 
+            _xelements1_generator = self._generatorXElements(xelements=xelements1,
+                                                             hash_algorithm=XHash.XDiffHasher.callbackHashTagNameConsitency,
+                                                             xtypes=_xtypes,
+                                                             child_cnt=child_cnt)
             for _xelement1 in _xelements1_generator:
 
                 if (_xelement1.hash == _xelement2.hash):
@@ -215,18 +251,21 @@ class XDiffExecutor(object):
 
                     break
 
-    def findAttributeValueElementValueConsitency(self, child_cnt, xelements1, xelements2):
+    def findAttributeValueElementValueConsitencyWithChildren(self, child_cnt, xelements1, xelements2):
 
         _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
-        _xelements1_generator = self._generatorXElements(xelements=xelements1,
-                                                         xtypes=_xtypes,
-                                                         child_cnt=child_cnt)
 
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
+                                                         hash_algorithm=XHash.XDiffHasher.callbackHashAttributeValueElementValueConsitency,
                                                          xtypes=_xtypes,
                                                          child_cnt=child_cnt)
 
         for _xelement2 in _xelements2_generator:
+
+            _xelements1_generator = self._generatorXElements(xelements=xelements1,
+                                                             hash_algorithm=XHash.XDiffHasher.callbackHashAttributeValueElementValueConsitency,
+                                                             xtypes=_xtypes,
+                                                             child_cnt=child_cnt)
 
             for _xelement1 in _xelements1_generator:
 
@@ -238,18 +277,21 @@ class XDiffExecutor(object):
 
                     break
 
-    def findTagNameAttributeNameValueConsitency(self, child_cnt, xelements1, xelements2):
+    def findTagNameAttributeNameValueConsitencyWithChildren(self, child_cnt, xelements1, xelements2):
 
         _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
-        _xelements1_generator = self._generatorXElements(xelements=xelements1,
-                                                         xtypes=_xtypes,
-                                                         child_cnt=child_cnt)
 
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
+                                                         hash_algorithm=XHash.XDiffHasher.callbackHashTagNameAttributeNameValueConsitency,
                                                          xtypes=_xtypes,
                                                          child_cnt=child_cnt)
 
         for _xelement2 in _xelements2_generator:
+
+            _xelements1_generator = self._generatorXElements(xelements=xelements1,
+                                                             hash_algorithm=XHash.XDiffHasher.callbackHashTagNameAttributeNameValueConsitency,
+                                                             xtypes=_xtypes,
+                                                             child_cnt=child_cnt)
 
             for _xelement1 in _xelements1_generator:
 
@@ -261,18 +303,21 @@ class XDiffExecutor(object):
 
                     break
 
-    def findTagNameAttributeNameConsitency(self, child_cnt, xelements1, xelements2):
+    def findTagNameAttributeNameConsitencyWithChildren(self, child_cnt, xelements1, xelements2):
 
         _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
-        _xelements1_generator = self._generatorXElements(xelements=xelements1,
-                                                         xtypes=_xtypes,
-                                                         child_cnt=child_cnt)
 
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
+                                                         hash_algorithm=XHash.XDiffHasher.callbackHashTagNameAttributeNameConsitency,
                                                          xtypes=_xtypes,
                                                          child_cnt=child_cnt)
 
         for _xelement2 in _xelements2_generator:
+
+            _xelements1_generator = self._generatorXElements(xelements=xelements1,
+                                                             hash_algorithm=XHash.XDiffHasher.callbackHashTagNameAttributeNameConsitency,
+                                                             xtypes=_xtypes,
+                                                             child_cnt=child_cnt)
 
             for _xelement1 in _xelements1_generator:
 
@@ -284,18 +329,19 @@ class XDiffExecutor(object):
 
                     break
 
-    def findMovedElementsChildCnt(self, child_cnt, xelements1, xelements2):
+    def findMovedElementsWithChildren(self, child_cnt, xelements1, xelements2):
 
         _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
-        _xelements1_generator = self._generatorXElements(xelements=xelements1,
-                                                         xtypes=_xtypes,
-                                                         child_cnt=child_cnt)
 
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
                                                          xtypes=_xtypes,
                                                          child_cnt=child_cnt)
 
         for _xelement2 in _xelements2_generator:
+
+            _xelements1_generator = self._generatorXElements(xelements=xelements1,
+                                                             xtypes=_xtypes,
+                                                             child_cnt=child_cnt)
 
             for _xelement1 in _xelements1_generator:
 
@@ -307,18 +353,19 @@ class XDiffExecutor(object):
                                                         XTypes.ElementMoved)
                         break
 
-    def findUnchangedElementsChildCnt(self, child_cnt, xelements1, xelements2):
+    def findUnchangedElementsWithChildren(self, child_cnt, xelements1, xelements2):
 
         _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
-        _xelements1_generator = self._generatorXElements(xelements=xelements1,
-                                                         xtypes=_xtypes,
-                                                         child_cnt=child_cnt)
 
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
                                                          xtypes=_xtypes,
                                                          child_cnt=child_cnt)
 
         for _xelement2 in _xelements2_generator:
+
+            _xelements1_generator = self._generatorXElements(xelements=xelements1,
+                                                             xtypes=_xtypes,
+                                                             child_cnt=child_cnt)
 
             for _xelement1 in _xelements1_generator:
 
@@ -334,13 +381,14 @@ class XDiffExecutor(object):
     def findMovedElements(self, xelements1, xelements2):
 
         _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
-        _xelements1_generator = self._generatorXElements(xelements=xelements1,
-                                                         xtypes=_xtypes)
 
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
                                                          xtypes=_xtypes)
 
         for _xelement2 in _xelements2_generator:
+
+            _xelements1_generator = self._generatorXElements(xelements=xelements1,
+                                                             xtypes=_xtypes)
 
             for _xelement1 in _xelements1_generator:
 
@@ -355,13 +403,14 @@ class XDiffExecutor(object):
     def findUnchangedElements(self, xelements1, xelements2):
 
         _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
-        _xelements1_generator = self._generatorXElements(xelements=xelements1,
-                                                         xtypes=_xtypes)
 
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
                                                          xtypes=_xtypes)
 
         for _xelement2 in _xelements2_generator:
+
+            _xelements1_generator = self._generatorXElements(xelements=xelements1,
+                                                             xtypes=_xtypes)
 
             for _xelement1 in _xelements1_generator:
 
