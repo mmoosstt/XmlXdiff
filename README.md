@@ -59,16 +59,17 @@ The selected order may change in future. This is still under investigation.
 
 ```
 test1: delta_t=0.0469s xml_elements=63
-test2: delta_t=0.0222s xml_elements=5
+test2: delta_t=0.0156s xml_elements=5
 test3: delta_t=0.0000s xml_elements=4
 test4: delta_t=0.0313s xml_elements=32
 test5: delta_t=0.0312s xml_elements=34
 test6: delta_t=0.0312s xml_elements=34
-test7: delta_t=0.0065s xml_elements=8
-test8: delta_t=0.0625s xml_elements=67
-test9: delta_t=6.8799s xml_elements=6144
-test11: delta_t=0.0254s xml_elements=34
-test12: delta_t=0.0468s xml_elements=45
+test7: delta_t=0.0156s xml_elements=8
+test8: delta_t=0.0780s xml_elements=67
+test9: delta_t=5.1238s xml_elements=6144
+test11: delta_t=0.0409s xml_elements=34
+test12: delta_t=0.0312s xml_elements=45
+test13: delta_t=0.0469s xml_elements=75
 
 ```
 
@@ -81,15 +82,15 @@ test12: delta_t=0.0468s xml_elements=45
 ```
 Name                               Stmts   Miss  Cover
 ------------------------------------------------------
-lib\XmlXdiff\XDiffer.py              159     54    66%
-lib\XmlXdiff\XHash.py                 61      8    87%
+lib\XmlXdiff\XDiffer.py              169     50    70%
+lib\XmlXdiff\XHash.py                 88     19    78%
 lib\XmlXdiff\XPath.py                 57     18    68%
 lib\XmlXdiff\XReport\XRender.py       60     44    27%
-lib\XmlXdiff\XReport\__init__.py     278    102    63%
-lib\XmlXdiff\XTypes.py               144     71    51%
+lib\XmlXdiff\XReport\__init__.py     279     93    67%
+lib\XmlXdiff\XTypes.py               156     98    37%
 lib\XmlXdiff\__init__.py               3      2    33%
 ------------------------------------------------------
-TOTAL                                762    299    61%
+TOTAL                                812    324    60%
 
 ```
 

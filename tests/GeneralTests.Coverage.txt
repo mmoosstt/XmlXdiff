@@ -1,11 +1,11 @@
 Name                               Stmts   Miss  Cover
 ------------------------------------------------------
-lib\XmlXdiff\XDiffer.py              159     54    66%
-lib\XmlXdiff\XHash.py                 61      8    87%
+lib\XmlXdiff\XDiffer.py              169     50    70%
+lib\XmlXdiff\XHash.py                 88     19    78%
 lib\XmlXdiff\XPath.py                 57     18    68%
 lib\XmlXdiff\XReport\XRender.py       60     44    27%
-lib\XmlXdiff\XReport\__init__.py     278    102    63%
-lib\XmlXdiff\XTypes.py               144     71    51%
+lib\XmlXdiff\XReport\__init__.py     279     93    67%
+lib\XmlXdiff\XTypes.py               156     98    37%
 lib\XmlXdiff\__init__.py               3      2    33%
 ------------------------------------------------------
-TOTAL                                762    299    61%
+TOTAL                                812    324    60%
