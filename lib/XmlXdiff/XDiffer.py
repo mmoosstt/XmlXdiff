@@ -69,77 +69,9 @@ class XDiffExecutor(object):
                                                self.xelements1,
                                                self.xelements2)
 
-        self.findAllWithAttributesAndChildren(self.xelements1, self.xelements2)
-
-        for _xelements1, _xelements2 in XTypes.LOOP_UNCHANGED_SEGMENTS(self.xelements1,
-                                                                       self.xelements2):
-
-            _child_cnts = {}
-            _ = [_child_cnts.update({_e.child_cnt: None})
-                 for _e in _xelements1]
-            _ = [_child_cnts.update({_e.child_cnt: None})
-                 for _e in _xelements2]
-
-            for _child_cnt in reversed(sorted(_child_cnts.keys())):
-                self.findTagNameAttributeNameValueConsitencyWithChildren(
-                    _child_cnt, _xelements1, _xelements2)
-
-                self.findAttributeValueElementValueConsitencyWithChildren(
-                    _child_cnt, _xelements1, _xelements2)
-
-                self.findTagNameAttributeNameConsitencyWithChildren(
-                    _child_cnt,  _xelements1, _xelements2)
-
-                self.findTagNameConsitencyWithChildren(
-                    _child_cnt,  _xelements1, _xelements2)
-
-        #.findUnchangedElements(1)
-        # self.findChangedElements(1)
-
-        # self.findTagNameAttributeNameValueConsitencyWithChildren(1)
-        # self.findAttributeValueElementValueConsitencyWithChildren(1)
-        # self.findTagNameAttributeNameConsitencyWithChildren(1)
-        # self.findTagNameConsitencyWithChildren(1)
-
-        # self.verifyChangedElements(self.xelements1)
-        # self.verifyChangedElements(self.xelements2)
-
-        # for _e in XTypes.LOOP(
-        #        self.xelements1, XTypes.ElementUnknown):
-        #    _e.setType(XTypes.ElementDeleted)
-
-        # for _e in XTypes.LOOP(
-        #        self.xelements2, XTypes.ElementUnknown):
-        #    _e.setType(XTypes.ElementAdded)
-
-    def verifyChangedElements(self, xelements):
-
-        # find all changed elements
-        _changed_elements = []
-        for _xelement in XTypes.LOOP(xelements, XTypes.ElementChanged):
-            _changed_elements.append(
-                (len(_xelement.xpath), _xelement.xpath, xelements.index(_xelement)))
-
-        # get most nested changed element first
-        for _, _path, _index in reversed(sorted(_changed_elements)):
-
-            _verified = False
-            for _xelement in xelements[_index + 1:]:
-
-                if _xelement.xpath.find(_path) == 0:
-
-                    if isinstance(_xelement.type, XTypes.ElementChanged):
-                        _verified = False
-                        break
-
-                    else:
-                        _verified = True
-
-                else:
-                    break
-
-            if _verified:
-                xelements[_index].setType(XTypes.ElementVerified)
+            self.findMovedElementsWithoutChildren(_child_cnt,
+                                                  self.xelements1,
+                                                  self.xelements2)
 
     def _calculateHashes(self, xelements, callback, child_cnt=None, children=True, xtypes=(XTypes.ElementChanged, XTypes.ElementUnknown)):
 
@@ -193,38 +125,79 @@ class XDiffExecutor(object):
         xelement1.addXelement(xelement2)
         xelement2.addXelement(xelement1)
 
-    def findAllWithAttributesAndChildren(self, xelements1, xelements2):
+    def findMovedElementsWithoutChildren(self, child_cnt, xelements1, xelements2):
 
         _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
-
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
                                                          hash_algorithm=XHash.XDiffHasher.callbackHashAll,
                                                          children=False,
+                                                         child_cnt=child_cnt,
                                                          xtypes=_xtypes)
 
         for _xelement2 in _xelements2_generator:
-
             _xelements1_generator = self._generatorXElements(xelements=xelements1,
                                                              hash_algorithm=XHash.XDiffHasher.callbackHashAll,
                                                              children=False,
                                                              xtypes=_xtypes)
 
             for _xelement1 in _xelements1_generator:
+                if (_xelement1.hash == _xelement2.hash):
 
-                # only nodes with attributes and
-                # nodes with children have to be used
-                if (
-                    _xelement1.node.attrib.keys() and
-                    _xelement2.node.attrib.keys() and
-                    _xelement1.child_cnt > 0 and
-                    _xelement2.child_cnt > 0
-                ):
+                    self.setElementType(_xelement1,
+                                        _xelement2,
+                                        XTypes.ElementTagRed)
 
-                    if (_xelement1.hash == _xelement2.hash):
+                    _xelements1 = XTypes.CHILDS_ARRAY(xelements1,
+                                                      _xelement1)
 
-                        self.setElementType(
-                            _xelement1, _xelement2, XTypes.ElementTagRed)
-                        break
+                    _xelements2 = XTypes.CHILDS_ARRAY(xelements2,
+                                                      _xelement2)
+
+                    _child_cnts = {}
+                    _ = [_child_cnts.update({_e.child_cnt: None})
+                         for _e in _xelements1]
+                    _ = [_child_cnts.update({_e.child_cnt: None})
+                         for _e in _xelements2]
+
+                    for _child_cnt in reversed(sorted(_child_cnts.keys())):
+
+                        self.findUnchangedElementsWithChildren(_child_cnt,
+                                                               _xelements1,
+                                                               _xelements2)
+
+                        self.findMovedElementsWithChildren(_child_cnt,
+                                                           _xelements1,
+                                                           _xelements2)
+
+                        self.findMovedElementsWithoutChildren(_child_cnt,
+                                                              _xelements1,
+                                                              _xelements2)
+
+                        self.findTagNameConsitencyWithChildren(_child_cnt,
+                                                               _xelements1,
+                                                               _xelements2)
+
+                        self.findTagNameAttributeNameValueConsitencyWithChildren(_child_cnt,
+                                                                                 _xelements1,
+                                                                                 _xelements2)
+
+                        self.findAttributeValueElementValueConsitencyWithChildren(_child_cnt,
+                                                                                  _xelements1,
+                                                                                  _xelements2)
+
+                        self.findTagNameAttributeNameConsitencyWithChildren(_child_cnt,
+                                                                            _xelements1,
+                                                                            _xelements2)
+
+                    for _e in _xelements1:
+                        if isinstance(_e.type, XTypes.ElementUnknown):
+                            _e.setType(XTypes.ElementDeleted)
+
+                    for _e in _xelements2:
+                        if isinstance(_e.type, XTypes.ElementUnknown):
+                            _e.setType(XTypes.ElementAdded)
+
+                    break
 
     def findTagNameConsitencyWithChildren(self, child_cnt, xelements1, xelements2):
 

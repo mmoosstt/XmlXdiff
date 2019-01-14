@@ -223,6 +223,20 @@ def LOOP_CHILD_ELEMENTS(elements, element):
             yield _element
 
 
+def CHILDS_ARRAY(elements, element):
+
+    _start_index = elements.index(element)
+    for _element in elements[_start_index:]:
+        if _element.xpath.find(element.xpath) == 0:
+            _stop_elment = _element
+        elif _element.xpath.find(element.xpath) != 0:
+            break
+
+    _stop_index = elements.index(_stop_elment)
+
+    return elements[_start_index + 1:_stop_index + 1]
+
+
 def LOOP_CHILD_CNT(elements, child_cnt, *element_types):
 
     for _element in elements:
