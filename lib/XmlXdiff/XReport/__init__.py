@@ -20,6 +20,8 @@ from XmlXdiff.XReport import XRender
 from XmlXdiff.XPath import XDiffXmlPath
 from XmlXdiff import XTypes
 
+from difflib import SequenceMatcher
+
 
 class ElementMarker(object):
     size = (2.5, 2.5)
@@ -161,14 +163,13 @@ class DrawXml(object):
 
         return "{tag}{attribs}: {text}".format(attribs=_attribs, tag=_tag, text=element.text)
 
-    def loadFromXElements(self, xelements):
+    def loadFromXElements(self, xelements, callback):
 
         self.dwg = svgwrite.Drawing(filename="test.svg")
 
         _root = xelements[0]
         _node_level_z = 0
         for _xelement in xelements:
-            _node_text = self.getElementText(_xelement.node)
 
             _node_level = XDiffXmlPath.getXpathDistance(
                 _root.xpath, _xelement.xpath)
@@ -187,45 +188,14 @@ class DrawXml(object):
                 for _x in range(abs(_steps)):
                     self.moveLeft()
 
-            _xelement.addSvgNode(self.addTextBox(_node_text))
-
-    def addTextBox2(self, element):
-        _g = Group()
-
-        if isinstance(element, lxml.etree._Comment):
-            _tag = "COMMENT"
-        else:
-            _tag = element.tag[element.tag.find("}") + 1:]
-        _attribs = " "
-
-        _w, _h = XRender.Render.getTextSize(_tag)
-        _t = Text(_tag)
-
-        _tag = TSpan(_tag)
-        _tag['x'] = 0
-        _tag['y'] = 0
-        _tag['id'] = 'tag'
-
-        for _attrib_name in sorted(element.attrib.keys()):
-            _w1, _h1 = XRender.Render.getTextSize(_attrib_name)
-
-            _attrib_value = element.attrib[_attrib_name]
-            _w2, _h2 = XRender.Render.getTextSize(_attrib_name)
-
-            _attribs = _attribs + " {name}='{value}' ".format(
-                name=_attrib_name, value=None)
-
-        _attribs = _attribs[:-1]
-
-        XRender.Render.splitTextToLines(element.text)
-
-        return "{tag}{attribs}: {text}".format(attribs=_attribs, tag=_tag, text=element.text)
+            _xelement.addSvgNode(callback(_xelement))
 
     def linesCallback(self, text):
         return XRender.Render.splitTextToLines(text)
 
-    def addTextBox(self, text):
-        _lines = self.linesCallback(text)
+    def addTextBox(self, xelement):
+        _text = self.getElementText(xelement.node)
+        _lines = self.linesCallback(_text)
 
         _y = copy.deepcopy(self.y)
 
@@ -253,6 +223,91 @@ class DrawXml(object):
         _svg.add(_t)
 
         return _svg
+
+    def addTextBox2(self, xelement):
+        _node_text = self.getElementText(xelement.node)
+        _lines1 = self.linesCallback(_node_text)
+
+        if xelement.getXelement() is None:
+            _lines2 = []
+        else:
+            _node_text2 = self.getElementText(xelement.getXelement().node)
+            _lines2 = self.linesCallback(_node_text2)
+
+        _l = max(len(_lines1), len(_lines2))
+
+        _lines1 = _lines1 + [(' ', 0, 0)] * (_l - len(_lines1))
+        _lines2 = _lines2 + [(' ', 0, 0)] * (_l - len(_lines2))
+
+        _svg = SVG(insert=(self.x, self.y),
+                   font_family=self.font_family,
+                   font_size=self.font_size)
+
+        _w = 0
+        _h = 0
+
+        while _lines1 and _lines2:
+            _line1, _, _ = _lines1[0]
+            _lines1 = _lines1[1:]
+            _line2, _, _ = _lines2[0]
+            _lines2 = _lines2[1:]
+
+            _text, _w1, _h1 = self.lineCompare(_line2, _line1)
+
+            _w = max(_w, _w1)
+            _h = _h + _h1
+
+            _text['x'] = 0
+            _text['y'] = _h
+
+            _svg.add(_text)
+
+        _svg['height'] = _h
+        _svg['width'] = _w
+        _svg.viewbox(0, 0, _w, _h)
+
+        self.y = self.y + float(_h)
+        self.y_max = max(self.y_max, self.y)
+        self.x_max = max(self.x_max, self.x + float(_w))
+
+        return _svg
+
+    def lineCompare(self, line1, line2):
+
+        text = Text(text="")
+
+        s = SequenceMatcher(None, line1, line2)
+
+        _text = ''
+        for tag, i1, i2, j1, j2 in s.get_opcodes():
+
+            if tag == "replace":
+                text.add(TSpan(text=line2[j1:j2]))
+                text.add(TSpan(text=line1[i1:i2],
+                               text_decoration="line-through"))
+                _text += line2[j1:j2]
+                _text += line1[i1:i2]
+
+            elif tag == "delete":
+                text.add(TSpan(text=line1[i1:i2],
+                               text_decoration="line-through"))
+                _text += line1[i1:i2]
+
+            elif tag == "insert":
+                text.add(
+                    TSpan(text=line2[j1:j2], text_decoration="blink", fill="blue"))
+                _text += line2[j1:j2]
+
+            elif tag == "equal":
+                text.add(TSpan(text=line1[i1:i2]))
+                _text += line1[i1:i2]
+
+        w, h = XRender.Render.getTextSize(_text)
+
+        text['y'] = h
+        text['x'] = 0
+
+        return text, w, h
 
     def moveLeft(self):
         self.x = self.x - 1.2 * self.unit
@@ -305,11 +360,13 @@ class DrawXmlDiff(object):
                                                                            filename2=self.differ.path2.filename)
 
         self.report1.moveRight()
-        self.report1.loadFromXElements(self.differ.xelements1)
+        self.report1.loadFromXElements(
+            self.differ.xelements1, self.report1.addTextBox)
         self.report1.saveSvg(self.differ.xelements1)
 
         self.report2.moveRight()
-        self.report2.loadFromXElements(self.differ.xelements2)
+        self.report2.loadFromXElements(
+            self.differ.xelements2, self.report2.addTextBox2)
         self.report2.saveSvg(self.differ.xelements2)
 
         self.legend = DrawLegend()
@@ -380,8 +437,8 @@ class DrawXmlDiff(object):
         for _e in XTypes.LOOP(self.differ.xelements1, xtype):
             _start_svg1 = _e.svg_node
 
-            if _e.getXelement(xtype):
-                _stop_svg2 = _e.getXelement(xtype).svg_node
+            if _e.getXelement():
+                _stop_svg2 = _e.getXelement().svg_node
 
                 _x1 = float(_start_svg1['x'])
                 _y1 = float(_start_svg1['y'])

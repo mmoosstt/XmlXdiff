@@ -21,7 +21,7 @@ class XElement(object):
         self.node = None
         self.child_cnt = None
         self.svg_node = None
-        self.xelements_compared = {}
+        self.xelements_compared = None
 
     def setChildCnt(self, inp):
         self.child_cnt = inp
@@ -30,22 +30,10 @@ class XElement(object):
         self.svg_node = inp
 
     def addXelement(self, xelement):
+        self.xelements_compared = xelement
 
-        _key = xelement.type.__class__.__name__
-
-        if _key in self.xelements_compared.keys():
-            self.xelements_compared[_key].append(xelement)
-        else:
-            self.xelements_compared[_key] = [xelement]
-
-    def getXelement(self, xtype):
-        if isclass(xtype):
-            _key = xtype.__name__
-        else:
-            _key = xtype.__class__.__name__
-
-        if _key in self.xelements_compared.keys():
-            return self.xelements_compared[_key][0]
+    def getXelement(self):
+        return self.xelements_compared
 
     def setNode(self, inp):
         self.node = inp
