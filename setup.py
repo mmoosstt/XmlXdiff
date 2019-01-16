@@ -7,7 +7,7 @@ URL = 'https://github.com/mmoosstt/XmlXdiff'
 EMAIL = 'diponaut@gmx.de'
 AUTHOR = 'mmoosstt'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = "0.3.0"
+VERSION = "0.3.1"
 
 REQUIRED = [
     'PySide2',

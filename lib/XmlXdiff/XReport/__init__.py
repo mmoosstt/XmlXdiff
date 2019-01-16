@@ -264,7 +264,8 @@ class DrawXml(object):
 
         _svg['height'] = _h
         _svg['width'] = _w
-        _svg.viewbox(0, 0, _w, _h)
+        _factor = 0.25
+        _svg.viewbox(0, 0, _w - _h1 * _factor, _h + _h1 * _factor)
 
         self.y = self.y + float(_h)
         self.y_max = max(self.y_max, self.y)
@@ -286,12 +287,13 @@ class DrawXml(object):
                 # text.add(TSpan(text=line1[i1:i2],
                 #               text_decoration="line-through"))
                 _text += line2[j1:j2]
-                _text += line1[i1:i2]
+                #_text += line1[i1:i2]
 
             elif tag == "delete":
                 # text.add(TSpan(text=line1[i1:i2],
                 #              text_decoration="line-through"))
-                _text += line1[i1:i2]
+                #_text += line1[i1:i2]
+                pass
 
             elif tag == "insert":
                 text.add(
@@ -398,7 +400,7 @@ class DrawXmlDiff(object):
         self.dwg.add(self.legend.dwg)
 
         self.drawMovePattern(XTypes.ElementMoved)
-        self.drawMovePattern(XTypes.ElementTagRed)
+        self.drawMovePattern(XTypes.ElementTagParentMoved)
         self.drawMovePattern(XTypes.ElementUnchanged)
         self.drawMovePattern(XTypes.ElementTagAttributeNameConsitency)
         self.drawMovePattern(XTypes.ElementTextAttributeValueConsitency)

@@ -137,8 +137,8 @@ class ElementTagAttributeNameValueConsitency(XType):
         super(self.__class__, self).__init__()
 
 
-class ElementTagRed(XType):
-    fill = rgb(0xff, 0, 0)
+class ElementTagParentMoved(XType):
+    fill = rgb(0x55, 0x99, 0xff)
 
     def __init__(self):
         super(self.__class__, self).__init__()

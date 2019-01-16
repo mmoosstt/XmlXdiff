@@ -145,7 +145,7 @@ class XDiffExecutor(object):
 
                     self.setElementType(_xelement1,
                                         _xelement2,
-                                        XTypes.ElementTagRed)
+                                        XTypes.ElementTagParentMoved)
 
                     _xelements1 = XTypes.CHILDS_ARRAY(xelements1,
                                                       _xelement1)
