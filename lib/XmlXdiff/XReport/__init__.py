@@ -282,20 +282,20 @@ class DrawXml(object):
         for tag, i1, i2, j1, j2 in s.get_opcodes():
 
             if tag == "replace":
-                text.add(TSpan(text=line2[j1:j2]))
-                text.add(TSpan(text=line1[i1:i2],
-                               text_decoration="line-through"))
+                text.add(TSpan(text=line2[j1:j2], fill="blue"))
+                # text.add(TSpan(text=line1[i1:i2],
+                #               text_decoration="line-through"))
                 _text += line2[j1:j2]
                 _text += line1[i1:i2]
 
             elif tag == "delete":
-                text.add(TSpan(text=line1[i1:i2],
-                               text_decoration="line-through"))
+                # text.add(TSpan(text=line1[i1:i2],
+                #              text_decoration="line-through"))
                 _text += line1[i1:i2]
 
             elif tag == "insert":
                 text.add(
-                    TSpan(text=line2[j1:j2], text_decoration="blink", fill="blue"))
+                    TSpan(text=line2[j1:j2], fill="blue"))
                 _text += line2[j1:j2]
 
             elif tag == "equal":
@@ -361,7 +361,7 @@ class DrawXmlDiff(object):
 
         self.report1.moveRight()
         self.report1.loadFromXElements(
-            self.differ.xelements1, self.report1.addTextBox)
+            self.differ.xelements1, self.report1.addTextBox2)
         self.report1.saveSvg(self.differ.xelements1)
 
         self.report2.moveRight()

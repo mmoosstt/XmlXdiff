@@ -4,8 +4,8 @@ lib\XmlXdiff\XDiffer.py              169     50    70%
 lib\XmlXdiff\XHash.py                 88     19    78%
 lib\XmlXdiff\XPath.py                 57     18    68%
 lib\XmlXdiff\XReport\XRender.py       60     44    27%
-lib\XmlXdiff\XReport\__init__.py     279     93    67%
-lib\XmlXdiff\XTypes.py               156     98    37%
+lib\XmlXdiff\XReport\__init__.py     312     96    69%
+lib\XmlXdiff\XTypes.py               149     96    36%
 lib\XmlXdiff\__init__.py               3      2    33%
 ------------------------------------------------------
-TOTAL                                812    324    60%
+TOTAL                                838    325    61%

@@ -10,7 +10,7 @@ cmd_uninstall = "{python_path}\\python.exe -m pip uninstall XmlXdiff".format(
     python_path=python_path,
     path=root_path)
 
-cmd_install = "{python_path}\\python.exe -m pip install {path}\\dist\\XmlXdiff-0.2.1-py3-none-any.whl".format(
+cmd_install = "{python_path}\\python.exe -m pip install {path}\\dist\\XmlXdiff-0.3.0-py3-none-any.whl".format(
     python_path=python_path,
     path=root_path)
 
