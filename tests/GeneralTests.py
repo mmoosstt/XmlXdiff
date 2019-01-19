@@ -9,7 +9,7 @@ import time
 import unittest
 import inspect
 from XmlXdiff import getPath, XDiffer
-from XmlXdiff.XReport import DrawXmlDiff, DrawXmlDiffBoxesOnly
+from XmlXdiff.XReport import DrawXmlDiff, DrawXmlDiffBoxesOnly, DrawLegend
 from XmlXdiff.XPath import XDiffXmlPath
 
 
@@ -21,6 +21,10 @@ class UnSorted(unittest.TestCase):
 
 
 class Usability(unittest.TestCase):
+
+    def testLegend(self):
+        _l = DrawLegend()
+        _l.saveSvg('{}\\..\\..\\tests\\simple\\legend.svg'.format(getPath()))
 
     def simpleExample(self):
 

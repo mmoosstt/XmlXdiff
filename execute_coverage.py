@@ -5,11 +5,10 @@ import os
 import io
 
 sys.path.append(os.path.abspath("./tests"))
-from GeneralTests import CompareAll
-
 cov = coverage.Coverage()
 cov.start()
 
+from GeneralTests import CompareAll
 test_suite = unittest.TestSuite()
 test_suite.addTest(CompareAll('test1'))
 test_suite.addTest(CompareAll('test2'))
@@ -25,6 +24,7 @@ res = test_runner.run(test_suite)
 
 cov.stop()
 cov.save()
+
 
 with open("./tests/GeneralTests.Coverage.txt", "w") as f:
     cov.report(file=f,

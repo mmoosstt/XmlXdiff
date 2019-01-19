@@ -75,7 +75,7 @@ class ElementUnchanged(XType):
 
 
 class ElementChanged(XType):
-    fill = rgb(0xff, 0x00, 0x80)
+    fill = rgb(0xff, 0x00, 0x77)
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -90,13 +90,6 @@ class ElementDeleted(XType):
 
 class ElementAdded(XType):
     fill = rgb(0x0f, 0xff, 0x00)
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
-class ElementVerified(XType):
-    fill = rgb(0xff, 0xff, 0x00)
 
     def __init__(self):
         super(self.__class__, self).__init__()

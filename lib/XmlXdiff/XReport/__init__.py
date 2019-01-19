@@ -72,36 +72,53 @@ class DrawLegend(object):
         XRender.Render.setFontSize(self.font_size)
 
         self.dwg = svgwrite.Drawing()
-
-        self.moveRight()
-        self.moveRight()
+        _svg = SVG(insert=(self.x, self.y))
 
         for _class in XTypes.LOOP_XTYPES():
-            _text, _width, _height = self.addLine(_class.name())
-            _mark = _class()
+            _svg.add(self.addLine(_class))
 
-            _rect = Rect()
-            _rect['x'] = _text['x']
-            _rect['y'] = float(_text['y']) - _height
-            _rect['height'] = _height
-            _rect['width'] = _width
-            _rect['fill'] = _mark.fill
-            _rect['opacity'] = 0.3
+        _svg["width"] = self.x_max
+        _svg["height"] = self.y_max
+        self.dwg["width"] = self.x_max
+        self.dwg["height"] = self.y_max
 
-            self.dwg.add(_text)
-            self.dwg.add(_rect)
+        self.dwg.add(_svg)
 
-    def addLine(self, text):
-        _x, _y = XRender.Render.getTextSize(text)
+    def addLine(self, class_):
 
-        self.y = self.y + _y  # (0.6 * self.unit)
-        self.x_max = max(self.x_max, _x + self.x)
+        _text = class_.name()
+        _w, _h = XRender.Render.getTextSize(_text)
+
+        _svg = SVG(insert=(self.x, self.y),
+                   width=_w,
+                   height=_h)
+
+        _text_svg = Text(_text)
+        _text_svg['x'] = 0
+        _text_svg['y'] = _h
+        _text_svg['font-size'] = self.font_size
+        _text_svg['font-family'] = self.font_family
+        _text_svg['opacity'] = 1.0
+        _text_svg['fill'] = class_.fill
+
+        _rect_svg = Rect()
+        _rect_svg['x'] = 0
+        _rect_svg['y'] = 0
+        _rect_svg['fill'] = rgb(0, 0, 0)  # class_.fill
+        _rect_svg['opacity'] = class_.opacity
+        _rect_svg['height'] = _h
+        _rect_svg['width'] = _w
+
+        _svg.add(_text_svg)
+        _svg.add(_rect_svg)
+
+        _svg.viewbox(0, 0, _w + _w * 0.25, _h + _h * 0.25)
+
+        self.y = self.y + _h
+        self.x_max = max(self.x_max, _w + self.x)
         self.y_max = max(self.y_max, self.y)
 
-        _text = Text(text, fill=rgb(0, 0, 0),
-                     insert=(self.x, self.y), font_size=self.font_size, font_family=self.font_family)
-
-        return _text, _x, _y
+        return _svg
 
     def moveLeft(self):
         self.x = self.x - 1.2 * self.unit
@@ -109,6 +126,14 @@ class DrawLegend(object):
     def moveRight(self):
         self.x = self.x + 1.2 * self.unit
         self.x_max = max(self.x_max, self.x)
+
+    def saveSvg(self, filepath=None):
+
+        if filepath is not None:
+            self.dwg.filename = filepath
+            self.filepath = filepath
+
+        self.dwg.save()
 
 
 class DrawXml(object):
@@ -265,7 +290,7 @@ class DrawXml(object):
         _svg['height'] = _h
         _svg['width'] = _w
         _factor = 0.25
-        _svg.viewbox(0, 0, _w - _h1 * _factor, _h + _h1 * _factor)
+        _svg.viewbox(0, 0, _w, _h + _h * _factor)
 
         self.y = self.y + float(_h)
         self.y_max = max(self.y_max, self.y)
@@ -414,12 +439,8 @@ class DrawXmlDiff(object):
         self.drawChangedPattern(XTypes.ElementAdded,
                                 self.differ.xelements2,
                                 self.report1.x_max * 1.2)
+
         self.drawChangedPattern(XTypes.ElementDeleted,
-                                self.differ.xelements1)
-        self.drawChangedPattern(XTypes.ElementVerified,
-                                self.differ.xelements2,
-                                self.report1.x_max * 1.2)
-        self.drawChangedPattern(XTypes.ElementVerified,
                                 self.differ.xelements1)
 
     def save(self):

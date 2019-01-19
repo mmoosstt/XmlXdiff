@@ -58,18 +58,18 @@ The selected order may change in future. This is still under investigation.
 [//]: # (insert_performance_start)
 
 ```
-test1: delta_t=0.1677s xml_elements=63
-test2: delta_t=0.0387s xml_elements=5
-test3: delta_t=0.0426s xml_elements=4
-test4: delta_t=0.1014s xml_elements=32
-test5: delta_t=0.1107s xml_elements=34
-test6: delta_t=0.1075s xml_elements=34
-test7: delta_t=0.0457s xml_elements=8
-test8: delta_t=0.2467s xml_elements=67
-test9: delta_t=8.5590s xml_elements=6144
-test11: delta_t=0.0756s xml_elements=34
-test12: delta_t=0.0806s xml_elements=45
-test13: delta_t=0.1297s xml_elements=75
+test1: delta_t=0.1218s xml_elements=63
+test2: delta_t=0.0156s xml_elements=5
+test3: delta_t=0.0192s xml_elements=4
+test4: delta_t=0.0541s xml_elements=32
+test5: delta_t=0.0702s xml_elements=34
+test6: delta_t=0.0676s xml_elements=34
+test7: delta_t=0.0310s xml_elements=8
+test8: delta_t=0.1587s xml_elements=67
+test9: delta_t=8.0836s xml_elements=6144
+test11: delta_t=0.0525s xml_elements=34
+test12: delta_t=0.0798s xml_elements=45
+test13: delta_t=0.0949s xml_elements=75
 
 ```
 
@@ -80,17 +80,19 @@ test13: delta_t=0.1297s xml_elements=75
 [//]: # (insert_coverage_start)
 
 ```
+pyscript   NoSource: No source for code: 'C:\Portable\git\XmlXdiff\pyscript'.
+Aborting report output, consider using -i.
 Name                               Stmts   Miss  Cover
 ------------------------------------------------------
-lib\XmlXdiff\XDiffer.py              169     50    70%
-lib\XmlXdiff\XHash.py                 88     19    78%
-lib\XmlXdiff\XPath.py                 57     18    68%
-lib\XmlXdiff\XReport\XRender.py       60     44    27%
-lib\XmlXdiff\XReport\__init__.py     312     96    69%
-lib\XmlXdiff\XTypes.py               149     96    36%
-lib\XmlXdiff\__init__.py               3      2    33%
+lib\XmlXdiff\XDiffer.py              169     24    86%
+lib\XmlXdiff\XHash.py                 88      3    97%
+lib\XmlXdiff\XPath.py                 57      5    91%
+lib\XmlXdiff\XReport\XRender.py       60     26    57%
+lib\XmlXdiff\XReport\__init__.py     327     51    84%
+lib\XmlXdiff\XTypes.py               145     40    72%
+lib\XmlXdiff\__init__.py               3      0   100%
 ------------------------------------------------------
-TOTAL                                838    325    61%
+TOTAL                                849    149    82%
 
 ```
 
