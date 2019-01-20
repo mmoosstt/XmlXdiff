@@ -9,6 +9,6 @@
 import timeit
 
 
-print(timeit.timeit(setup="import xDiffXml.xDiffCore as api",
-                    stmt="api.xDiffExecutor().run()",
+print(timeit.timeit(setup="import XmlXdiff.XDiffer as api",
+                    stmt="api.XDiffExecutor().run()",
                     number=10))

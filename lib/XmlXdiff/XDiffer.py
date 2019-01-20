@@ -25,8 +25,10 @@ class XDiffPath(object):
 class XDiffExecutor(object):
 
     def __init__(self):
-        self.path1 = XDiffPath('{}\\tests\\test1\\a.xml'.format(getPath()))
-        self.path2 = XDiffPath('{}\\tests\\test1\\b.xml'.format(getPath()))
+        self.path1 = XDiffPath(
+            '{}\\..\\..\\tests\\test1\\a.xml'.format(getPath()))
+        self.path2 = XDiffPath(
+            '{}\\..\\..\\tests\\test1\\b.xml'.format(getPath()))
         self.setGravity(0)
 
     def setGravity(self, inp):
@@ -145,7 +147,7 @@ class XDiffExecutor(object):
 
                     self.setElementType(_xelement1,
                                         _xelement2,
-                                        XTypes.ElementTagParentMoved)
+                                        XTypes.ElementMovedParent)
 
                     _xelements1 = XTypes.CHILDS_ARRAY(xelements1,
                                                       _xelement1)

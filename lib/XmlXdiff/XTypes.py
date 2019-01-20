@@ -75,7 +75,7 @@ class ElementUnchanged(XType):
 
 
 class ElementChanged(XType):
-    fill = rgb(0xff, 0x00, 0x77)
+    fill = rgb(0xfc, 0xd1, 0x2a)
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -102,15 +102,15 @@ class ElementMoved(XType):
         super(self.__class__, self).__init__()
 
 
-class ElementTagConsitency(XType):
-    fill = rgb(0x00, 0xa0, 0x70)
+class ElementMovedParent(XType):
+    fill = rgb(0x55, 0x99, 0xff)
 
     def __init__(self):
         super(self.__class__, self).__init__()
 
 
-class ElementTextAttributeValueConsitency(XType):
-    fill = rgb(0x00, 0x70, 0xa0)
+class ElementTagConsitency(XType):
+    fill = rgb(0x00, 0xa0, 0x70)
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -130,8 +130,8 @@ class ElementTagAttributeNameValueConsitency(XType):
         super(self.__class__, self).__init__()
 
 
-class ElementTagParentMoved(XType):
-    fill = rgb(0x55, 0x99, 0xff)
+class ElementTextAttributeValueConsitency(XType):
+    fill = rgb(0x00, 0x70, 0xa0)
 
     def __init__(self):
         super(self.__class__, self).__init__()
