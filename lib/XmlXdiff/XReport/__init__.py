@@ -5,8 +5,9 @@
 # Copyright (C) 2019, diponaut@gmx.de
 # License: TBD
 
-import lxml.etree
+from difflib import SequenceMatcher
 import copy
+import lxml.etree
 
 import svgwrite
 from svgwrite import cm, mm, rgb
@@ -19,8 +20,6 @@ from XmlXdiff import XDiffer
 from XmlXdiff.XReport import XRender
 from XmlXdiff.XPath import XDiffXmlPath
 from XmlXdiff import XTypes
-
-from difflib import SequenceMatcher
 
 
 class ElementMarker(object):

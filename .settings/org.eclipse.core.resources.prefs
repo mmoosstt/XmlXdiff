@@ -8,4 +8,5 @@ encoding//lib/XmlXdiff/XTypes.py=utf-8
 encoding//lib/XmlXdiff/__init__.py=utf-8
 encoding//lib/XmlXdiff/tests/GeneralTests.py=utf-8
 encoding//tests/GeneralTests.py=utf-8
-encoding//tests/TimeitTests.py=utf-8
+encoding/execute_profile.py=utf-8
+encoding/execute_timeit.py=utf-8

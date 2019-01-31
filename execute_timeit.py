@@ -11,4 +11,4 @@ import timeit
 
 print(timeit.timeit(setup="import XmlXdiff.XDiffer as api",
                     stmt="api.XDiffExecutor().run()",
-                    number=10))
+                    number=100))

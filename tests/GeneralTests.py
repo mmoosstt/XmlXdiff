@@ -30,8 +30,24 @@ class Usability(unittest.TestCase):
 
         from XmlXdiff.XReport import DrawXmlDiff
 
-        _xml1 = """<root><deleted>with content</deleted><unchanged/><changed name="test1" /></root>"""
-        _xml2 = """<root><unchanged/><changed name="test2" /><added/></root>"""
+        _xml1 = """<ngs_sample id="40332">
+  <workflow value="salmonella" version="101_provisional" />
+  <results>
+  <gastro_prelim_st reason="not novel" success="false">
+      <type st="1364" />
+      <type st="9999" />
+  </gastro_prelim_st>
+ </results>
+</ngs_sample>"""
+
+        _xml2 = """<ngs_sample id="40332">
+  <workflow value="salmonella" version="101_provisional" />
+  <results>
+  <gastro_prelim_st reason="not novel" success="false">
+      <type st="1364" />
+   </gastro_prelim_st>
+ </results>
+</ngs_sample>"""
 
         _path1 = '{}\\..\\..\\tests\\simple\\xml1.xml'.format(getPath())
         _path2 = '{}\\..\\..\\tests\\simple\\xml2.xml'.format(getPath())
@@ -44,6 +60,7 @@ class Usability(unittest.TestCase):
             f.write(_xml2)
 
         x = DrawXmlDiff(_path1, _path2)
+        x.draw()
         x.saveSvg(_out)
 
 

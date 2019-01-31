@@ -1,3 +1,6 @@
 **/__pycache__
 /build/
-/.coverage
+**/.coverage
+**/coverage/*
+**/.mypy_cache/
+**/.settings/
