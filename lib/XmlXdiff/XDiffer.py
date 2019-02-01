@@ -1,9 +1,12 @@
-# coding:utf-8
-# Author:  mmoosstt -- github
-# Purpose: calculate difference between source and target file (inspired from xdiff algorithm)
-# Created: 01.01.2019
-# Copyright (C) 2019, diponaut@gmx.de
-# License: TBD
+"""
+ coding:utf-8
+ Author:  mmoosstt -- github
+ Purpose: calculate difference between source and target file (inspired from xdiff algorithm)
+ Created: 01.01.2019
+ Copyright (C) 2019, diponaut@gmx.de
+ License: TBD
+
+"""
 
 from XmlXdiff import XTypes, XPath, XHash, getPath
 import lxml.etree
@@ -88,7 +91,7 @@ class XDiffExecutor(object):
 
         XHash.XDiffHasher.getHashes(_xelements_gen, callback, children)
 
-    def _generatorXElements(self, xelements, hash_algorithm=XHash.XDiffHasher.callbackHashAllNoChilds, child_cnt=None, children=True, xtypes=(XTypes.ElementChanged, XTypes.ElementUnknown)):
+    def _generatorXElements(self, xelements, hash_algorithm=XHash.XDiffHasher.callbackHashAll, child_cnt=None, children=True, xtypes=(XTypes.ElementChanged, XTypes.ElementUnknown)):
 
         self._calculateHashes(xelements, hash_algorithm,
                               child_cnt, children, xtypes)

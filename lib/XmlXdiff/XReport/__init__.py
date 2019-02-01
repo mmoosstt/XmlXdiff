@@ -252,7 +252,7 @@ class DrawXml(object):
 
         return _svg
 
-    def addTextBox2(self, xelement):
+    def addTextBoxLineCompare(self, xelement):
         _node_text = self.getElementText(xelement.node)
         _lines1 = self.linesCallback(_node_text)
 
@@ -395,12 +395,12 @@ class DrawXmlDiff(object):
 
         self.report1.moveRight()
         self.report1.loadFromXElements(
-            self.differ.xelements1, self.report1.addTextBox2)
+            self.differ.xelements1, self.report1.addTextBoxLineCompare)
         self.report1.saveSvg(self.differ.xelements1)
 
         self.report2.moveRight()
         self.report2.loadFromXElements(
-            self.differ.xelements2, self.report2.addTextBox2)
+            self.differ.xelements2, self.report2.addTextBoxLineCompare)
         self.report2.saveSvg(self.differ.xelements2)
 
         self.legend = DrawLegend()

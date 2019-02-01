@@ -1,34 +1,53 @@
-# coding:utf-8
-# Author:  mmoosstt -- github
-# Purpose: build more suitable xpathes
-# Created: 01.01.2019
-# Copyright (C) 2019, diponaut@gmx.de
-# License: TBD
+"""
+ coding:utf-8
+ Author:  mmoosstt -- github
+ Purpose: build more suitable xpathes
+ Created: 01.01.2019
+ Copyright (C) 2019, diponaut@gmx.de
+ License: TBD
+"""
+
 
 import lxml.etree
 from XmlXdiff import XTypes
 
 
 class XPathException(Exception):
-    pass
+    '''
+    Exception applicable for this module only
+    '''
 
 
-class XDiffXmlPath(object):
+class XDiffXmlPath():
+    '''
+    Implements a xpath conformed representation that is slightly different to lxml library
+
+    lxml /*/*/tag_name[pos]
+    XDiff /*[name()=tag_name1][10]/*[name()=tag_name2][10]/*[name()=tag_name3][10]
+    '''
 
     xml = None
 
     @classmethod
-    def setXmlValidation(cls, xml_root):
-        cls.xml = xml_root
-
-    @classmethod
     def getXelements(cls, element, parent_path="", pos=0):
+        """
+        Creates a list of XmlXdiff.XTypes.XElement from lxml root element for instance.
+        """
+
         cls.xelements = []
         cls.walk(element, parent_path, pos)
         return cls.xelements
 
     @classmethod
     def getXpathDistance(cls, path1, path2):
+        '''
+        Calculate distance between paths.
+        Can be used for cost calculation of moved nodes.
+        Path seperator has to be /.
+
+        :param path1: source xpath
+        :param path2: destination xpath
+        '''
 
         _arr1 = path1.split("/")
         _arr2 = path2.split("/")
@@ -47,32 +66,45 @@ class XDiffXmlPath(object):
 
     @classmethod
     def getTag(cls, element, pos):
+        '''
+        Creation of valid tag name for new xpath syntax by taking namespaces and
+        comments into account.
+
+        :param element: lxml tree element
+        :param pos: position among parent children
+        '''
 
         if isinstance(element, lxml.etree._Comment):
             return "comment()[{pos}]".format(pos=pos)
 
-        else:
+        _tag = element.tag
+        if _tag.find("{") > -1:
+            for _ns in element.nsmap.keys():
 
-            _tag = element.tag
-            if _tag.find("{") > -1:
-                for _ns in element.nsmap.keys():
+                _nslong = "{{{nslong}}}".format(
+                    nslong=element.nsmap[_ns])
+                if _ns is None:
+                    _nsshort = ""
+                else:
+                    _nsshort = "{nsshort}:".format(nsshort=_ns)
 
-                    _nslong = "{{{nslong}}}".format(
-                        nslong=element.nsmap[_ns])
-                    if _ns is None:
-                        _nsshort = ""
-                    else:
-                        _nsshort = "{nsshort}:".format(nsshort=_ns)
+                _tag = _tag.replace(_nslong, _nsshort)
 
-                    _tag = _tag.replace(_nslong, _nsshort)
+                if _tag.find("{") < 0:
+                    break
 
-                    if _tag.find("{") < 0:
-                        break
-
-            return "*[name()='{tag}'][{pos}]".format(tag=_tag, pos=pos)
+        return "*[name()='{tag}'][{pos}]".format(tag=_tag, pos=pos)
 
     @classmethod
     def walk(cls, element, parent_path, pos, child_cnt=0):
+        '''
+        Creation of new xpath style for selected lxml etree element.
+
+        :param element: lxml etree element
+        :param parent_path: start point of xpath
+        :param pos: start pos of element
+        :param child_cnt: number of investigated children
+        '''
 
         _path = "{parent}/{tag}".format(parent=parent_path,
                                         tag=cls.getTag(element, pos))

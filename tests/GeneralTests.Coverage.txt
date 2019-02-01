@@ -3,11 +3,11 @@ Aborting report output, consider using -i.
 Name                               Stmts   Miss  Cover
 ------------------------------------------------------
 lib\XmlXdiff\XDiffer.py              149      5    97%
-lib\XmlXdiff\XHash.py                 88      2    98%
-lib\XmlXdiff\XPath.py                 57      5    91%
+lib\XmlXdiff\XHash.py                 71      0   100%
+lib\XmlXdiff\XPath.py                 54      4    93%
 lib\XmlXdiff\XReport\XRender.py       60      2    97%
 lib\XmlXdiff\XReport\__init__.py     329     49    85%
 lib\XmlXdiff\XTypes.py               145     40    72%
 lib\XmlXdiff\__init__.py               3      0   100%
 ------------------------------------------------------
-TOTAL                                831    103    88%
+TOTAL                                811    100    88%
