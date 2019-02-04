@@ -178,10 +178,6 @@ class XDiffExecutor(object):
                                                               _xelements1,
                                                               _xelements2)
 
-                        self.findTagNameConsitencyWithChildren(_child_cnt,
-                                                               _xelements1,
-                                                               _xelements2)
-
                         self.findTagNameAttributeNameValueConsitencyWithChildren(_child_cnt,
                                                                                  _xelements1,
                                                                                  _xelements2)
@@ -193,6 +189,10 @@ class XDiffExecutor(object):
                         self.findTagNameAttributeNameConsitencyWithChildren(_child_cnt,
                                                                             _xelements1,
                                                                             _xelements2)
+
+                        self.findTagNameConsitencyWithChildren(_child_cnt,
+                                                               _xelements1,
+                                                               _xelements2)
 
                     for _e in _xelements1:
                         if isinstance(_e.type, XTypes.ElementUnknown):

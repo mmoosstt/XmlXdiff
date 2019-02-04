@@ -1,5 +1,6 @@
-<top>
-  <mid info="something">
-    abcd
-  </mid>
+<top  xmlns:seil="http://www.w3.org/TR/seil/"  xmlns:feil="http://www.w3.org/TR/feil/"  xmlns:beil="http://www.w3.org/TR/beil/" >
+  <seil:olivia info="something">abcd</seil:olivia>
+  <feil:felizitas info="else">abcd</feil:felizitas>
+  <beil:oli infoo="no">wer</beil:oli>
+  <bernd infoo="no">was</bernd>
 </top>

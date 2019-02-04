@@ -1,5 +1,6 @@
-<top>
-  <mid type="omething">
-    abcde
-  </mid>
+<top  xmlns:seil="http://www.w3.org/TR/seil/"  xmlns:feil="http://www.w3.org/TR/feil/"  xmlns:beil="http://www.w3.org/TR/beil/" >
+  <seil:olivia type="omething">abcde</seil:olivia>
+  <feil:felizitas infoo="else">abcd</feil:felizitas>
+  <beil:oli infoo="else">abcd</beil:oli>
+  <bernd infoo="no">wer</bernd>
 </top>

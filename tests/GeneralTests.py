@@ -8,9 +8,47 @@
 import time
 import unittest
 import inspect
+from xmldiff import main, formatting
+
 from XmlXdiff import getPath, XDiffer
 from XmlXdiff.XReport import DrawXmlDiff, DrawXmlDiffBoxesOnly, DrawLegend
 from XmlXdiff.XPath import XDiffXmlPath
+
+import lxml.etree
+
+XSLT = '''
+<xsl:stylesheet version="1.0" xmlns:diff="http://namespaces.shoobx.com/diff" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:template match="@diff:insert-formatting">
+        <xsl:attribute name="class">
+            <xsl:value-of select="'insert-formatting'"/>
+        </xsl:attribute>
+    </xsl:template>
+    
+    <xsl:template match="diff:delete">
+        <del><xsl:apply-templates /></del>
+    </xsl:template>
+    
+    <xsl:template match="diff:insert">
+        <ins><xsl:apply-templates /></ins>
+    </xsl:template>
+    
+    <xsl:template match="@*| node()">
+        <xsl:copy>
+        <xsl:apply-templates select="@*| node()"/>
+        </xsl:copy>
+    </xsl:template>
+</xsl:stylesheet>
+'''
+
+
+XSLT_TEMPLATE = lxml.etree.fromstring(XSLT)
+
+
+class HTMLFormatter(formatting.XMLFormatter):
+    def render(self, result):
+        transform = lxml.etree.XSLT(XSLT_TEMPLATE)
+        result = transform(result)
+        return super(HTMLFormatter, self).render(result)
 
 
 class UnSorted(unittest.TestCase):
@@ -126,6 +164,26 @@ class CompareAll(unittest.TestCase):
     def test9(self):
         name = inspect.currentframe().f_code.co_name
         self.__class__.execute(name)
+
+    def test9Compare(self):
+        _path1 = "{}\\..\\..\\tests\\test9\\a.xml".format(
+            getPath())
+        _path2 = "{}\\..\\..\\tests\\test9\\b.xml".format(
+            getPath())
+
+        _t = time.time()
+
+        formatter = HTMLFormatter(
+            text_tags=('p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li'),
+            formatting_tags=('b', 'u', 'i', 'strike', 'em', 'super',
+                             'sup', 'sub', 'link', 'a', 'span'))
+
+        result = main.diff_files(_path1, _path2, formatter=formatter)
+
+        print(time.time() - _t)
+
+        with open('output.html', "w") as f:
+            f.write(result)
 
     def test11(self):
         name = inspect.currentframe().f_code.co_name
