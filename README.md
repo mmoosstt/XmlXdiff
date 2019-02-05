@@ -68,18 +68,18 @@ All xml elements that are still marked as changed have to be investigated
 [//]: # (insert_performance_start)
 
 ```
-test1: delta_t=0.1533s xml_elements=63
-test2: delta_t=0.0486s xml_elements=5
-test3: delta_t=0.0725s xml_elements=4
-test4: delta_t=0.0982s xml_elements=32
-test5: delta_t=0.1005s xml_elements=34
-test6: delta_t=0.0957s xml_elements=34
-test7: delta_t=0.0657s xml_elements=8
-test8: delta_t=0.2705s xml_elements=67
-test9: delta_t=8.1556s xml_elements=6144
-test11: delta_t=0.0578s xml_elements=34
-test12: delta_t=0.0786s xml_elements=45
-test13: delta_t=0.1148s xml_elements=75
+test1: delta_t=0.0970s xml_elements=63
+test2: delta_t=0.0192s xml_elements=5
+test3: delta_t=0.0257s xml_elements=10
+test4: delta_t=0.0387s xml_elements=32
+test5: delta_t=0.0632s xml_elements=34
+test6: delta_t=0.0634s xml_elements=34
+test7: delta_t=0.0424s xml_elements=8
+test8: delta_t=0.2233s xml_elements=67
+test9: delta_t=7.4147s xml_elements=6144
+test11: delta_t=0.0805s xml_elements=34
+test12: delta_t=0.0931s xml_elements=45
+test13: delta_t=0.1199s xml_elements=75
 
 ```
 
@@ -94,15 +94,15 @@ pyscript   NoSource: No source for code: 'C:\Portable\git\XmlXdiff\pyscript'.
 Aborting report output, consider using -i.
 Name                               Stmts   Miss  Cover
 ------------------------------------------------------
-lib\XmlXdiff\XDiffer.py              149      5    97%
-lib\XmlXdiff\XHash.py                 88      2    98%
-lib\XmlXdiff\XPath.py                 57      5    91%
+lib\XmlXdiff\XDiffer.py              155      3    98%
+lib\XmlXdiff\XHash.py                 71      0   100%
+lib\XmlXdiff\XPath.py                 54      3    94%
 lib\XmlXdiff\XReport\XRender.py       60      2    97%
-lib\XmlXdiff\XReport\__init__.py     329     49    85%
-lib\XmlXdiff\XTypes.py               145     40    72%
+lib\XmlXdiff\XReport\__init__.py     329     48    85%
+lib\XmlXdiff\XTypes.py               120     14    88%
 lib\XmlXdiff\__init__.py               3      0   100%
 ------------------------------------------------------
-TOTAL                                831    103    88%
+TOTAL                                792     70    91%
 
 ```
 
