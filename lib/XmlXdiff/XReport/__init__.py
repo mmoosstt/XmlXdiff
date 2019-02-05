@@ -1,13 +1,15 @@
-# coding:utf-8
-# Author:  mmoosstt -- github
-# Purpose: create diff report
-# Created: 01.01.2019
-# Copyright (C) 2019, diponaut@gmx.de
-# License: TBD
+"""
+ coding:utf-8
+ Author:  mmoosstt -- github
+ Purpose: create diff report
+ Created: 01.01.2019
+ Copyright (C) 2019, diponaut@gmx.de
+ License: TBD
+"""
 
-from difflib import SequenceMatcher
 import copy
 import lxml.etree
+from difflib import SequenceMatcher
 
 import svgwrite
 from svgwrite import cm, mm, rgb
@@ -22,7 +24,7 @@ from XmlXdiff.XPath import XDiffXmlPath
 from XmlXdiff import XTypes
 
 
-class ElementMarker(object):
+class ElementMarker:
     size = (2.5, 2.5)
     fill = rgb(200, 0, 0)
     unit = 10
@@ -54,7 +56,7 @@ class ElementMarker(object):
             self.svg_mark['x']) - 1.2 * self.__class__.unit
 
 
-class DrawLegend(object):
+class DrawLegend:
 
     def __init__(self):
 
@@ -75,7 +77,7 @@ class DrawLegend(object):
 
         _svg = SVG(insert=(self.x, self.y))
 
-        for _class in XTypes.LOOP_XTYPES():
+        for _class in XTypes.generatorAvailableXTypes():
             _svg.add(self.addLine(_class))
 
         _svg["width"] = self.x_max
@@ -139,7 +141,7 @@ class DrawLegend(object):
         self.dwg.save()
 
 
-class DrawXml(object):
+class DrawXml:
 
     def __init__(self):
         self.dwg = None
@@ -373,7 +375,7 @@ class DrawXml(object):
         svg_node.add(_r)
 
 
-class DrawXmlDiff(object):
+class DrawXmlDiff:
 
     def __init__(self, path1, path2):
 
@@ -385,9 +387,9 @@ class DrawXmlDiff(object):
 
     def draw(self):
 
-        self.differ.setPath1(self.path1)
-        self.differ.setPath2(self.path2)
-        self.differ.run()
+        self.differ.setLeftPath(self.path1)
+        self.differ.setRightPath(self.path2)
+        self.differ.execute()
 
         self.filepath = "{path}\\xdiff_{filename1}_{filename2}.svg".format(path=self.differ.path1.path,
                                                                            filename1=self.differ.path1.filename,
@@ -464,7 +466,7 @@ class DrawXmlDiff(object):
 
     def drawMovePattern(self, xtype):
 
-        for _e in XTypes.LOOP(self.differ.xelements1, xtype):
+        for _e in XTypes.generatorXTypes(self.differ.xelements1, xtype):
             _start_svg1 = _e.svg_node
 
             if _e.getXelement():
@@ -501,7 +503,7 @@ class DrawXmlDiff(object):
 
     def drawChangedPattern(self, xtype, xelements, x_offset=0):
 
-        for _e in XTypes.LOOP(xelements, xtype):
+        for _e in XTypes.generatorXTypes(xelements, xtype):
             _start_svg1 = _e.svg_node
 
             _x1 = float(_start_svg1['x']) + x_offset

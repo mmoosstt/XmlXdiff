@@ -165,26 +165,6 @@ class CompareAll(unittest.TestCase):
         name = inspect.currentframe().f_code.co_name
         self.__class__.execute(name)
 
-    def test9Compare(self):
-        _path1 = "{}\\..\\..\\tests\\test9\\a.xml".format(
-            getPath())
-        _path2 = "{}\\..\\..\\tests\\test9\\b.xml".format(
-            getPath())
-
-        _t = time.time()
-
-        formatter = HTMLFormatter(
-            text_tags=('p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li'),
-            formatting_tags=('b', 'u', 'i', 'strike', 'em', 'super',
-                             'sup', 'sub', 'link', 'a', 'span'))
-
-        result = main.diff_files(_path1, _path2, formatter=formatter)
-
-        print(time.time() - _t)
-
-        with open('output.html', "w") as f:
-            f.write(result)
-
     def test11(self):
         name = inspect.currentframe().f_code.co_name
         self.__class__.execute(name)

@@ -8,13 +8,16 @@
 
 """
 
-from XmlXdiff import XTypes, XPath, XHash, getPath
-import lxml.etree
 import os
 import copy
+import lxml.etree
+from XmlXdiff import XTypes, XPath, XHash, getPath
 
 
-class XDiffPath(object):
+class XDiffPath:
+    '''
+    Interface for file names
+    '''
 
     def __init__(self, filepath):
         _x = os.path.abspath(filepath).replace("\\", "/")
@@ -25,28 +28,66 @@ class XDiffPath(object):
         self.filepath = _x.replace("/", "\\")
 
 
-class XDiffExecutor(object):
+class XDiffExecutor:
+    '''
+    This is the heart and entry point of XmlXdiff. The orchestration of looping, hashing and
+    comparing.  
+    '''
 
     def __init__(self):
         self.path1 = XDiffPath(
             '{}\\..\\..\\tests\\test1\\a.xml'.format(getPath()))
         self.path2 = XDiffPath(
             '{}\\..\\..\\tests\\test1\\b.xml'.format(getPath()))
-        self.setGravity(0)
+
+        # initialised when execute is executed
+        self.gravity = 0
+        self.path1 = None
+        self.path2 = None
+        self.xml1 = None
+        self.xml2 = None
+        self.root1 = None
+        self.root2 = None
+        self.xelements1 = None
+        self.xelements2 = None
 
     def setGravity(self, inp):
+        '''
+        Interface setter for gravity - unused till now.
+        replaced by parent indentification
+
+        :param inp: int
+        '''
+
         self.gravity = inp
 
     def getGravity(self):
+        '''
+        Interface getter for gravity.
+        '''
         return copy.deepcopy(self.gravity)
 
-    def setPath1(self, path):
+    def setLeftPath(self, path):
+        '''
+        Interface setter for path1 - normal the left/elder side
+
+        :param path: str - path not checked for validity till now
+        '''
         self.path1 = XDiffPath(path)
 
-    def setPath2(self, path):
+    def setRightPath(self, path):
+        '''
+        Interface setter for path2 - normal the right/latest side
+
+        :param path: str - path not checked for validity till now
+        '''
         self.path2 = XDiffPath(path)
 
-    def run(self):
+    def execute(self):
+        '''
+        Entry point for differ.
+        '''
+
         self.xml1 = lxml.etree.parse(self.path1.filepath)
         self.xml2 = lxml.etree.parse(self.path2.filepath)
 
@@ -74,43 +115,60 @@ class XDiffExecutor(object):
                                                self.xelements1,
                                                self.xelements2)
 
-            self.findMovedElementsWithoutChildren(_child_cnt,
-                                                  self.xelements1,
-                                                  self.xelements2)
+            self.findMovedParentElements(_child_cnt,
+                                         self.xelements1,
+                                         self.xelements2)
 
-    def _calculateHashes(self, xelements, callback, child_cnt=None, children=True, xtypes=(XTypes.ElementChanged, XTypes.ElementUnknown)):
+    def _calculateHashes(self,
+                         xelements,
+                         callback,
+                         child_cnt=None,
+                         children=True,
+                         xtypes=(XTypes.ElementChanged, XTypes.ElementUnknown)):
 
-        if child_cnt is None:
-            _xelements_gen = XTypes.LOOP(xelements,
-                                         *xtypes)
+        pass
 
-        else:
-            _xelements_gen = XTypes.LOOP_CHILD_CNT(xelements,
-                                                   child_cnt,
-                                                   *xtypes)
-
-        XHash.XDiffHasher.getHashes(_xelements_gen, callback, children)
-
-    def _generatorXElements(self, xelements, hash_algorithm=XHash.XDiffHasher.callbackHashAll, child_cnt=None, children=True, xtypes=(XTypes.ElementChanged, XTypes.ElementUnknown)):
-
-        self._calculateHashes(xelements, hash_algorithm,
-                              child_cnt, children, xtypes)
+    def _generatorXElements(self,
+                            xelements,
+                            hash_algorithm=XHash.XDiffHasher.callbackHashAll,
+                            child_cnt=None,
+                            children=True,
+                            xtypes=(XTypes.ElementChanged, XTypes.ElementUnknown)):
 
         if child_cnt is None:
-            _generator = XTypes.LOOP(xelements, *xtypes)
+            _xelements_gen = XTypes.generatorXTypes(xelements,
+                                                    *xtypes)
 
         else:
-            _generator = XTypes.LOOP_CHILD_CNT(xelements, child_cnt, *xtypes)
+            _xelements_gen = XTypes.generatorChildCount(xelements,
+                                                        child_cnt,
+                                                        *xtypes)
+
+        XHash.XDiffHasher.getHashes(_xelements_gen, hash_algorithm, children)
+
+        if child_cnt is None:
+            _generator = XTypes.generatorXTypes(xelements, *xtypes)
+
+        else:
+            _generator = XTypes.generatorChildCount(
+                xelements, child_cnt, *xtypes)
 
         return _generator
 
     def setElementTypeWithChildren(self, xelement1, xelement2, xtype):
+        '''
+        Set element type of child elements 
 
-        _xelements1 = XTypes.LOOP_CHILD_ELEMENTS(self.xelements1,
-                                                 xelement1)
+        :param xelement1: [XElement, XElement, ..]
+        :param xelement2: [XElement, XElement, ..]
+        :param xtype: XType
+        '''
 
-        _xelements2 = XTypes.LOOP_CHILD_ELEMENTS(self.xelements2,
-                                                 xelement2)
+        _xelements1 = XTypes.generatorChildElements(self.xelements1,
+                                                    xelement1)
+
+        _xelements2 = XTypes.generatorChildElements(self.xelements2,
+                                                    xelement2)
 
         for _xelement1 in _xelements1:
             _xelement2 = next(_xelements2)
@@ -123,14 +181,14 @@ class XDiffExecutor(object):
                 _xelement1.addXelement(_xelement2)
                 _xelement2.addXelement(_xelement1)
 
-    def setElementType(self, xelement1, xelement2, xtype):
+    def findMovedParentElements(self, child_cnt, xelements1, xelements2):
+        '''
+        Entry point of pseudo recursive execution
 
-        xelement1.setType(xtype)
-        xelement2.setType(xtype)
-        xelement1.addXelement(xelement2)
-        xelement2.addXelement(xelement1)
-
-    def findMovedElementsWithoutChildren(self, child_cnt, xelements1, xelements2):
+        :param child_cnt: int - only elements with a certain number of children are investigated
+        :param xelements1: [XElement, XElement, ...]
+        :param xelements2: [XElement, XElement, ...]
+        '''
 
         _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
@@ -148,15 +206,16 @@ class XDiffExecutor(object):
             for _xelement1 in _xelements1_generator:
                 if (_xelement1.hash == _xelement2.hash):
 
-                    self.setElementType(_xelement1,
-                                        _xelement2,
-                                        XTypes.ElementMovedParent)
+                    _xelement1.setType(XTypes.ElementMovedParent)
+                    _xelement2.setType(XTypes.ElementMovedParent)
+                    _xelement1.addXelement(_xelement2)
+                    _xelement2.addXelement(_xelement1)
 
-                    _xelements1 = XTypes.CHILDS_ARRAY(xelements1,
-                                                      _xelement1)
+                    _xelements1 = XTypes.arrayChildElements(xelements1,
+                                                            _xelement1)
 
-                    _xelements2 = XTypes.CHILDS_ARRAY(xelements2,
-                                                      _xelement2)
+                    _xelements2 = XTypes.arrayChildElements(xelements2,
+                                                            _xelement2)
 
                     _child_cnts = {}
                     _ = [_child_cnts.update({_e.child_cnt: None})
@@ -174,9 +233,10 @@ class XDiffExecutor(object):
                                                            _xelements1,
                                                            _xelements2)
 
-                        self.findMovedElementsWithoutChildren(_child_cnt,
-                                                              _xelements1,
-                                                              _xelements2)
+                        # recursive entry point
+                        self.findMovedParentElements(_child_cnt,
+                                                     _xelements1,
+                                                     _xelements2)
 
                         self.findTagNameAttributeNameValueConsitencyWithChildren(_child_cnt,
                                                                                  _xelements1,
@@ -205,6 +265,13 @@ class XDiffExecutor(object):
                     break
 
     def findTagNameConsitencyWithChildren(self, child_cnt, xelements1, xelements2):
+        '''
+        TBD
+
+        :param child_cnt: int - only elements with a certain number of children are investigated
+        :param xelements1: [XElement, XElement, ...]
+        :param xelements2: [XElement, XElement, ...]
+        '''
 
         _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
 
@@ -221,7 +288,7 @@ class XDiffExecutor(object):
                                                              child_cnt=child_cnt)
             for _xelement1 in _xelements1_generator:
 
-                if (_xelement1.hash == _xelement2.hash):
+                if _xelement1.hash == _xelement2.hash:
 
                     self.setElementTypeWithChildren(_xelement1,
                                                     _xelement2,
@@ -230,6 +297,13 @@ class XDiffExecutor(object):
                     break
 
     def findAttributeValueElementValueConsitencyWithChildren(self, child_cnt, xelements1, xelements2):
+        '''
+        TBD
+
+        :param child_cnt: int - only elements with a certain number of children are investigated
+        :param xelements1: [XElement, XElement, ...]
+        :param xelements2: [XElement, XElement, ...]
+        '''
 
         _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
 
@@ -247,7 +321,7 @@ class XDiffExecutor(object):
 
             for _xelement1 in _xelements1_generator:
 
-                if (_xelement1.hash == _xelement2.hash):
+                if _xelement1.hash == _xelement2.hash:
 
                     self.setElementTypeWithChildren(_xelement1,
                                                     _xelement2,
@@ -256,6 +330,13 @@ class XDiffExecutor(object):
                     break
 
     def findTagNameAttributeNameValueConsitencyWithChildren(self, child_cnt, xelements1, xelements2):
+        '''
+        TBD
+
+        :param child_cnt: int - only elements with a certain number of children are investigated
+        :param xelements1: [XElement, XElement, ...]
+        :param xelements2: [XElement, XElement, ...]
+        '''
 
         _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
 
@@ -273,7 +354,7 @@ class XDiffExecutor(object):
 
             for _xelement1 in _xelements1_generator:
 
-                if (_xelement1.hash == _xelement2.hash):
+                if _xelement1.hash == _xelement2.hash:
 
                     self.setElementTypeWithChildren(_xelement1,
                                                     _xelement2,
@@ -282,6 +363,13 @@ class XDiffExecutor(object):
                     break
 
     def findTagNameAttributeNameConsitencyWithChildren(self, child_cnt, xelements1, xelements2):
+        '''
+        TBD
+
+        :param child_cnt: int - only elements with a certain number of children are investigated
+        :param xelements1: [XElement, XElement, ...]
+        :param xelements2: [XElement, XElement, ...]
+        '''
 
         _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
 
@@ -299,7 +387,7 @@ class XDiffExecutor(object):
 
             for _xelement1 in _xelements1_generator:
 
-                if (_xelement1.hash == _xelement2.hash):
+                if _xelement1.hash == _xelement2.hash:
 
                     self.setElementTypeWithChildren(_xelement1,
                                                     _xelement2,
@@ -308,6 +396,13 @@ class XDiffExecutor(object):
                     break
 
     def findMovedElementsWithChildren(self, child_cnt, xelements1, xelements2):
+        '''
+        TBD
+
+        :param child_cnt: int - only elements with a certain number of children are investigated
+        :param xelements1: [XElement, XElement, ...]
+        :param xelements2: [XElement, XElement, ...]
+        '''
 
         _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
 
@@ -323,8 +418,8 @@ class XDiffExecutor(object):
 
             for _xelement1 in _xelements1_generator:
 
-                if (_xelement1.hash == _xelement2.hash):
-                    if not(_xelement1.xpath == _xelement2.xpath):
+                if _xelement1.hash == _xelement2.hash:
+                    if not _xelement1.xpath == _xelement2.xpath:
 
                         self.setElementTypeWithChildren(_xelement1,
                                                         _xelement2,
@@ -332,6 +427,13 @@ class XDiffExecutor(object):
                         break
 
     def findUnchangedElementsWithChildren(self, child_cnt, xelements1, xelements2):
+        '''
+        TBD
+
+        :param child_cnt: int - only elements with a certain number of children are investigated
+        :param xelements1: [XElement, XElement, ...]
+        :param xelements2: [XElement, XElement, ...]
+        '''
 
         _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
 
@@ -347,8 +449,8 @@ class XDiffExecutor(object):
 
             for _xelement1 in _xelements1_generator:
 
-                if (_xelement1.hash == _xelement2.hash):
-                    if(_xelement1.xpath == _xelement2.xpath):
+                if _xelement1.hash == _xelement2.hash:
+                    if _xelement1.xpath == _xelement2.xpath:
 
                         self.setElementTypeWithChildren(_xelement1,
                                                         _xelement2,

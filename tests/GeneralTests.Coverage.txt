@@ -2,12 +2,12 @@ pyscript   NoSource: No source for code: 'C:\Portable\git\XmlXdiff\pyscript'.
 Aborting report output, consider using -i.
 Name                               Stmts   Miss  Cover
 ------------------------------------------------------
-lib\XmlXdiff\XDiffer.py              149      1    99%
+lib\XmlXdiff\XDiffer.py              155      3    98%
 lib\XmlXdiff\XHash.py                 71      0   100%
 lib\XmlXdiff\XPath.py                 54      3    94%
 lib\XmlXdiff\XReport\XRender.py       60      2    97%
 lib\XmlXdiff\XReport\__init__.py     329     48    85%
-lib\XmlXdiff\XTypes.py               145     38    74%
+lib\XmlXdiff\XTypes.py               120     14    88%
 lib\XmlXdiff\__init__.py               3      0   100%
 ------------------------------------------------------
-TOTAL                                811     92    89%
+TOTAL                                792     70    91%
