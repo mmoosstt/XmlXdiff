@@ -120,7 +120,7 @@ class CompareAll(unittest.TestCase):
         _path2 = "{}\\..\\..\\tests\\{}\\b.xml".format(getPath(), folder_name)
         cls.differ = DrawXmlDiff(_path1, _path2)
         cls.differ.draw()
-        cls.differ.save()
+        cls.differ.saveSvg()
         print("{name}: delta_t={time:.4f}s xml_elements={cnt}".format(name=folder_name,
                                                                       time=time.time() - _t,
                                                                       cnt=len(cls.differ.differ.xelements2) + len(cls.differ.differ.xelements1)))

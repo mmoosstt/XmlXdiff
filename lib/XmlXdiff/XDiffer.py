@@ -31,7 +31,7 @@ class XDiffPath:
 class XDiffExecutor:
     '''
     This is the heart and entry point of XmlXdiff. The orchestration of looping, hashing and
-    comparing.  
+    comparing.
     '''
 
     def __init__(self):
@@ -157,7 +157,7 @@ class XDiffExecutor:
 
     def setElementTypeWithChildren(self, xelement1, xelement2, xtype):
         '''
-        Set element type of child elements 
+        Set element type of child elements
 
         :param xelement1: [XElement, XElement, ..]
         :param xelement2: [XElement, XElement, ..]
@@ -204,7 +204,7 @@ class XDiffExecutor:
                                                              xtypes=_xtypes)
 
             for _xelement1 in _xelements1_generator:
-                if (_xelement1.hash == _xelement2.hash):
+                if _xelement1.hash == _xelement2.hash:
 
                     _xelement1.setType(XTypes.ElementMovedParent)
                     _xelement2.setType(XTypes.ElementMovedParent)
