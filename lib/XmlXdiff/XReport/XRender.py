@@ -19,9 +19,7 @@ class Render:
     '''
     Interface for getting the svg rendered size of an svg text element
     '''
-
-    app = QApplication(sys.argv)
-
+    _app = None
     font = None
     font_size = None
     font_family = None
@@ -35,6 +33,15 @@ class Render:
         static init interface, font family and font size have to be
         set first. This function does not have to be called.
         '''
+
+        # should move to main
+        # workaround
+        if cls._app is None:
+            try:
+                cls._app = QApplication(sys.argv)
+            except RuntimeError:
+                cls._app = False
+
         if (cls.font_size is not None and cls.font_family is not None):
             cls.font = QFont(cls.font_family, cls.font_size)
             cls.font_metrics = QFontMetricsF(cls.font, QSvgGenerator())

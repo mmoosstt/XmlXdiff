@@ -31,4 +31,4 @@ cov.html_report(directory="./tests/coverage",
 
 with open("./tests/GeneralTests.Coverage.txt", "w") as f:
     cov.report(file=f,
-               omit=['./tests/*'])
+               omit=['./tests/*', 'pyscript'])
