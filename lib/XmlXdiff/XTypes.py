@@ -237,34 +237,6 @@ class ElementTextAttributeValueConsitency(XType):
         XType.__init__(self)
 
 
-def generatorGravity(xelementsa, xelementsb, xelementb):
-    '''
-    Generator looping over xelements, starting with the position of the gravity element.
-    The gravity index is used to find following matches around the position
-    of the gravity element.
-
-    :param xelementsa: [XElement, ...]
-    :param xelementsb: [XElement, ...]
-    :param xelementb: XElement
-    '''
-
-    _g = None
-    for _g in reversed(xelementsb[:xelementsb.index(xelementb)]):
-        if _g.xelement_compared is not None:
-            break
-
-    _index = 0
-    if _g is not None:
-        if _g.xelement_compared is not None:
-            _index = xelementsa.index(_g.xelement_compared)
-
-    for _element in xelementsa[_index:]:
-        yield _element
-
-    for _element in xelementsa[_index:]:
-        yield _element
-
-
 def generatorChildElements(elements, element):
     '''
     Generator for all child elements of element that are part of elements

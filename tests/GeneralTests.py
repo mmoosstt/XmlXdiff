@@ -6,12 +6,13 @@
 # License: TBD
 
 import time
+import os
 import unittest
 import inspect
 from xmldiff import main, formatting
 
 from XmlXdiff import getPath, XDiffer
-from XmlXdiff.XReport import DrawXmlDiff, DrawXmlDiffBoxesOnly, DrawLegend
+from XmlXdiff.XReport.XSvgColoredText import DrawXmlDiff, DrawLegend
 from XmlXdiff.XPath import XDiffXmlPath
 
 import lxml.etree
@@ -58,15 +59,25 @@ class UnSorted(unittest.TestCase):
         self.assertEqual(_res, 3)
 
 
-class Usability(unittest.TestCase):
+class ReportModule(unittest.TestCase):
 
     def testLegend(self):
         _l = DrawLegend()
         _l.saveSvg('{}\\..\\..\\tests\\simple\\legend.svg'.format(getPath()))
 
-    def simpleExample(self):
+    def testXSvgCompact(self):
+        from XmlXdiff.XReport.XSvgCompact import DrawXmlDiff
+        self._simpleModule(DrawXmlDiff)
 
-        from XmlXdiff.XReport import DrawXmlDiff
+    def testXSvgColoredText(self):
+        from XmlXdiff.XReport.XSvgColoredText import DrawXmlDiff
+        self._simpleModule(DrawXmlDiff)
+
+    def testXSvgColorOnly(self):
+        from XmlXdiff.XReport.XSvgColorOnly import DrawXmlDiff
+        self._simpleModule(DrawXmlDiff)
+
+    def _simpleModule(self, modul_under_test):
 
         _xml1 = """<ngs_sample id="40332">
   <workflow value="salmonella" version="101_provisional" />
@@ -89,7 +100,12 @@ class Usability(unittest.TestCase):
 
         _path1 = '{}\\..\\..\\tests\\simple\\xml1.xml'.format(getPath())
         _path2 = '{}\\..\\..\\tests\\simple\\xml2.xml'.format(getPath())
-        _out = '{}\\..\\..\\tests\\simple\\xdiff.svg'.format(getPath())
+        _out = '{}\\..\\..\\tests\\simple\\{}.svg'.format(getPath(),
+                                                          modul_under_test.__module__)
+
+        _path1 = os.path.abspath(_path1)
+        _path2 = os.path.abspath(_path2)
+        _out = os.path.abspath(_out)
 
         with open(_path1, "w") as f:
             f.write(_xml1)
@@ -97,7 +113,7 @@ class Usability(unittest.TestCase):
         with open(_path2, "w") as f:
             f.write(_xml2)
 
-        x = DrawXmlDiff(_path1, _path2)
+        x = modul_under_test(_path1, _path2)
         x.draw()
         x.saveSvg(_out)
 

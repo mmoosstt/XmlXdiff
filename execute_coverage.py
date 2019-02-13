@@ -8,8 +8,12 @@ sys.path.append(os.path.abspath("./tests"))
 cov = coverage.Coverage()
 cov.start()
 
-from GeneralTests import CompareAll
+from GeneralTests import CompareAll, ReportModule
+
 test_suite = unittest.TestSuite()
+test_suite.addTest(ReportModule('testXSvgColoredText'))
+test_suite.addTest(ReportModule('testXSvgCompact'))
+test_suite.addTest(ReportModule('testXSvgColorOnly'))
 test_suite.addTest(CompareAll('test1'))
 test_suite.addTest(CompareAll('test2'))
 test_suite.addTest(CompareAll('test3'))
@@ -31,4 +35,5 @@ cov.html_report(directory="./tests/coverage",
 
 with open("./tests/GeneralTests.Coverage.txt", "w") as f:
     cov.report(file=f,
-               omit=['./tests/*', 'pyscript'])
+               omit=['./tests/*',
+                     'pyscript'])
