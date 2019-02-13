@@ -90,19 +90,20 @@ test13: delta_t=0.1199s xml_elements=75
 [//]: # (insert_coverage_start)
 
 ```
-pyscript   NoSource: No source for code: 'C:\Portable\git\XmlXdiff\pyscript'.
-Aborting report output, consider using -i.
-Name                               Stmts   Miss  Cover
-------------------------------------------------------
-lib\XmlXdiff\XDiffer.py              155      3    98%
-lib\XmlXdiff\XHash.py                 71      0   100%
-lib\XmlXdiff\XPath.py                 54      3    94%
-lib\XmlXdiff\XReport\XRender.py       60      2    97%
-lib\XmlXdiff\XReport\__init__.py     329     48    85%
-lib\XmlXdiff\XTypes.py               120     14    88%
-lib\XmlXdiff\__init__.py               3      0   100%
-------------------------------------------------------
-TOTAL                                792     70    91%
+Name                                      Stmts   Miss  Cover
+-------------------------------------------------------------
+lib\XmlXdiff\XDiffer.py                     155      3    98%
+lib\XmlXdiff\XHash.py                        71      0   100%
+lib\XmlXdiff\XPath.py                        54      3    94%
+lib\XmlXdiff\XReport\XRender.py              65      4    94%
+lib\XmlXdiff\XReport\XSvgColorOnly.py        12      0   100%
+lib\XmlXdiff\XReport\XSvgColoredText.py      43      0   100%
+lib\XmlXdiff\XReport\XSvgCompact.py         268      8    97%
+lib\XmlXdiff\XReport\__init__.py              0      0   100%
+lib\XmlXdiff\XTypes.py                      107      2    98%
+lib\XmlXdiff\__init__.py                      3      0   100%
+-------------------------------------------------------------
+TOTAL                                       778     20    97%
 
 ```
 
