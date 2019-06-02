@@ -25,7 +25,7 @@ class Render:
     font_family = None
     font_generator = None
     font_metrics = None
-    max_textbox_len = 700  # px
+    max_textbox_len = 600  # px
 
     @classmethod
     def _initFontInterface(cls):
@@ -78,7 +78,7 @@ class Render:
         return (cls.font_metrics.width(text), cls.font_metrics.height())
 
     @classmethod
-    def splitTextToLines(cls, text):
+    def splitTextToLines(cls, text, offset=0):
         """
             Split Into Max TextBoxSize
 
@@ -106,41 +106,58 @@ class Render:
                 _delta = _len_text - _index
 
                 # the delta is to high for used text box size
-                if _delta > cls.max_textbox_len:
+                if _delta > (cls.max_textbox_len - offset):
                     return False
 
                 return _index
 
-            index = getValidIndex("\n")
+            index = getValidIndex("\t")
             if not index:
 
-                index = getValidIndex("\t")
+                index = getValidIndex(" ")
                 if not index:
-
-                    index = getValidIndex(" ")
-                    if not index:
-                        index = abs(len(text) - 50)
+                    index = abs(len(text) - 50)
 
             return text[:index]
 
-        _width = cls.max_textbox_len + 10
-        _text = []
+        _lines = text.split('\n')
+        _text_array = []
+        _max_width = cls.max_textbox_len - offset
+        _cnt = 0
 
-        while _width > cls.max_textbox_len:
+        for _text in _lines:
+            _text_width = (cls.max_textbox_len + 10)
 
-            _width, _height = cls.getTextSize(text)
+            while _text_width > _max_width:
+                _text_width, _text_height = cls.getTextSize(_text)
 
-            if _width > cls.max_textbox_len:
+                # too long
+                if _text_width > _max_width:
 
-                _line_x = copy.deepcopy(text)
-                _width2 = cls.max_textbox_len + 10
-                while _width2 > cls.max_textbox_len:
-                    _line_x = getTextSegment(_line_x)
-                    _width2, _height2 = cls.getTextSize(_line_x)
+                    # create shorter string
+                    _text_segment = copy.deepcopy(_text)
+                    _text_segment_z = copy.deepcopy(_text)
+                    _text_segment_width = cls.max_textbox_len + 10
 
-                _text.append((_line_x, _width2, _height2))
-                text = text[len(_line_x):]
-            else:
-                _text.append((text, _width, _height))
+                    while _text_segment_width > _max_width:
+                        _text_segment = getTextSegment(_text_segment)
+                        _text_segment_width, _text_segment_height = cls.getTextSize(_text_segment)
 
-        return _text
+                        # exit if fragment does not change anymore
+                        if _text_segment == _text_segment_z:
+                            break
+
+                        else:
+                            _text_segment_z = _text_segment
+
+                    _text_array.append((_text_segment, _text_segment_width, _text_segment_height))
+                    _max_width = cls.max_textbox_len
+
+                    # rest of string
+                    _text = _text[len(_text_segment):]
+
+                else:
+                    _text_array.append((_text, _text_width, _text_height))
+                    _max_width = cls.max_textbox_len
+
+        return _text_array

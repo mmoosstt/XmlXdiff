@@ -26,55 +26,17 @@ class DrawXml(XSvgCompact.DrawXml):
         :param xelement: XTypes.XElement
         '''
 
-        _node_text = self.getElementText(xelement.node)
-        _lines1 = self._linesCallback(_node_text)
+        _node_text1 = self.getElementText(xelement.node)
 
         if xelement.getXelement() is None:
-            _lines2 = []
+            _node_text2 = ""
         else:
             _node_text2 = self.getElementText(xelement.getXelement().node)
-            _lines2 = self._linesCallback(_node_text2)
 
-        _l = max(len(_lines1), len(_lines2))
-
-        _lines1 = _lines1 + [(' ', 0, 0)] * (_l - len(_lines1))
-        _lines2 = _lines2 + [(' ', 0, 0)] * (_l - len(_lines2))
-
-        _svg = SVG(insert=(self.pos_x, self.pos_y),
-                   font_family=self.font_family,
-                   font_size=self.font_size)
-
-        _w = 0
-        _h = 0
-
-        while _lines1 and _lines2:
-            _line1, _, _ = _lines1[0]
-            _lines1 = _lines1[1:]
-            _line2, _, _ = _lines2[0]
-            _lines2 = _lines2[1:]
-
-            _text, _w1, _h1 = self.lineCompare(_line2, _line1)
-
-            _h1_offset = _h1 * 0.25
-
-            _w = max(_w, _w1)
-            _h = _h + _h1
-
-            _text['x'] = 0
-            _text['y'] = _h
-
-            _h = _h + _h1_offset
-
-            _svg.add(_text)
-
-        _svg['height'] = _h
-        _svg['width'] = _w
-        #_factor = 0.25
-        #_svg.viewbox(0, 0, _w + _w * _factor, _h + _h * _factor)
-
-        self.pos_y = self.pos_y + float(_h)
+        _svg, _width, _height = self.addTextBlockCompare(_node_text1, _node_text2)
+        self.pos_y = self.pos_y + float(_height)
         self.pos_y_max = max(self.pos_y_max, self.pos_y)
-        self.pos_x_max = max(self.pos_x_max, self.pos_x + float(_w))
+        self.pos_x_max = max(self.pos_x_max, self.pos_x + float(_width))
 
         return _svg
 

@@ -9,7 +9,6 @@ import time
 import os
 import unittest
 import inspect
-from xmldiff import main, formatting
 
 from XmlXdiff import getPath, XDiffer
 from XmlXdiff.XReport.XSvgColoredText import DrawXmlDiff, DrawLegend
@@ -43,13 +42,6 @@ XSLT = '''
 
 
 XSLT_TEMPLATE = lxml.etree.fromstring(XSLT)
-
-
-class HTMLFormatter(formatting.XMLFormatter):
-    def render(self, result):
-        transform = lxml.etree.XSLT(XSLT_TEMPLATE)
-        result = transform(result)
-        return super(HTMLFormatter, self).render(result)
 
 
 class UnSorted(unittest.TestCase):
@@ -186,5 +178,9 @@ class CompareAll(unittest.TestCase):
         self.__class__.execute(name)
 
     def test12(self):
+        name = inspect.currentframe().f_code.co_name
+        self.__class__.execute(name)
+
+    def test14(self):
         name = inspect.currentframe().f_code.co_name
         self.__class__.execute(name)

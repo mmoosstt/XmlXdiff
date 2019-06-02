@@ -24,6 +24,106 @@ from XmlXdiff.XPath import XDiffXmlPath
 from XmlXdiff import XTypes
 
 
+class TextBoxCompare:
+
+    def __init__(self):
+        self.max_line_width = XRender.Render.max_textbox_len
+        self.pos_x = 0
+        self.pos_y = 0
+        self.act_line_width = 0
+        self.font_family = None
+        self.font_size = None
+        self.width, self.height_line = XRender.Render.getTextSize("")
+        self.height = self.height_line
+        self.width_max = 0
+        self.svg_text = Text(text="")
+
+    def buildSvgLine(self, line_fragment, fill):
+        _lines = XRender.Render.splitTextToLines(line_fragment, self.act_line_width)
+        _line, _w, _h = _lines[0]
+
+        if self.svg_text is None:
+            self.svg_text = Text(text="")
+
+        if len(_lines) == 1 and self.act_line_width < self.max_line_width:
+            self.svg_text.add(TSpan(text=_line, fill=fill))
+            self.act_line_width += _w
+            self.width_max = max(self.act_line_width, self.width_max)
+
+        elif len(_lines) == 1 and self.act_line_width >= self.max_line_width:
+            self.svg_text.add(TSpan(text=_line, fill=fill))
+            self.svg_text["x"] = 0
+            self.svg_text["y"] = self.height
+            self.svg.add(self.svg_text)
+            self.height += _h
+            self.act_line_width = 0
+            self.svg_text = None
+
+        elif len(_lines) > 1:
+
+            for _line, _w, _h in _lines:
+
+                if self.svg_text is None:
+                    self.svg_text = Text(text="")
+
+                if self.act_line_width < self.max_line_width:
+                    self.svg_text.add(TSpan(text=_line, fill=fill))
+                    self.act_line_width += _w
+                    self.width_max = max(self.act_line_width, self.width_max)
+
+                else:
+
+                    self.svg_text["x"] = 0
+                    self.svg_text["y"] = self.height
+                    self.svg.add(self.svg_text)
+                    self.height += _h
+                    self.act_line_width = _w
+                    self.width_max = max(self.act_line_width, self.width_max)
+                    self.svg_text = None
+
+    def compare(self, text_block1, text_block2):
+
+        self.svg = SVG(insert=(self.pos_x, self.pos_y),
+                       font_family=self.font_family,
+                       font_size=self.font_size)
+
+        _matcher = SequenceMatcher(None, text_block1, text_block2)
+
+        for tag, _s1, _e1, _s2, _e2 in _matcher.get_opcodes():
+
+            if tag == "replace":
+                _text = text_block2[_s2:_e2]
+                _fill = rgb(0x00, 0x80, 0xff)
+                self.buildSvgLine(_text, _fill)
+
+            elif tag == "delete":
+                pass
+
+            elif tag == "insert":
+                _text = text_block2[_s2:_e2]
+                _fill = rgb(0x00, 0x80, 0xff)
+                self.buildSvgLine(_text, _fill)
+
+            elif tag == "equal":
+                _text = text_block1[_s1:_e1]
+                _fill = rgb(0x0, 0x0, 0x0)
+                self.buildSvgLine(_text, _fill)
+
+        if self.svg_text is not None:
+            self.svg_text["x"] = 0
+            self.svg_text["y"] = self.height
+            self.svg.add(self.svg_text)
+
+            self.height += self.height_line
+            self.svg_text = None
+
+        self.svg['height'] = self.height
+        self.svg['width'] = self.width_max
+
+        print()
+        return self.svg, self.width_max, self.height
+
+
 class DrawLegend:
     '''
     Draw svg legend.
@@ -268,6 +368,24 @@ class DrawXml:
         _svg.add(_t)
 
         return _svg
+
+    def addTextBlockCompare(self, text_block1, text_block2):
+        '''
+        Create difference of to text lines.
+
+        :param line1: str
+        :param line2: str
+        '''
+
+        _tc = TextBoxCompare()
+        _tc.pos_x = self.pos_x
+        _tc.pos_y = self.pos_y
+        _tc.font_family = XRender.Render.font_family
+        _tc.font_size = XRender.Render.font_size
+
+        svg, width_max, height = _tc.compare(text_block1, text_block2)
+
+        return svg, width_max, height
 
     def lineCompare(self, line1, line2):
         '''
