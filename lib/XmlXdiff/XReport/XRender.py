@@ -120,7 +120,9 @@ class Render:
 
             return text[:index]
 
-        _lines = text.split('\n')
+        _text = text.strip()
+        _text = _text.replace('\n', '\n%NewLine%\n')
+        _lines = _text.split('\n')
         _text_array = []
         _max_width = cls.max_textbox_len - offset
         _cnt = 0

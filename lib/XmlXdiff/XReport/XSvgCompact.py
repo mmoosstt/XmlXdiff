@@ -66,7 +66,15 @@ class TextBoxCompare:
                 if self.svg_text is None:
                     self.svg_text = Text(text="")
 
-                if self.act_line_width < self.max_line_width:
+                if _line == "%NewLine%":
+                    self.svg_text["x"] = 0
+                    self.svg_text["y"] = self.height
+                    self.svg.add(self.svg_text)
+                    self.height += _h
+                    self.act_line_width = 0
+                    self.svg_text = None
+
+                elif self.act_line_width < self.max_line_width:
                     self.svg_text.add(TSpan(text=_line, fill=fill))
                     self.act_line_width += _w
                     self.width_max = max(self.act_line_width, self.width_max)
@@ -114,13 +122,12 @@ class TextBoxCompare:
             self.svg_text["y"] = self.height
             self.svg.add(self.svg_text)
 
-            self.height += self.height_line
+            self.height += self.height_line * 0.3
             self.svg_text = None
 
         self.svg['height'] = self.height
         self.svg['width'] = self.width_max
 
-        print()
         return self.svg, self.width_max, self.height
 
 
@@ -386,51 +393,6 @@ class DrawXml:
         svg, width_max, height = _tc.compare(text_block1, text_block2)
 
         return svg, width_max, height
-
-    def lineCompare(self, line1, line2):
-        '''
-        Create difference of to text lines.
-
-        :param line1: str
-        :param line2: str
-        '''
-
-        text = Text(text="")
-
-        _matcher = SequenceMatcher(None, line1, line2)
-
-        _text = ''
-        for tag, _s1, _e1, _s2, _e2 in _matcher.get_opcodes():
-
-            if tag == "replace":
-                text.add(
-                    TSpan(text=line2[_s2:_e2], fill=rgb(0x00, 0x80, 0xff)))
-                # text.add(TSpan(text=line1[_s1:_e1],
-                #               text_decoration="line-through"))
-                _text += line2[_s2:_e2]
-                #_text += line1[_s1:_e1]
-
-            elif tag == "delete":
-                # text.add(TSpan(text=line1[_s1:_e1],
-                #              text_decoration="line-through"))
-                #_text += line1[_s1:_e1]
-                pass
-
-            elif tag == "insert":
-                text.add(
-                    TSpan(text=line2[_s2:_e2], fill=rgb(0x00, 0x80, 0xff)))
-                _text += line2[_s2:_e2]
-
-            elif tag == "equal":
-                text.add(TSpan(text=line1[_s1:_e1]))
-                _text += line1[_s1:_e1]
-
-        _width, _height = XRender.Render.getTextSize(_text)
-
-        text['y'] = _height
-        text['x'] = 0
-
-        return text, _width, _height
 
     def _moveLeft(self):
         self.pos_x = self.pos_x - 1.2 * self.unit
