@@ -95,27 +95,43 @@ class TextBoxCompare:
                        font_family=self.font_family,
                        font_size=self.font_size)
 
-        _matcher = SequenceMatcher(None, text_block1, text_block2)
+        _len_textblock1 = len(text_block1)
+        _len_textblock2 = len(text_block2)
 
-        for tag, _s1, _e1, _s2, _e2 in _matcher.get_opcodes():
+        if _len_textblock1 > 0 and _len_textblock2 > 0:
+            _matcher = SequenceMatcher(None, text_block1, text_block2)
 
-            if tag == "replace":
-                _text = text_block2[_s2:_e2]
-                _fill = rgb(0x00, 0x80, 0xff)
-                self.buildSvgLine(_text, _fill)
+            for tag, _s1, _e1, _s2, _e2 in _matcher.get_opcodes():
 
-            elif tag == "delete":
-                pass
+                if tag == "replace":
+                    _text = text_block2[_s2:_e2]
+                    _fill = rgb(0x00, 0x80, 0xff)
+                    self.buildSvgLine(_text, _fill)
 
-            elif tag == "insert":
-                _text = text_block2[_s2:_e2]
-                _fill = rgb(0x00, 0x80, 0xff)
-                self.buildSvgLine(_text, _fill)
+                elif tag == "delete":
+                    pass
 
-            elif tag == "equal":
-                _text = text_block1[_s1:_e1]
-                _fill = rgb(0x0, 0x0, 0x0)
-                self.buildSvgLine(_text, _fill)
+                elif tag == "insert":
+                    _text = text_block2[_s2:_e2]
+                    _fill = rgb(0x00, 0x80, 0xff)
+                    self.buildSvgLine(_text, _fill)
+
+                elif tag == "equal":
+                    _text = text_block1[_s1:_e1]
+                    _fill = rgb(0x0, 0x0, 0x0)
+                    self.buildSvgLine(_text, _fill)
+
+        elif _len_textblock1 == 0 and _len_textblock2 > 0:
+            _fill = rgb(0x00, 0x0, 0x0)
+            self.buildSvgLine(text_block2, _fill)
+
+        elif _len_textblock1 > 0 and _len_textblock2 == 0:
+            _fill = rgb(0x00, 0x0, 0x0)
+            self.buildSvgLine(text_block1, _fill)
+
+        else:
+            _fill = rgb(0x00, 0x0, 0x0)
+            self.buildSvgLine("", _fill)
 
         if self.svg_text is not None:
             self.svg_text["x"] = 0
