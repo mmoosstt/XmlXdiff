@@ -7,28 +7,28 @@
  License: TBD
 """
 
-from XmlXdiff.XReport import XSvgCompact
-from XmlXdiff.XReport.XSvgCompact import DrawLegend
+from xml_xdiff.report.svg_collection import compact
+from xml_xdiff.report.svg_collection.compact import DrawLegend
 
 
-class DrawXml(XSvgCompact.DrawXml):
+class DrawXml(compact):
     '''
     Create diff without text.
     '''
 
     def __init__(self):
-        XSvgCompact.DrawXml.__init__(self)
+        compact.DrawXml.__init__(self)
 
-    def _linesCallback(self, text):
+    def _lines_callback(self, text):
         return [('', 40, 10)]
 
 
-class DrawXmlDiff(XSvgCompact.DrawXmlDiff):
+class DrawXmlDiff(compact.DrawXmlDiff):
     '''
     Create diff without text.
     '''
 
     def __init__(self, path1, path2):
-        XSvgCompact.DrawXmlDiff.__init__(self, path1, path2)
+        compact.DrawXmlDiff.__init__(self, path1, path2)
         self.report1 = DrawXml()
         self.report2 = DrawXml()

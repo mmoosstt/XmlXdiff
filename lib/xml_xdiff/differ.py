@@ -11,7 +11,7 @@
 import os
 import copy
 import lxml.etree
-from XmlXdiff import XTypes, XPath, XHash, getPath
+from xml_xdiff import base, xpath, hash, getPath
 
 
 class XDiffPath:
@@ -94,7 +94,7 @@ class XDiffExecutor:
         self.root1 = self.xml1.getroot()
         self.root2 = self.xml2.getroot()
 
-        _xpath = XPath.XDiffXmlPath()
+        _xpath = xpath.XDiffXmlPath()
 
         self.xelements1 = _xpath.getXelements(self.root1, "", 1)
         self.xelements2 = _xpath.getXelements(self.root2, "", 1)
@@ -124,33 +124,33 @@ class XDiffExecutor:
                          callback,
                          child_cnt=None,
                          children=True,
-                         xtypes=(XTypes.ElementChanged, XTypes.ElementUnknown)):
+                         xtypes=(base.ElementChanged, base.ElementUnknown)):
 
         pass
 
     def _generatorXElements(self,
                             xelements,
-                            hash_algorithm=XHash.XDiffHasher.callbackHashAll,
+                            hash_algorithm=hash.XDiffHasher.callbackHashAll,
                             child_cnt=None,
                             children=True,
-                            xtypes=(XTypes.ElementChanged, XTypes.ElementUnknown)):
+                            xtypes=(base.ElementChanged, base.ElementUnknown)):
 
         if child_cnt is None:
-            _xelements_gen = XTypes.generatorXTypes(xelements,
-                                                    *xtypes)
+            _xelements_gen = base.generatorXTypes(xelements,
+                                                  *xtypes)
 
         else:
-            _xelements_gen = XTypes.generatorChildCount(xelements,
-                                                        child_cnt,
-                                                        *xtypes)
+            _xelements_gen = base.generatorChildCount(xelements,
+                                                      child_cnt,
+                                                      *xtypes)
 
-        XHash.XDiffHasher.getHashes(_xelements_gen, hash_algorithm, children)
+        hash.XDiffHasher.getHashes(_xelements_gen, hash_algorithm, children)
 
         if child_cnt is None:
-            _generator = XTypes.generatorXTypes(xelements, *xtypes)
+            _generator = base.generatorXTypes(xelements, *xtypes)
 
         else:
-            _generator = XTypes.generatorChildCount(
+            _generator = base.generatorChildCount(
                 xelements, child_cnt, *xtypes)
 
         return _generator
@@ -164,17 +164,17 @@ class XDiffExecutor:
         :param xtype: XType
         '''
 
-        _xelements1 = XTypes.generatorChildElements(self.xelements1,
-                                                    xelement1)
+        _xelements1 = base.generatorChildElements(self.xelements1,
+                                                  xelement1)
 
-        _xelements2 = XTypes.generatorChildElements(self.xelements2,
-                                                    xelement2)
+        _xelements2 = base.generatorChildElements(self.xelements2,
+                                                  xelement2)
 
         for _xelement1 in _xelements1:
             _xelement2 = next(_xelements2)
 
-            if (isinstance(_xelement1.type, XTypes.ElementUnknown) and
-                    isinstance(_xelement2.type, XTypes.ElementUnknown)):
+            if (isinstance(_xelement1.type, base.ElementUnknown) and
+                    isinstance(_xelement2.type, base.ElementUnknown)):
 
                 _xelement1.setType(xtype)
                 _xelement2.setType(xtype)
@@ -190,32 +190,32 @@ class XDiffExecutor:
         :param xelements2: [XElement, XElement, ...]
         '''
 
-        _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
+        _xtypes = (base.ElementChanged, base.ElementUnknown)
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
-                                                         hash_algorithm=XHash.XDiffHasher.callbackHashAll,
+                                                         hash_algorithm=hash.XDiffHasher.callbackHashAll,
                                                          children=False,
                                                          child_cnt=child_cnt,
                                                          xtypes=_xtypes)
 
         for _xelement2 in _xelements2_generator:
             _xelements1_generator = self._generatorXElements(xelements=xelements1,
-                                                             hash_algorithm=XHash.XDiffHasher.callbackHashAll,
+                                                             hash_algorithm=hash.XDiffHasher.callbackHashAll,
                                                              children=False,
                                                              xtypes=_xtypes)
 
             for _xelement1 in _xelements1_generator:
                 if _xelement1.hash == _xelement2.hash:
 
-                    _xelement1.setType(XTypes.ElementMovedParent)
-                    _xelement2.setType(XTypes.ElementMovedParent)
+                    _xelement1.setType(base.ElementMovedParent)
+                    _xelement2.setType(base.ElementMovedParent)
                     _xelement1.addXelement(_xelement2)
                     _xelement2.addXelement(_xelement1)
 
-                    _xelements1 = XTypes.arrayChildElements(xelements1,
-                                                            _xelement1)
+                    _xelements1 = base.arrayChildElements(xelements1,
+                                                          _xelement1)
 
-                    _xelements2 = XTypes.arrayChildElements(xelements2,
-                                                            _xelement2)
+                    _xelements2 = base.arrayChildElements(xelements2,
+                                                          _xelement2)
 
                     _child_cnts = {}
                     _ = [_child_cnts.update({_e.child_cnt: None})
@@ -255,12 +255,12 @@ class XDiffExecutor:
                                                                _xelements2)
 
                     for _e in _xelements1:
-                        if isinstance(_e.type, XTypes.ElementUnknown):
-                            _e.setType(XTypes.ElementDeleted)
+                        if isinstance(_e.type, base.ElementUnknown):
+                            _e.setType(base.ElementDeleted)
 
                     for _e in _xelements2:
-                        if isinstance(_e.type, XTypes.ElementUnknown):
-                            _e.setType(XTypes.ElementAdded)
+                        if isinstance(_e.type, base.ElementUnknown):
+                            _e.setType(base.ElementAdded)
 
                     break
 
@@ -273,17 +273,17 @@ class XDiffExecutor:
         :param xelements2: [XElement, XElement, ...]
         '''
 
-        _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
+        _xtypes = (base.ElementChanged, base.ElementUnknown)
 
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
-                                                         hash_algorithm=XHash.XDiffHasher.callbackHashTagNameConsitency,
+                                                         hash_algorithm=hash.XDiffHasher.callbackHashTagNameConsitency,
                                                          xtypes=_xtypes,
                                                          child_cnt=child_cnt)
 
         for _xelement2 in _xelements2_generator:
 
             _xelements1_generator = self._generatorXElements(xelements=xelements1,
-                                                             hash_algorithm=XHash.XDiffHasher.callbackHashTagNameConsitency,
+                                                             hash_algorithm=hash.XDiffHasher.callbackHashTagNameConsitency,
                                                              xtypes=_xtypes,
                                                              child_cnt=child_cnt)
             for _xelement1 in _xelements1_generator:
@@ -292,7 +292,7 @@ class XDiffExecutor:
 
                     self.setElementTypeWithChildren(_xelement1,
                                                     _xelement2,
-                                                    XTypes.ElementTagConsitency)
+                                                    base.ElementTagConsitency)
 
                     break
 
@@ -305,17 +305,17 @@ class XDiffExecutor:
         :param xelements2: [XElement, XElement, ...]
         '''
 
-        _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
+        _xtypes = (base.ElementChanged, base.ElementUnknown)
 
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
-                                                         hash_algorithm=XHash.XDiffHasher.callbackHashAttributeValueElementValueConsitency,
+                                                         hash_algorithm=hash.XDiffHasher.callbackHashAttributeValueElementValueConsitency,
                                                          xtypes=_xtypes,
                                                          child_cnt=child_cnt)
 
         for _xelement2 in _xelements2_generator:
 
             _xelements1_generator = self._generatorXElements(xelements=xelements1,
-                                                             hash_algorithm=XHash.XDiffHasher.callbackHashAttributeValueElementValueConsitency,
+                                                             hash_algorithm=hash.XDiffHasher.callbackHashAttributeValueElementValueConsitency,
                                                              xtypes=_xtypes,
                                                              child_cnt=child_cnt)
 
@@ -325,7 +325,7 @@ class XDiffExecutor:
 
                     self.setElementTypeWithChildren(_xelement1,
                                                     _xelement2,
-                                                    XTypes.ElementTextAttributeValueConsitency)
+                                                    base.ElementTextAttributeValueConsitency)
 
                     break
 
@@ -338,17 +338,17 @@ class XDiffExecutor:
         :param xelements2: [XElement, XElement, ...]
         '''
 
-        _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
+        _xtypes = (base.ElementChanged, base.ElementUnknown)
 
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
-                                                         hash_algorithm=XHash.XDiffHasher.callbackHashTagNameAttributeNameValueConsitency,
+                                                         hash_algorithm=hash.XDiffHasher.callbackHashTagNameAttributeNameValueConsitency,
                                                          xtypes=_xtypes,
                                                          child_cnt=child_cnt)
 
         for _xelement2 in _xelements2_generator:
 
             _xelements1_generator = self._generatorXElements(xelements=xelements1,
-                                                             hash_algorithm=XHash.XDiffHasher.callbackHashTagNameAttributeNameValueConsitency,
+                                                             hash_algorithm=hash.XDiffHasher.callbackHashTagNameAttributeNameValueConsitency,
                                                              xtypes=_xtypes,
                                                              child_cnt=child_cnt)
 
@@ -358,7 +358,7 @@ class XDiffExecutor:
 
                     self.setElementTypeWithChildren(_xelement1,
                                                     _xelement2,
-                                                    XTypes.ElementTagAttributeNameValueConsitency)
+                                                    base.ElementTagAttributeNameValueConsitency)
 
                     break
 
@@ -371,17 +371,17 @@ class XDiffExecutor:
         :param xelements2: [XElement, XElement, ...]
         '''
 
-        _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
+        _xtypes = (base.ElementChanged, base.ElementUnknown)
 
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
-                                                         hash_algorithm=XHash.XDiffHasher.callbackHashTagNameAttributeNameConsitency,
+                                                         hash_algorithm=hash.XDiffHasher.callbackHashTagNameAttributeNameConsitency,
                                                          xtypes=_xtypes,
                                                          child_cnt=child_cnt)
 
         for _xelement2 in _xelements2_generator:
 
             _xelements1_generator = self._generatorXElements(xelements=xelements1,
-                                                             hash_algorithm=XHash.XDiffHasher.callbackHashTagNameAttributeNameConsitency,
+                                                             hash_algorithm=hash.XDiffHasher.callbackHashTagNameAttributeNameConsitency,
                                                              xtypes=_xtypes,
                                                              child_cnt=child_cnt)
 
@@ -391,7 +391,7 @@ class XDiffExecutor:
 
                     self.setElementTypeWithChildren(_xelement1,
                                                     _xelement2,
-                                                    XTypes.ElementTagAttributeNameConsitency)
+                                                    base.ElementTagAttributeNameConsitency)
 
                     break
 
@@ -404,7 +404,7 @@ class XDiffExecutor:
         :param xelements2: [XElement, XElement, ...]
         '''
 
-        _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
+        _xtypes = (base.ElementChanged, base.ElementUnknown)
 
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
                                                          xtypes=_xtypes,
@@ -423,7 +423,7 @@ class XDiffExecutor:
 
                         self.setElementTypeWithChildren(_xelement1,
                                                         _xelement2,
-                                                        XTypes.ElementMoved)
+                                                        base.ElementMoved)
                         break
 
     def findUnchangedElementsWithChildren(self, child_cnt, xelements1, xelements2):
@@ -435,7 +435,7 @@ class XDiffExecutor:
         :param xelements2: [XElement, XElement, ...]
         '''
 
-        _xtypes = (XTypes.ElementChanged, XTypes.ElementUnknown)
+        _xtypes = (base.ElementChanged, base.ElementUnknown)
 
         _xelements2_generator = self._generatorXElements(xelements=xelements2,
                                                          xtypes=_xtypes,
@@ -454,6 +454,6 @@ class XDiffExecutor:
 
                         self.setElementTypeWithChildren(_xelement1,
                                                         _xelement2,
-                                                        XTypes.ElementUnchanged)
+                                                        base.ElementUnchanged)
 
                         break

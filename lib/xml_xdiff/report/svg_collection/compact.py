@@ -17,29 +17,29 @@ from svgwrite.container import Group, SVG
 from svgwrite.shapes import Rect, Polyline
 from svgwrite.text import Text, TSpan, TextArea
 
-from XmlXdiff import getPath
-from XmlXdiff import XDiffer
-from XmlXdiff.XReport import XRender
-from XmlXdiff.XPath import XDiffXmlPath
-from XmlXdiff import XTypes
+from xml_xdiff import getPath
+from xml_xdiff import differ
+from xml_xdiff.report import render_text
+from xml_xdiff.xpath import XDiffXmlPath
+from xml_xdiff import base
 
 
 class TextBoxCompare:
 
     def __init__(self):
-        self.max_line_width = XRender.Render.max_textbox_len
+        self.max_line_width = render_text.Render.max_textbox_len
         self.pos_x = 0
         self.pos_y = 0
         self.act_line_width = 0
         self.font_family = None
         self.font_size = None
-        self.width, self.height_line = XRender.Render.getTextSize("")
+        self.width, self.height_line = render_text.Render.get_text_size("")
         self.height = self.height_line
         self.width_max = 0
         self.svg_text = Text(text="")
 
-    def buildSvgLine(self, line_fragment, fill):
-        _lines = XRender.Render.splitTextToLines(line_fragment, self.act_line_width)
+    def build_svg_line(self, line_fragment, fill):
+        _lines = render_text.Render.split_text_to_lines(line_fragment, self.act_line_width)
         _line, _w, _h = _lines[0]
 
         if self.svg_text is None:
@@ -98,7 +98,11 @@ class TextBoxCompare:
         _len_textblock1 = len(text_block1)
         _len_textblock2 = len(text_block2)
 
-        if _len_textblock1 > 0 and _len_textblock2 > 0:
+        if text_block1 == text_block2:
+            _fill = rgb(0x00, 0x0, 0x0)
+            self.build_svg_line(text_block2, _fill)
+
+        elif _len_textblock1 > 0 and _len_textblock2 > 0:
             _matcher = SequenceMatcher(None, text_block1, text_block2)
 
             for tag, _s1, _e1, _s2, _e2 in _matcher.get_opcodes():
@@ -106,7 +110,7 @@ class TextBoxCompare:
                 if tag == "replace":
                     _text = text_block2[_s2:_e2]
                     _fill = rgb(0x00, 0x80, 0xff)
-                    self.buildSvgLine(_text, _fill)
+                    self.build_svg_line(_text, _fill)
 
                 elif tag == "delete":
                     pass
@@ -114,24 +118,24 @@ class TextBoxCompare:
                 elif tag == "insert":
                     _text = text_block2[_s2:_e2]
                     _fill = rgb(0x00, 0x80, 0xff)
-                    self.buildSvgLine(_text, _fill)
+                    self.build_svg_line(_text, _fill)
 
                 elif tag == "equal":
                     _text = text_block1[_s1:_e1]
                     _fill = rgb(0x0, 0x0, 0x0)
-                    self.buildSvgLine(_text, _fill)
+                    self.build_svg_line(_text, _fill)
 
         elif _len_textblock1 == 0 and _len_textblock2 > 0:
             _fill = rgb(0x00, 0x0, 0x0)
-            self.buildSvgLine(text_block2, _fill)
+            self.build_svg_line(text_block2, _fill)
 
         elif _len_textblock1 > 0 and _len_textblock2 == 0:
             _fill = rgb(0x00, 0x0, 0x0)
-            self.buildSvgLine(text_block1, _fill)
+            self.build_svg_line(text_block1, _fill)
 
         else:
             _fill = rgb(0x00, 0x0, 0x0)
-            self.buildSvgLine("", _fill)
+            self.build_svg_line("", _fill)
 
         if self.svg_text is not None:
             self.svg_text["x"] = 0
@@ -164,16 +168,16 @@ class DrawLegend:
         self.font_family = "Lucida Console"
         self.filepath = None
 
-        XRender.Render.setFontFamily(self.font_family)
-        XRender.Render.setFontSize(self.font_size)
+        render_text.Render.set_font_family(self.font_family)
+        render_text.Render.set_font_size(self.font_size)
 
         self.dwg = svgwrite.Drawing()
-        self._moveRight()
+        self._move_right()
 
         _svg = SVG(insert=(self.pos_x, self.pos_y))
 
-        for _class in XTypes.generatorAvailableXTypes():
-            _svg.add(self.addLine(_class))
+        for _class in base.generatorAvailableXTypes():
+            _svg.add(self.add_line(_class))
 
         _svg["width"] = self.pos_x_max
         _svg["height"] = self.pos_y_max
@@ -182,7 +186,7 @@ class DrawLegend:
 
         self.dwg.add(_svg)
 
-    def addLine(self, instance_xtype):
+    def add_line(self, instance_xtype):
         '''
         Draw svg line representing XElement.
 
@@ -190,7 +194,7 @@ class DrawLegend:
         '''
 
         _text = instance_xtype.name()
-        _w, _h = XRender.Render.getTextSize(_text)
+        _w, _h = render_text.Render.get_text_size(_text)
 
         _h += _h * 0.25
 
@@ -225,14 +229,14 @@ class DrawLegend:
 
         return _svg
 
-    def _moveLeft(self):
+    def _move_left(self):
         '''
         Positioning within svg.
         '''
 
         self.pos_x = self.pos_x - 1.2 * self.unit
 
-    def _moveRight(self):
+    def _move_right(self):
         '''
         Positioning within svg
         '''
@@ -240,7 +244,7 @@ class DrawLegend:
         self.pos_x = self.pos_x + 1.2 * self.unit
         self.pos_x_max = max(self.pos_x_max, self.pos_x)
 
-    def saveSvg(self, filepath=None):
+    def save_svg(self, filepath=None):
         '''
         save svg.
 
@@ -274,11 +278,11 @@ class DrawXml:
         self.font_size = 10
         self.font_family = "Lucida Console"
 
-        XRender.Render.setFontFamily(self.font_family)
-        XRender.Render.setFontSize(self.font_size)
-        self.pos_y = XRender.Render.font_metrics.height() * 2
+        render_text.Render.set_font_family(self.font_family)
+        render_text.Render.set_font_size(self.font_size)
+        self.pos_y = render_text.Render.font_metrics.height() * 2
 
-    def getElementText(self, element):
+    def get_element_text(self, element):
         '''
         returning string representing lxml.etree.node.
         handing comments, namespace and attributes.
@@ -314,7 +318,7 @@ class DrawXml:
 
         return "{tag}{attribs}: {text}".format(attribs=_attribs, tag=_tag, text=element.text)
 
-    def loadFromXElements(self, xelements, callback):
+    def load_from_xelements(self, xelements, callback):
         '''
         XElements to svg representation.
 
@@ -338,32 +342,32 @@ class DrawXml:
             if _steps > 0:
 
                 for _x in range(abs(_steps)):
-                    self._moveRight()
+                    self._move_right()
 
             elif _steps < 0:
 
                 for _x in range(abs(_steps)):
-                    self._moveLeft()
+                    self._move_left()
 
             _xelement.addSvgNode(callback(_xelement))
 
-    def _linesCallback(self, text):
+    def _lines_callback(self, text):
         '''
         For debugging purpose.
 
         :param text: str - line
         '''
 
-        return XRender.Render.splitTextToLines(text)
+        return render_text.Render.split_text_to_lines(text)
 
-    def addTextBox(self, xelement):
+    def add_text_box(self, xelement):
         '''
         Simple text box with fixed width.
 
         :param xelement: XTypes.XElement
         '''
-        _text = self.getElementText(xelement.node)
-        _lines = self._linesCallback(_text)
+        _text = self.get_element_text(xelement.node)
+        _lines = self._lines_callback(_text)
 
         _y = copy.deepcopy(self.pos_y)
 
@@ -392,7 +396,7 @@ class DrawXml:
 
         return _svg
 
-    def addTextBlockCompare(self, text_block1, text_block2):
+    def add_text_block_compare(self, text_block1, text_block2):
         '''
         Create difference of to text lines.
 
@@ -403,27 +407,27 @@ class DrawXml:
         _tc = TextBoxCompare()
         _tc.pos_x = self.pos_x
         _tc.pos_y = self.pos_y
-        _tc.font_family = XRender.Render.font_family
-        _tc.font_size = XRender.Render.font_size
+        _tc.font_family = render_text.Render.font_family
+        _tc.font_size = render_text.Render.font_size
 
         svg, width_max, height = _tc.compare(text_block1, text_block2)
 
         return svg, width_max, height
 
-    def _moveLeft(self):
+    def _move_left(self):
         self.pos_x = self.pos_x - 1.2 * self.unit
         self.pos_x_max = max(self.pos_x_max, self.pos_x)
 
-    def _moveRight(self):
+    def _move_right(self):
         self.pos_x = self.pos_x + 1.2 * self.unit
         self.pos_x_max = max(self.pos_x_max, self.pos_x)
 
-    def _moveTop(self):
+    def _move_top(self):
         self.fill = self.fill_blue
         self.pos_y = 0.3 * self.unit
         self.pos_x = self.pos_x_max  # + (5.5 * self.unit)
 
-    def saveSvg(self, xelements):
+    def save_svg(self, xelements):
         """
         Save svg to file.
         """
@@ -446,7 +450,7 @@ class DrawXmlDiff:
         self.differ = None
         self.path1 = path1
         self.path2 = path2
-        self.differ = XDiffer.XDiffExecutor()
+        self.differ = differ.XDiffExecutor()
         self.report1 = DrawXml()
         self.report2 = DrawXml()
 
@@ -463,15 +467,15 @@ class DrawXmlDiff:
                                                                            filename1=self.differ.path1.filename,
                                                                            filename2=self.differ.path2.filename)
 
-        self.report1._moveRight()
-        self.report1.loadFromXElements(self.differ.xelements1,
-                                       self.report1.addTextBox)
-        self.report1.saveSvg(self.differ.xelements1)
+        self.report1._move_right()
+        self.report1.load_from_xelements(self.differ.xelements1,
+                                         self.report1.add_text_box)
+        self.report1.save_svg(self.differ.xelements1)
 
-        self.report2._moveRight()
-        self.report2.loadFromXElements(self.differ.xelements2,
-                                       self.report2.addTextBox)
-        self.report2.saveSvg(self.differ.xelements2)
+        self.report2._move_right()
+        self.report2.load_from_xelements(self.differ.xelements2,
+                                         self.report2.add_text_box)
+        self.report2.save_svg(self.differ.xelements2)
 
         self.legend = DrawLegend()
 
@@ -502,26 +506,26 @@ class DrawXmlDiff:
         self.dwg.add(self.report2.dwg)
         self.dwg.add(self.legend.dwg)
 
-        self._drawMovePattern(XTypes.ElementMoved)
-        self._drawMovePattern(XTypes.ElementMovedParent)
-        self._drawMovePattern(XTypes.ElementUnchanged)
-        self._drawMovePattern(XTypes.ElementTagAttributeNameConsitency)
-        self._drawMovePattern(XTypes.ElementTextAttributeValueConsitency)
-        self._drawMovePattern(XTypes.ElementTagConsitency)
-        self._drawMovePattern(XTypes.ElementTagAttributeNameValueConsitency)
+        self._draw_move_pattern(base.ElementMoved)
+        self._draw_move_pattern(base.ElementMovedParent)
+        self._draw_move_pattern(base.ElementUnchanged)
+        self._draw_move_pattern(base.ElementTagAttributeNameConsitency)
+        self._draw_move_pattern(base.ElementTextAttributeValueConsitency)
+        self._draw_move_pattern(base.ElementTagConsitency)
+        self._draw_move_pattern(base.ElementTagAttributeNameValueConsitency)
 
-        self._drawChangedPattern(XTypes.ElementChanged,
-                                 self.differ.xelements2,
-                                 self.report1.pos_x_max * 1.2)
+        self._draw_changed_pattern(base.ElementChanged,
+                                   self.differ.xelements2,
+                                   self.report1.pos_x_max * 1.2)
 
-        self._drawChangedPattern(XTypes.ElementAdded,
-                                 self.differ.xelements2,
-                                 self.report1.pos_x_max * 1.2)
+        self._draw_changed_pattern(base.ElementAdded,
+                                   self.differ.xelements2,
+                                   self.report1.pos_x_max * 1.2)
 
-        self._drawChangedPattern(XTypes.ElementDeleted,
-                                 self.differ.xelements1)
+        self._draw_changed_pattern(base.ElementDeleted,
+                                   self.differ.xelements1)
 
-    def saveSvg(self, filepath=None):
+    def save_svg(self, filepath=None):
         '''
         Save svg to filepath
 
@@ -534,9 +538,9 @@ class DrawXmlDiff:
 
         self.dwg.save()
 
-    def _drawMovePattern(self, xtype):
+    def _draw_move_pattern(self, xtype):
 
-        for _e in XTypes.generatorXTypes(self.differ.xelements1, xtype):
+        for _e in base.generatorXTypes(self.differ.xelements1, xtype):
             _start_svg1 = _e.svg_node
 
             if _e.getXelement():
@@ -571,9 +575,9 @@ class DrawXmlDiff:
 
                 self.dwg.add(_line)
 
-    def _drawChangedPattern(self, xtype, xelements, x_offset=0):
+    def _draw_changed_pattern(self, xtype, xelements, x_offset=0):
 
-        for _e in XTypes.generatorXTypes(xelements, xtype):
+        for _e in base.generatorXTypes(xelements, xtype):
             _start_svg1 = _e.svg_node
 
             _x1 = float(_start_svg1['x']) + x_offset

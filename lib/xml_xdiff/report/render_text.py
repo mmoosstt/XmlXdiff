@@ -25,10 +25,10 @@ class Render:
     font_family = None
     font_generator = None
     font_metrics = None
-    max_textbox_len = 600  # px
+    max_textbox_len = 300  # px
 
     @classmethod
-    def _initFontInterface(cls):
+    def _init_font_interface(cls):
         '''
         static init interface, font family and font size have to be
         set first. This function does not have to be called.
@@ -47,16 +47,16 @@ class Render:
             cls.font_metrics = QFontMetricsF(cls.font, QSvgGenerator())
 
     @classmethod
-    def setFontFamily(cls, inp):
+    def set_font_family(cls, inp):
         '''
         set font family
         :param inp: str - "arial"
         '''
         cls.font_family = inp
-        cls._initFontInterface()
+        cls._init_font_interface()
 
     @classmethod
-    def setFontSize(cls, inp):
+    def set_font_size(cls, inp):
         '''
         set font size
 
@@ -64,10 +64,10 @@ class Render:
         '''
 
         cls.font_size = inp
-        cls._initFontInterface()
+        cls._init_font_interface()
 
     @classmethod
-    def getTextSize(cls, text):
+    def get_text_size(cls, text):
         """
             calculates the height and width of the input text string.
 
@@ -78,21 +78,21 @@ class Render:
         return (cls.font_metrics.width(text), cls.font_metrics.height())
 
     @classmethod
-    def splitTextToLines(cls, text, offset=0):
+    def split_text_to_lines(cls, text, offset=0):
         """
             Split Into Max TextBoxSize
 
             return = [(text1:str, width1:int, height1:int), (text1, width2, height2), (..)]
         """
 
-        def getTextSegment(text):
+        def _get_text_segment(text):
             '''
             find the first wigth space from the right side
             '''
 
             _len_text = len(text)
 
-            def getValidIndex(inp_str):
+            def _get_valid_index(inp_str):
                 _index = text.rfind(inp_str)
 
                 # not found
@@ -111,10 +111,10 @@ class Render:
 
                 return _index
 
-            index = getValidIndex("\t")
+            index = _get_valid_index("\t")
             if not index:
 
-                index = getValidIndex(" ")
+                index = _get_valid_index(" ")
                 if not index:
                     index = abs(len(text) - 50)
 
@@ -131,7 +131,7 @@ class Render:
             _text_width = (cls.max_textbox_len + 10)
 
             while _text_width > _max_width:
-                _text_width, _text_height = cls.getTextSize(_text)
+                _text_width, _text_height = cls.get_text_size(_text)
 
                 # too long
                 if _text_width > _max_width:
@@ -142,8 +142,9 @@ class Render:
                     _text_segment_width = cls.max_textbox_len + 10
 
                     while _text_segment_width > _max_width:
-                        _text_segment = getTextSegment(_text_segment)
-                        _text_segment_width, _text_segment_height = cls.getTextSize(_text_segment)
+                        _text_segment = _get_text_segment(_text_segment)
+                        _text_segment_width, _text_segment_height = cls.get_text_size(
+                            _text_segment)
 
                         # exit if fragment does not change anymore
                         if _text_segment == _text_segment_z:

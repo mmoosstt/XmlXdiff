@@ -10,9 +10,9 @@ import os
 import unittest
 import inspect
 
-from XmlXdiff import getPath, XDiffer
-from XmlXdiff.XReport.XSvgColoredText import DrawXmlDiff, DrawLegend
-from XmlXdiff.XPath import XDiffXmlPath
+from xml_xdiff import getPath, differ
+from xml_xdiff.report.svg_collection.coloured_text import DrawXmlDiff, DrawLegend
+from xml_xdiff.xpath import XDiffXmlPath
 
 import lxml.etree
 
@@ -58,15 +58,15 @@ class ReportModule(unittest.TestCase):
         _l.saveSvg('{}\\..\\..\\tests\\simple\\legend.svg'.format(getPath()))
 
     def testXSvgCompact(self):
-        from XmlXdiff.XReport.XSvgCompact import DrawXmlDiff
+        from xml_xdiff.report.svg_collection.compact import DrawXmlDiff
         self._simpleModule(DrawXmlDiff)
 
     def testXSvgColoredText(self):
-        from XmlXdiff.XReport.XSvgColoredText import DrawXmlDiff
+        from xml_xdiff.report.svg_collection.coloured_text import DrawXmlDiff
         self._simpleModule(DrawXmlDiff)
 
     def testXSvgColorOnly(self):
-        from XmlXdiff.XReport.XSvgColorOnly import DrawXmlDiff
+        from xml_xdiff.report.svg_collection.coloured_without_text import DrawXmlDiff
         self._simpleModule(DrawXmlDiff)
 
     def _simpleModule(self, modul_under_test):
@@ -114,7 +114,7 @@ class CompareAll(unittest.TestCase):
 
     @staticmethod
     def execute_old(folder_name):
-        _i = XDiffer.XDiffExecutor()
+        _i = differ.XDiffExecutor()
         _i.setPath1("{}\\..\\..\\tests\\{}\\a.xml".format(
             getPath(), folder_name))
         _i.setPath2("{}\\..\\..\\tests\\{}\\b.xml".format(
@@ -128,7 +128,7 @@ class CompareAll(unittest.TestCase):
         _path2 = "{}\\..\\..\\tests\\{}\\b.xml".format(getPath(), folder_name)
         cls.differ = DrawXmlDiff(_path1, _path2)
         cls.differ.draw()
-        cls.differ.saveSvg()
+        cls.differ.save_svg()
         print("{name}: delta_t={time:.4f}s xml_elements={cnt}".format(name=folder_name,
                                                                       time=time.time() - _t,
                                                                       cnt=len(cls.differ.differ.xelements2) + len(cls.differ.differ.xelements1)))

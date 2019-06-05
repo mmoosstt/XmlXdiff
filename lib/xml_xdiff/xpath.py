@@ -9,7 +9,7 @@
 
 
 import lxml.etree
-from XmlXdiff import XTypes
+from xml_xdiff import base
 
 
 class XPathException(Exception):
@@ -109,8 +109,8 @@ class XDiffXmlPath():
         _path = "{parent}/{tag}".format(parent=parent_path,
                                         tag=cls.getTag(element, pos))
 
-        _xelement = XTypes.XElement()
-        _xelement.setType(XTypes.ElementUnknown)
+        _xelement = base.XElement()
+        _xelement.setType(base.ElementUnknown)
         _xelement.setNode(element)
         _xelement.setXpath(_path)
 

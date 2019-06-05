@@ -3,7 +3,7 @@ import unittest
 import inspect
 from xmldiff import main, formatting
 
-from XmlXdiff import getPath
+from xml_xdiff import getPath
 
 import lxml.etree
 

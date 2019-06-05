@@ -7,33 +7,33 @@
  License: TBD
 """
 from svgwrite.container import SVG
-from XmlXdiff.XReport import XSvgCompact
-from XmlXdiff.XReport.XSvgCompact import DrawLegend
+from xml_xdiff.report.svg_collection import compact
+from xml_xdiff.report.svg_collection.compact import DrawLegend
 
 
-class DrawXml(XSvgCompact.DrawXml):
+class DrawXml(compact.DrawXml):
     '''
     Draw svg signle xml
     '''
 
     def __init__(self):
-        XSvgCompact.DrawXml.__init__(self)
+        compact.DrawXml.__init__(self)
 
-    def addTextBox(self, xelement):
+    def add_text_box(self, xelement):
         '''
         Text box with fixed width and content text diff.
 
         :param xelement: XTypes.XElement
         '''
 
-        _node_text1 = self.getElementText(xelement.node)
+        _node_text1 = self.get_element_text(xelement.node)
 
         if xelement.getXelement() is None:
             _node_text2 = ""
         else:
-            _node_text2 = self.getElementText(xelement.getXelement().node)
+            _node_text2 = self.get_element_text(xelement.getXelement().node)
 
-        _svg, _width, _height = self.addTextBlockCompare(_node_text1, _node_text2)
+        _svg, _width, _height = self.add_text_block_compare(_node_text1, _node_text2)
         self.pos_y = self.pos_y + float(_height)
         self.pos_y_max = max(self.pos_y_max, self.pos_y)
         self.pos_x_max = max(self.pos_x_max, self.pos_x + float(_width))
@@ -41,12 +41,12 @@ class DrawXml(XSvgCompact.DrawXml):
         return _svg
 
 
-class DrawXmlDiff(XSvgCompact.DrawXmlDiff):
+class DrawXmlDiff(compact.DrawXmlDiff):
     '''
     Create diff without text.
     '''
 
     def __init__(self, path1, path2):
-        XSvgCompact.DrawXmlDiff.__init__(self, path1, path2)
+        compact.DrawXmlDiff.__init__(self, path1, path2)
         self.report1 = DrawXml()
         self.report2 = DrawXml()
