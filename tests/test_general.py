@@ -10,9 +10,9 @@ import os
 import unittest
 import inspect
 
-from xml_xdiff import get_path, differ
-from xml_xdiff.report.svg_collection.coloured_text import DrawXmlDiff, DrawLegend
-from xml_xdiff.xpath import XDiffXmlPath
+from diffx import get_path, differ
+from diffx.svg.coloured_text import DrawXmlDiff, DrawLegend
+from diffx.xpath import XDiffXmlPath
 
 import lxml.etree
 
@@ -47,7 +47,7 @@ XSLT_TEMPLATE = lxml.etree.fromstring(XSLT)
 class UnSorted(unittest.TestCase):
 
     def calcDistance(self):
-        _res = XDiffXmlPath.getXpathDistance("a/b/c/d/1/2/3", "a/b/c/d/1/3")
+        _res = XDiffXmlPath.get_xpath_distance("a/b/c/d/1/2/3", "a/b/c/d/1/3")
         self.assertEqual(_res, 3)
 
 
@@ -58,15 +58,15 @@ class ReportModule(unittest.TestCase):
         _l.saveSvg('{}\\..\\..\\tests\\simple\\legend.svg'.format(get_path()))
 
     def testXSvgCompact(self):
-        from xml_xdiff.report.svg_collection.compact import DrawXmlDiff
+        from diffx.svg.compact import DrawXmlDiff
         self._simpleModule(DrawXmlDiff)
 
     def testXSvgColoredText(self):
-        from xml_xdiff.report.svg_collection.coloured_text import DrawXmlDiff
+        from diffx.svg.coloured_text import DrawXmlDiff
         self._simpleModule(DrawXmlDiff)
 
     def testXSvgColorOnly(self):
-        from xml_xdiff.report.svg_collection.coloured_without_text import DrawXmlDiff
+        from diffx.svg.coloured_without_text import DrawXmlDiff
         self._simpleModule(DrawXmlDiff)
 
     def _simpleModule(self, modul_under_test):

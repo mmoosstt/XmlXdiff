@@ -9,7 +9,7 @@
 
 
 import lxml.etree
-from xml_xdiff import base
+from diffx import base
 
 
 class XPathException(Exception):
@@ -29,7 +29,7 @@ class XDiffXmlPath():
     xml = None
 
     @classmethod
-    def getXelements(cls, element, parent_path="", pos=0):
+    def get_xelements(cls, element, parent_path="", pos=0):
         """
         Creates a list of XmlXdiff.XTypes.XElement from lxml root element for instance.
         """
@@ -39,7 +39,7 @@ class XDiffXmlPath():
         return cls.xelements
 
     @classmethod
-    def getXpathDistance(cls, path1, path2):
+    def get_xpath_distance(cls, path1, path2):
         '''
         Calculate distance between paths.
         Can be used for cost calculation of moved nodes.
@@ -65,7 +65,7 @@ class XDiffXmlPath():
                 return len(_arr1) + len(_arr2)
 
     @classmethod
-    def getTag(cls, element, pos):
+    def get_tag(cls, element, pos):
         '''
         Creation of valid tag name for new xpath syntax by taking namespaces and
         comments into account.
@@ -107,7 +107,7 @@ class XDiffXmlPath():
         '''
 
         _path = "{parent}/{tag}".format(parent=parent_path,
-                                        tag=cls.getTag(element, pos))
+                                        tag=cls.get_tag(element, pos))
 
         _xelement = base.XElement()
         _xelement.set_type(base.ElementUnknown)
