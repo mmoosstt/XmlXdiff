@@ -3,7 +3,7 @@ import unittest
 import inspect
 from xmldiff import main, formatting
 
-from xml_xdiff import getPath
+from xml_xdiff import get_path
 
 import lxml.etree
 
@@ -45,10 +45,10 @@ class HTMLFormatter(formatting.XMLFormatter):
 class UnSorted(unittest.TestCase):
 
     path1 = "{}\\..\\..\\tests\\test9\\a.xml".format(
-        getPath())
+        get_path())
     path2 = "{}\\..\\..\\tests\\test9\\b.xml".format(
-        getPath())
-    path = "{}\\..\\..\\tests".format(getPath())
+        get_path())
+    path = "{}\\..\\..\\tests".format(get_path())
 
     def testStdOutput(self):
 

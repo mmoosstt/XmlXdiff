@@ -169,4 +169,4 @@ class XDiffHasher():
             _hash_algo = hashlib.sha1()
             callback_hash_algorithm(_xelement.node, _hash_algo, children)
             _hash = _hash_algo.hexdigest()
-            _xelement.setHash(_hash)
+            _xelement.set_hash(_hash)

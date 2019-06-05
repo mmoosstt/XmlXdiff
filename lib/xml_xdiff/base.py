@@ -31,7 +31,7 @@ class XElement:
         self.svg_node = None
         self.xelements_compared = None
 
-    def setChildCnt(self, inp):
+    def set_child_cnt(self, inp):
         '''
         interface setter for child_cnt
 
@@ -40,14 +40,14 @@ class XElement:
 
         self.child_cnt = inp
 
-    def addSvgNode(self, inp):
+    def add_svg_node(self, inp):
         '''
         interface setter for svg_node
         :param inp:
         '''
         self.svg_node = inp
 
-    def addXelement(self, xelement):
+    def add_xelement(self, xelement):
         '''
         interface setter for xelment_compared
 
@@ -55,13 +55,13 @@ class XElement:
         '''
         self.xelements_compared = xelement
 
-    def getXelement(self):
+    def get_xelement(self):
         '''
         interface getter for xelment_compared
         '''
         return self.xelements_compared
 
-    def setNode(self, inp):
+    def set_node(self, inp):
         '''
         interface setter for node
 
@@ -69,7 +69,7 @@ class XElement:
         '''
         self.node = inp
 
-    def setType(self, inp):
+    def set_type(self, inp):
         '''
         interface setter for type
 
@@ -81,7 +81,7 @@ class XElement:
         else:
             self.type = inp
 
-    def setXpath(self, inp):
+    def set_xpath(self, inp):
         '''
         interface setter for xpath
         custom xpath, different compatible to lxml.xpath but different syntax used.
@@ -90,7 +90,7 @@ class XElement:
         '''
         self.xpath = inp
 
-    def setHash(self, inp):
+    def set_hash(self, inp):
         '''
         interface setter for hash
         current calculated hash.
@@ -237,7 +237,7 @@ class ElementTextAttributeValueConsitency(XType):
         XType.__init__(self)
 
 
-def generatorChildElements(elements, element):
+def generator_child_elements(elements, element):
     '''
     Generator for all child elements of element that are part of elements
 
@@ -249,10 +249,10 @@ def generatorChildElements(elements, element):
             yield _element
 
 
-def arrayChildElements(elements, element):
+def array_child_elements(elements, element):
     '''
     Returns an array of child elements of element that are part of elements
-    Use CHILD_ARRAY over generatorChildElements if it is consumed more times afterwards.
+    Use CHILD_ARRAY over generator_child_elements if it is consumed more times afterwards.
 
     :param elements: [XElement, ..]
     :param element: XElement
@@ -270,7 +270,7 @@ def arrayChildElements(elements, element):
     return elements[_start_index + 1:_stop_index + 1]
 
 
-def generatorChildCount(elements, child_cnt, *element_types):
+def generator_child_count(elements, child_cnt, *element_types):
     '''
     Generator for elements of a certain type and a specific number of children
 
@@ -285,7 +285,7 @@ def generatorChildCount(elements, child_cnt, *element_types):
                 yield _element
 
 
-def generatorXTypes(elements, *element_types):
+def generator_xtypes(elements, *element_types):
     """
     Generator for elements of a certain type.
 
@@ -304,7 +304,7 @@ def generatorXTypes(elements, *element_types):
             yield _element
 
 
-def generatorAvailableXTypes():
+def generator_available_xtypes():
     '''
     Generator for all available XTypes
     '''

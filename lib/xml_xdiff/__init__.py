@@ -10,7 +10,7 @@
 import os
 
 
-def getPath():
+def get_path():
     """
     return: path of the model __init__.py is located in.
     """

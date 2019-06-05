@@ -11,7 +11,7 @@
 import os
 import copy
 import lxml.etree
-from xml_xdiff import base, xpath, hash, getPath
+from xml_xdiff import base, xpath, hash, get_path
 
 
 class XDiffPath:
@@ -36,9 +36,9 @@ class XDiffExecutor:
 
     def __init__(self):
         self.path1 = XDiffPath(
-            '{}\\..\\..\\tests\\test1\\a.xml'.format(getPath()))
+            '{}\\..\\..\\tests\\test1\\a.xml'.format(get_path()))
         self.path2 = XDiffPath(
-            '{}\\..\\..\\tests\\test1\\b.xml'.format(getPath()))
+            '{}\\..\\..\\tests\\test1\\b.xml'.format(get_path()))
 
         # initialised when execute is executed
         self.gravity = 0
@@ -136,21 +136,21 @@ class XDiffExecutor:
                             xtypes=(base.ElementChanged, base.ElementUnknown)):
 
         if child_cnt is None:
-            _xelements_gen = base.generatorXTypes(xelements,
+            _xelements_gen = base.generator_xtypes(xelements,
                                                   *xtypes)
 
         else:
-            _xelements_gen = base.generatorChildCount(xelements,
+            _xelements_gen = base.generator_child_count(xelements,
                                                       child_cnt,
                                                       *xtypes)
 
         hash.XDiffHasher.getHashes(_xelements_gen, hash_algorithm, children)
 
         if child_cnt is None:
-            _generator = base.generatorXTypes(xelements, *xtypes)
+            _generator = base.generator_xtypes(xelements, *xtypes)
 
         else:
-            _generator = base.generatorChildCount(
+            _generator = base.generator_child_count(
                 xelements, child_cnt, *xtypes)
 
         return _generator
@@ -164,10 +164,10 @@ class XDiffExecutor:
         :param xtype: XType
         '''
 
-        _xelements1 = base.generatorChildElements(self.xelements1,
+        _xelements1 = base.generator_child_elements(self.xelements1,
                                                   xelement1)
 
-        _xelements2 = base.generatorChildElements(self.xelements2,
+        _xelements2 = base.generator_child_elements(self.xelements2,
                                                   xelement2)
 
         for _xelement1 in _xelements1:
@@ -176,10 +176,10 @@ class XDiffExecutor:
             if (isinstance(_xelement1.type, base.ElementUnknown) and
                     isinstance(_xelement2.type, base.ElementUnknown)):
 
-                _xelement1.setType(xtype)
-                _xelement2.setType(xtype)
-                _xelement1.addXelement(_xelement2)
-                _xelement2.addXelement(_xelement1)
+                _xelement1.set_type(xtype)
+                _xelement2.set_type(xtype)
+                _xelement1.add_xelement(_xelement2)
+                _xelement2.add_xelement(_xelement1)
 
     def findMovedParentElements(self, child_cnt, xelements1, xelements2):
         '''
@@ -206,15 +206,15 @@ class XDiffExecutor:
             for _xelement1 in _xelements1_generator:
                 if _xelement1.hash == _xelement2.hash:
 
-                    _xelement1.setType(base.ElementMovedParent)
-                    _xelement2.setType(base.ElementMovedParent)
-                    _xelement1.addXelement(_xelement2)
-                    _xelement2.addXelement(_xelement1)
+                    _xelement1.set_type(base.ElementMovedParent)
+                    _xelement2.set_type(base.ElementMovedParent)
+                    _xelement1.add_xelement(_xelement2)
+                    _xelement2.add_xelement(_xelement1)
 
-                    _xelements1 = base.arrayChildElements(xelements1,
+                    _xelements1 = base.array_child_elements(xelements1,
                                                           _xelement1)
 
-                    _xelements2 = base.arrayChildElements(xelements2,
+                    _xelements2 = base.array_child_elements(xelements2,
                                                           _xelement2)
 
                     _child_cnts = {}
@@ -256,11 +256,11 @@ class XDiffExecutor:
 
                     for _e in _xelements1:
                         if isinstance(_e.type, base.ElementUnknown):
-                            _e.setType(base.ElementDeleted)
+                            _e.set_type(base.ElementDeleted)
 
                     for _e in _xelements2:
                         if isinstance(_e.type, base.ElementUnknown):
-                            _e.setType(base.ElementAdded)
+                            _e.set_type(base.ElementAdded)
 
                     break
 

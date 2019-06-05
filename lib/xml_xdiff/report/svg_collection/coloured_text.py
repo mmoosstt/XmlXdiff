@@ -28,10 +28,10 @@ class DrawXml(compact.DrawXml):
 
         _node_text1 = self.get_element_text(xelement.node)
 
-        if xelement.getXelement() is None:
+        if xelement.get_xelement() is None:
             _node_text2 = ""
         else:
-            _node_text2 = self.get_element_text(xelement.getXelement().node)
+            _node_text2 = self.get_element_text(xelement.get_xelement().node)
 
         _svg, _width, _height = self.add_text_block_compare(_node_text1, _node_text2)
         self.pos_y = self.pos_y + float(_height)

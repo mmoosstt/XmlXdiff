@@ -10,7 +10,7 @@ import os
 import unittest
 import inspect
 
-from xml_xdiff import getPath, differ
+from xml_xdiff import get_path, differ
 from xml_xdiff.report.svg_collection.coloured_text import DrawXmlDiff, DrawLegend
 from xml_xdiff.xpath import XDiffXmlPath
 
@@ -55,7 +55,7 @@ class ReportModule(unittest.TestCase):
 
     def testLegend(self):
         _l = DrawLegend()
-        _l.saveSvg('{}\\..\\..\\tests\\simple\\legend.svg'.format(getPath()))
+        _l.saveSvg('{}\\..\\..\\tests\\simple\\legend.svg'.format(get_path()))
 
     def testXSvgCompact(self):
         from xml_xdiff.report.svg_collection.compact import DrawXmlDiff
@@ -90,9 +90,9 @@ class ReportModule(unittest.TestCase):
  </results>
 </ngs_sample>"""
 
-        _path1 = '{}\\..\\..\\tests\\simple\\xml1.xml'.format(getPath())
-        _path2 = '{}\\..\\..\\tests\\simple\\xml2.xml'.format(getPath())
-        _out = '{}\\..\\..\\tests\\simple\\{}.svg'.format(getPath(),
+        _path1 = '{}\\..\\..\\tests\\simple\\xml1.xml'.format(get_path())
+        _path2 = '{}\\..\\..\\tests\\simple\\xml2.xml'.format(get_path())
+        _out = '{}\\..\\..\\tests\\simple\\{}.svg'.format(get_path(),
                                                           modul_under_test.__module__)
 
         _path1 = os.path.abspath(_path1)
@@ -116,16 +116,16 @@ class CompareAll(unittest.TestCase):
     def execute_old(folder_name):
         _i = differ.XDiffExecutor()
         _i.setPath1("{}\\..\\..\\tests\\{}\\a.xml".format(
-            getPath(), folder_name))
+            get_path(), folder_name))
         _i.setPath2("{}\\..\\..\\tests\\{}\\b.xml".format(
-            getPath(), folder_name))
+            get_path(), folder_name))
         _i.run()
 
     @classmethod
     def execute(cls, folder_name):
         _t = time.time()
-        _path1 = "{}\\..\\..\\tests\\{}\\a.xml".format(getPath(), folder_name)
-        _path2 = "{}\\..\\..\\tests\\{}\\b.xml".format(getPath(), folder_name)
+        _path1 = "{}\\..\\..\\tests\\{}\\a.xml".format(get_path(), folder_name)
+        _path2 = "{}\\..\\..\\tests\\{}\\b.xml".format(get_path(), folder_name)
         cls.differ = DrawXmlDiff(_path1, _path2)
         cls.differ.draw()
         cls.differ.save_svg()

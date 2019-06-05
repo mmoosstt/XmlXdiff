@@ -110,9 +110,9 @@ class XDiffXmlPath():
                                         tag=cls.getTag(element, pos))
 
         _xelement = base.XElement()
-        _xelement.setType(base.ElementUnknown)
-        _xelement.setNode(element)
-        _xelement.setXpath(_path)
+        _xelement.set_type(base.ElementUnknown)
+        _xelement.set_node(element)
+        _xelement.set_xpath(_path)
 
         cls.xelements.append(_xelement)
 
@@ -132,7 +132,7 @@ class XDiffXmlPath():
             child_cnt += cls.walk(
                 _child, _path, _pos_dict[_child.tag], 0)
 
-        _xelement.setChildCnt(child_cnt)
+        _xelement.set_child_cnt(child_cnt)
         child_cnt = child_cnt + 1
 
         return child_cnt

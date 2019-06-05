@@ -17,7 +17,7 @@ from svgwrite.container import Group, SVG
 from svgwrite.shapes import Rect, Polyline
 from svgwrite.text import Text, TSpan, TextArea
 
-from xml_xdiff import getPath
+from xml_xdiff import get_path
 from xml_xdiff import differ
 from xml_xdiff.report import render_text
 from xml_xdiff.xpath import XDiffXmlPath
@@ -176,7 +176,7 @@ class DrawLegend:
 
         _svg = SVG(insert=(self.pos_x, self.pos_y))
 
-        for _class in base.generatorAvailableXTypes():
+        for _class in base.generator_available_xtypes():
             _svg.add(self.add_line(_class))
 
         _svg["width"] = self.pos_x_max
@@ -349,7 +349,7 @@ class DrawXml:
                 for _x in range(abs(_steps)):
                     self._move_left()
 
-            _xelement.addSvgNode(callback(_xelement))
+            _xelement.add_svg_node(callback(_xelement))
 
     def _lines_callback(self, text):
         '''
@@ -540,11 +540,11 @@ class DrawXmlDiff:
 
     def _draw_move_pattern(self, xtype):
 
-        for _e in base.generatorXTypes(self.differ.xelements1, xtype):
+        for _e in base.generator_xtypes(self.differ.xelements1, xtype):
             _start_svg1 = _e.svg_node
 
-            if _e.getXelement():
-                _stop_svg2 = _e.getXelement().svg_node
+            if _e.get_xelement():
+                _stop_svg2 = _e.get_xelement().svg_node
 
                 _x1 = float(_start_svg1['x'])
                 _y1 = float(_start_svg1['y'])
@@ -577,7 +577,7 @@ class DrawXmlDiff:
 
     def _draw_changed_pattern(self, xtype, xelements, x_offset=0):
 
-        for _e in base.generatorXTypes(xelements, xtype):
+        for _e in base.generator_xtypes(xelements, xtype):
             _start_svg1 = _e.svg_node
 
             _x1 = float(_start_svg1['x']) + x_offset
