@@ -7,7 +7,7 @@ URL = 'https://github.com/mmoosstt/XmlXdiff'
 EMAIL = 'diponaut@gmx.de'
 AUTHOR = 'mmoosstt'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = "0.3.4"
+VERSION = "0.4.0"
 
 REQUIRED = [
     'PySide2',
@@ -34,7 +34,7 @@ setup(name=NAME,
       author_email=EMAIL,
       license='LGPL',
       package_dir={'': 'lib'},
-      packages=['XmlXdiff', 'XmlXdiff.XReport'],
+      packages=['diffx', 'diffx.svg'],
       install_requires=REQUIRED,
       zip_safe=True,
       )

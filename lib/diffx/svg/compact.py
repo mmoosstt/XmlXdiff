@@ -8,20 +8,18 @@
 """
 
 import copy
-from difflib import SequenceMatcher
 import lxml.etree
-
 import svgwrite
-from svgwrite import cm, mm, rgb
-from svgwrite.container import Group, SVG
-from svgwrite.shapes import Rect, Polyline
-from svgwrite.text import Text, TSpan, TextArea
 
-from xml_xdiff import get_path
-from xml_xdiff import differ
-from xml_xdiff.report import render_text
-from xml_xdiff.xpath import XDiffXmlPath
-from xml_xdiff import base
+from svgwrite import rgb
+from svgwrite.container import SVG
+from svgwrite.shapes import Rect, Polyline
+from svgwrite.text import Text, TSpan
+from difflib import SequenceMatcher
+
+from diffx import differ, base
+from diffx.svg import render_text
+from diffx.xpath import XDiffXmlPath
 
 
 class TextBoxCompare:
@@ -332,7 +330,7 @@ class DrawXml:
         _node_level_z = 0
         for _xelement in xelements:
 
-            _node_level = XDiffXmlPath.getXpathDistance(
+            _node_level = XDiffXmlPath.get_xpath_distance(
                 _root.xpath, _xelement.xpath)
 
             _steps = _node_level - _node_level_z

@@ -26,7 +26,7 @@ class XDiffHasher():
     """
 
     @classmethod
-    def callbackHashAll(cls, element, hashpipe, children=True):
+    def callback_hash_all(cls, element, hashpipe, children=True):
         '''
         calculate hash over tag, attribute_names, attribute_values, pre- and post-text
 
@@ -38,7 +38,7 @@ class XDiffHasher():
         _element_childes = element.getchildren()
         if children:
             for child in _element_childes:
-                hashpipe.update(cls.callbackHashAll(child, hashpipe))
+                hashpipe.update(cls.callback_hash_all(child, hashpipe))
 
         hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
 
@@ -57,7 +57,7 @@ class XDiffHasher():
         return bytes(hashpipe.hexdigest(), 'utf-8')
 
     @classmethod
-    def callbackHashAttributeValueElementValueConsitency(cls, element, hashpipe, children=True):
+    def callback_hash_attribute_value_element_value_consitency(cls, element, hashpipe, children=True):
         '''
         calculate hash over attribute_values, pre- and post-text
 
@@ -70,7 +70,7 @@ class XDiffHasher():
         if children:
             for child in _element_childes:
                 hashpipe.update(
-                    cls.callbackHashAttributeValueElementValueConsitency(child, hashpipe))
+                    cls.callback_hash_attribute_value_element_value_consitency(child, hashpipe))
 
         if hasattr(element, 'attrib'):
             for _name in sorted(element.attrib.keys()):
@@ -86,7 +86,7 @@ class XDiffHasher():
         return bytes(hashpipe.hexdigest(), 'utf-8')
 
     @classmethod
-    def callbackHashTagNameAttributeNameValueConsitency(cls, element, hashpipe, children=True):
+    def callback_hash_tag_name_attribute_name_value_consitency(cls, element, hashpipe, children=True):
         '''
         calculate hash over tag, attribute_names, attribute_values
 
@@ -99,7 +99,7 @@ class XDiffHasher():
         if children:
             for child in _element_childes:
                 hashpipe.update(
-                    cls.callbackHashTagNameAttributeNameValueConsitency(child, hashpipe))
+                    cls.callback_hash_tag_name_attribute_name_value_consitency(child, hashpipe))
 
         hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
         if hasattr(element, 'attrib'):
@@ -110,7 +110,7 @@ class XDiffHasher():
         return bytes(hashpipe.hexdigest(), 'utf-8')
 
     @classmethod
-    def callbackHashTagNameAttributeNameConsitency(cls, element, hashpipe, children=True):
+    def callback_hash_tag_name_attribute_name_consitency(cls, element, hashpipe, children=True):
         '''
         calculate hash over tag, attribute_names
 
@@ -123,7 +123,7 @@ class XDiffHasher():
         if children:
             for child in _element_childes:
                 hashpipe.update(
-                    cls.callbackHashTagNameAttributeNameConsitency(child, hashpipe))
+                    cls.callback_hash_tag_name_attribute_name_consitency(child, hashpipe))
 
         hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
 
@@ -134,7 +134,7 @@ class XDiffHasher():
         return bytes(hashpipe.hexdigest(), 'utf-8')
 
     @classmethod
-    def callbackHashTagNameConsitency(cls, element, hashpipe, children=True):
+    def callback_hash_tag_name_consitency(cls, element, hashpipe, children=True):
         '''
         calculate hash over tag
 
@@ -147,14 +147,14 @@ class XDiffHasher():
         if children:
             for child in _element_childes:
                 hashpipe.update(
-                    cls.callbackHashTagNameConsitency(child, hashpipe))
+                    cls.callback_hash_tag_name_consitency(child, hashpipe))
 
         hashpipe.update(bytes(str(element.tag) + '#tag', 'utf-8'))
 
         return bytes(hashpipe.hexdigest(), 'utf-8')
 
     @classmethod
-    def getHashes(cls, xelements, callback_hash_algorithm, children=True):
+    def get_hashes(cls, xelements, callback_hash_algorithm, children=True):
         '''
 
         calculate hashes for xelements

@@ -7,8 +7,8 @@
  License: TBD
 """
 from svgwrite.container import SVG
-from xml_xdiff.report.svg_collection import compact
-from xml_xdiff.report.svg_collection.compact import DrawLegend
+from diffx.svg import compact
+from diffx.svg.compact import DrawLegend
 
 
 class DrawXml(compact.DrawXml):

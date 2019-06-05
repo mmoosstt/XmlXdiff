@@ -6,7 +6,7 @@ import io
 sys.stdout = io.StringIO()
 
 sys.path.append(os.path.abspath("./tests"))
-from GeneralTests import CompareAll
+from test_general import CompareAll
 
 test_suite = unittest.TestSuite()
 test_suite.addTest(CompareAll('test1'))
