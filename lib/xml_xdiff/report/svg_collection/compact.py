@@ -459,8 +459,8 @@ class DrawXmlDiff:
         Starts diff creation.
         '''
 
-        self.differ.setLeftPath(self.path1)
-        self.differ.setRightPath(self.path2)
+        self.differ.set_left_path(self.path1)
+        self.differ.set_right_path(self.path2)
         self.differ.execute()
 
         self.filepath = "{path}\\xdiff_{filename1}_{filename2}.svg".format(path=self.differ.path1.path,
