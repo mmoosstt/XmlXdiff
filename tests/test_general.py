@@ -11,8 +11,8 @@ import unittest
 import inspect
 
 from diffx import get_path, differ
-from diffx.svg.coloured_text import DrawXmlDiff, DrawLegend
-from diffx.xpath import XDiffXmlPath
+from diffx.svg.coloured_text import DrawDiffxDiff, DrawLegend
+from diffx.xpath import DiffxPath
 
 import lxml.etree
 
@@ -47,7 +47,7 @@ XSLT_TEMPLATE = lxml.etree.fromstring(XSLT)
 class UnSorted(unittest.TestCase):
 
     def calcDistance(self):
-        _res = XDiffXmlPath.get_xpath_distance("a/b/c/d/1/2/3", "a/b/c/d/1/3")
+        _res = DiffxPath.get_xpath_distance("a/b/c/d/1/2/3", "a/b/c/d/1/3")
         self.assertEqual(_res, 3)
 
 
@@ -55,19 +55,19 @@ class ReportModule(unittest.TestCase):
 
     def testLegend(self):
         _l = DrawLegend()
-        _l.saveSvg('{}\\..\\..\\tests\\simple\\legend.svg'.format(get_path()))
+        _l.save_svg('{}\\..\\..\\tests\\simple\\legend.svg'.format(get_path()))
 
     def testXSvgCompact(self):
-        from diffx.svg.compact import DrawXmlDiff
-        self._simpleModule(DrawXmlDiff)
+        from diffx.svg.compact import DrawDiffxDiff
+        self._simpleModule(DrawDiffxDiff)
 
     def testXSvgColoredText(self):
-        from diffx.svg.coloured_text import DrawXmlDiff
-        self._simpleModule(DrawXmlDiff)
+        from diffx.svg.coloured_text import DrawDiffxDiff
+        self._simpleModule(DrawDiffxDiff)
 
     def testXSvgColorOnly(self):
-        from diffx.svg.coloured_without_text import DrawXmlDiff
-        self._simpleModule(DrawXmlDiff)
+        from diffx.svg.coloured_without_text import DrawDiffxDiff
+        self._simpleModule(DrawDiffxDiff)
 
     def _simpleModule(self, modul_under_test):
 
@@ -107,14 +107,14 @@ class ReportModule(unittest.TestCase):
 
         x = modul_under_test(_path1, _path2)
         x.draw()
-        x.saveSvg(_out)
+        x.save_svg(_out)
 
 
 class CompareAll(unittest.TestCase):
 
     @staticmethod
     def execute_old(folder_name):
-        _i = differ.XDiffExecutor()
+        _i = differ.DiffxExecutor()
         _i.setPath1("{}\\..\\..\\tests\\{}\\a.xml".format(
             get_path(), folder_name))
         _i.setPath2("{}\\..\\..\\tests\\{}\\b.xml".format(
@@ -126,12 +126,12 @@ class CompareAll(unittest.TestCase):
         _t = time.time()
         _path1 = "{}\\..\\..\\tests\\{}\\a.xml".format(get_path(), folder_name)
         _path2 = "{}\\..\\..\\tests\\{}\\b.xml".format(get_path(), folder_name)
-        cls.differ = DrawXmlDiff(_path1, _path2)
+        cls.differ = DrawDiffxDiff(_path1, _path2)
         cls.differ.draw()
         cls.differ.save_svg()
         print("{name}: delta_t={time:.4f}s xml_elements={cnt}".format(name=folder_name,
                                                                       time=time.time() - _t,
-                                                                      cnt=len(cls.differ.differ.xelements2) + len(cls.differ.differ.xelements1)))
+                                                                      cnt=len(cls.differ.differ.diffx_nodes_two) + len(cls.differ.differ.diffx_nodes_one)))
 
     def test13(self):
         name = inspect.currentframe().f_code.co_name

@@ -10,7 +10,7 @@
 import hashlib
 
 
-class XDiffHasher():
+class DiffxHasher():
     """
     Collection of hash calculation of xml element tree structures.
     hash algorithm differ in the selection of relevant data.
@@ -159,7 +159,7 @@ class XDiffHasher():
 
         calculate hashes for xelements
 
-        :param xelements: [XmlXdiff.XTypes.XElement, ...]
+        :param xelements: [XmlXdiff.XTypes.DiffxElement, ...]
         :param callback_hash_algorithm: callback of this class for selection of hash algorithm
         :param children: bool - if true children are included
         '''

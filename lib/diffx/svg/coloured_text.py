@@ -11,19 +11,19 @@ from diffx.svg import compact
 from diffx.svg.compact import DrawLegend
 
 
-class DrawXml(compact.DrawXml):
+class DrawDiffx(compact.DrawDiffx):
     '''
     Draw svg signle xml
     '''
 
     def __init__(self):
-        compact.DrawXml.__init__(self)
+        compact.DrawDiffx.__init__(self)
 
     def add_text_box(self, xelement):
         '''
         Text box with fixed width and content text diff.
 
-        :param xelement: XTypes.XElement
+        :param xelement: XTypes.DiffxElement
         '''
 
         _node_text1 = self.get_element_text(xelement.node)
@@ -41,12 +41,12 @@ class DrawXml(compact.DrawXml):
         return _svg
 
 
-class DrawXmlDiff(compact.DrawXmlDiff):
+class DrawDiffxDiff(compact.DrawDiffxDiff):
     '''
     Create diff without text.
     '''
 
     def __init__(self, path1, path2):
-        compact.DrawXmlDiff.__init__(self, path1, path2)
-        self.report1 = DrawXml()
-        self.report2 = DrawXml()
+        compact.DrawDiffxDiff.__init__(self, path1, path2)
+        self.report1 = DrawDiffx()
+        self.report2 = DrawDiffx()

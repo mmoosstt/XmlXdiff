@@ -19,7 +19,7 @@ from difflib import SequenceMatcher
 
 from diffx import differ, base
 from diffx.svg import render_text
-from diffx.xpath import XDiffXmlPath
+from diffx.xpath import DiffxPath
 
 
 class TextBoxCompare:
@@ -174,7 +174,7 @@ class DrawLegend:
 
         _svg = SVG(insert=(self.pos_x, self.pos_y))
 
-        for _class in base.generator_available_xtypes():
+        for _class in base.gen_available_diffx_node_types():
             _svg.add(self.add_line(_class))
 
         _svg["width"] = self.pos_x_max
@@ -186,9 +186,9 @@ class DrawLegend:
 
     def add_line(self, instance_xtype):
         '''
-        Draw svg line representing XElement.
+        Draw svg line representing DiffxElement.
 
-        :param instance_xtype: XTypes.XElement
+        :param instance_xtype: XTypes.DiffxElement
         '''
 
         _text = instance_xtype.name()
@@ -256,7 +256,7 @@ class DrawLegend:
         self.dwg.save()
 
 
-class DrawXml:
+class DrawDiffx:
     '''
     Draw svg signle xml
     '''
@@ -318,9 +318,9 @@ class DrawXml:
 
     def load_from_xelements(self, xelements, callback):
         '''
-        XElements to svg representation.
+        DiffxElements to svg representation.
 
-        :param xelements: [XElement, ...]
+        :param xelements: [DiffxElement, ...]
         :param callback: method defining svg representation of xelement
         '''
 
@@ -330,7 +330,7 @@ class DrawXml:
         _node_level_z = 0
         for _xelement in xelements:
 
-            _node_level = XDiffXmlPath.get_xpath_distance(
+            _node_level = DiffxPath.get_xpath_distance(
                 _root.xpath, _xelement.xpath)
 
             _steps = _node_level - _node_level_z
@@ -362,7 +362,7 @@ class DrawXml:
         '''
         Simple text box with fixed width.
 
-        :param xelement: XTypes.XElement
+        :param xelement: XTypes.DiffxElement
         '''
         _text = self.get_element_text(xelement.node)
         _lines = self._lines_callback(_text)
@@ -436,7 +436,7 @@ class DrawXml:
         self.dwg.save()
 
 
-class DrawXmlDiff:
+class DrawDiffxDiff(object):
     '''
     Creation diff output.
     '''
@@ -448,9 +448,9 @@ class DrawXmlDiff:
         self.differ = None
         self.path1 = path1
         self.path2 = path2
-        self.differ = differ.XDiffExecutor()
-        self.report1 = DrawXml()
-        self.report2 = DrawXml()
+        self.differ = differ.DiffxExecutor()
+        self.report1 = DrawDiffx()
+        self.report2 = DrawDiffx()
 
     def draw(self):
         '''
@@ -466,14 +466,14 @@ class DrawXmlDiff:
                                                                            filename2=self.differ.path2.filename)
 
         self.report1._move_right()
-        self.report1.load_from_xelements(self.differ.xelements1,
+        self.report1.load_from_xelements(self.differ.diffx_nodes_one,
                                          self.report1.add_text_box)
-        self.report1.save_svg(self.differ.xelements1)
+        self.report1.save_svg(self.differ.diffx_nodes_one)
 
         self.report2._move_right()
-        self.report2.load_from_xelements(self.differ.xelements2,
+        self.report2.load_from_xelements(self.differ.diffx_nodes_two,
                                          self.report2.add_text_box)
-        self.report2.save_svg(self.differ.xelements2)
+        self.report2.save_svg(self.differ.diffx_nodes_two)
 
         self.legend = DrawLegend()
 
@@ -504,24 +504,24 @@ class DrawXmlDiff:
         self.dwg.add(self.report2.dwg)
         self.dwg.add(self.legend.dwg)
 
-        self._draw_move_pattern(base.ElementMoved)
-        self._draw_move_pattern(base.ElementMovedParent)
-        self._draw_move_pattern(base.ElementUnchanged)
-        self._draw_move_pattern(base.ElementTagAttributeNameConsitency)
-        self._draw_move_pattern(base.ElementTextAttributeValueConsitency)
-        self._draw_move_pattern(base.ElementTagConsitency)
-        self._draw_move_pattern(base.ElementTagAttributeNameValueConsitency)
+        self._draw_move_pattern(base.DiffxNodeMoved)
+        self._draw_move_pattern(base.DiffxParentNodeMoved)
+        self._draw_move_pattern(base.DiffxNodeUnchanged)
+        self._draw_move_pattern(base.DiffxNodeTagAttriNameConsi)
+        self._draw_move_pattern(base.DiffxNodeTextAttriValueConsi)
+        self._draw_move_pattern(base.DiffxNodeTagConsi)
+        self._draw_move_pattern(base.DiffxNodeTagAttriNameValueConsi)
 
-        self._draw_changed_pattern(base.ElementChanged,
-                                   self.differ.xelements2,
+        self._draw_changed_pattern(base.DiffxNodeChanged,
+                                   self.differ.diffx_nodes_two,
                                    self.report1.pos_x_max * 1.2)
 
-        self._draw_changed_pattern(base.ElementAdded,
-                                   self.differ.xelements2,
+        self._draw_changed_pattern(base.DiffxNodeAdded,
+                                   self.differ.diffx_nodes_two,
                                    self.report1.pos_x_max * 1.2)
 
-        self._draw_changed_pattern(base.ElementDeleted,
-                                   self.differ.xelements1)
+        self._draw_changed_pattern(base.DiffxNodeDeleted,
+                                   self.differ.diffx_nodes_one)
 
     def save_svg(self, filepath=None):
         '''
@@ -538,7 +538,7 @@ class DrawXmlDiff:
 
     def _draw_move_pattern(self, xtype):
 
-        for _e in base.generator_xtypes(self.differ.xelements1, xtype):
+        for _e in base.gen_diffx_nodes(self.differ.diffx_nodes_one, xtype):
             _start_svg1 = _e.svg_node
 
             if _e.get_xelement():
@@ -575,7 +575,7 @@ class DrawXmlDiff:
 
     def _draw_changed_pattern(self, xtype, xelements, x_offset=0):
 
-        for _e in base.generator_xtypes(xelements, xtype):
+        for _e in base.gen_diffx_nodes(xelements, xtype):
             _start_svg1 = _e.svg_node
 
             _x1 = float(_start_svg1['x']) + x_offset

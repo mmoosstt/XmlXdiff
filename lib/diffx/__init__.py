@@ -1,7 +1,7 @@
 """
  coding:utf-8
  Author:  mmoosstt -- github
- Purpose: root module
+ Purpose: inteface for diffx
  Created: 01.01.2019
  Copyright (C) 2019, diponaut@gmx.de
  License: TBD
@@ -12,7 +12,10 @@ import os
 
 def get_path():
     """
-    return: path of the model __init__.py is located in.
+    get folder path of diffx independent from deployment.
+    purpose unittesting/debugging
+
+    return: path 
     """
 
     return __file__.replace('\\__init__.py', "")

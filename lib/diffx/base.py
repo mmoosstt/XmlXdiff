@@ -11,7 +11,7 @@ from inspect import isclass
 from svgwrite import rgb
 
 
-class XElement:
+class DiffxElement:
     '''
     General type extending an xml node to an xelement node.
 
@@ -51,7 +51,7 @@ class XElement:
         '''
         interface setter for xelment_compared
 
-        :param xelement: XTypes.XElement
+        :param xelement: XTypes.DiffxElement
         '''
         self.xelements_compared = xelement
 
@@ -73,7 +73,7 @@ class XElement:
         '''
         interface setter for type
 
-        :param inp: XTypes.XElement
+        :param inp: XTypes.DiffxElement
         '''
 
         if isclass(inp):
@@ -101,9 +101,9 @@ class XElement:
         self.hash = inp
 
 
-class XType:
+class DiffxNode:
     '''
-    Type for XElement description.
+    Type for DiffxElement description.
     provides standard interfaces for XmlXdiff.
     '''
 
@@ -117,145 +117,145 @@ class XType:
         return cls.__name__.replace("Element", "")
 
 
-class ElementUnknown(XType):
+class DiffxNodeUnknown(DiffxNode):
     '''
-    SVG interface for Unknown XElements
+    SVG interface for Unknown DiffxElements
     '''
     fill = rgb(0xd0, 0xd0, 0xd0)
 
     def __init__(self):
-        XType.__init__(self)
+        DiffxNode.__init__(self)
 
 
-class ElementUnchanged(XType):
+class DiffxNodeUnchanged(DiffxNode):
     '''
-    SVG interface for Unchanged XElements
+    SVG interface for Unchanged DiffxElements
     '''
 
     fill = rgb(0x7e, 0x62, 0xa1)
 
     def __init__(self):
-        XType.__init__(self)
+        DiffxNode.__init__(self)
 
 
-class ElementChanged(XType):
+class DiffxNodeChanged(DiffxNode):
     '''
-    SVG interface for Changed XElements
+    SVG interface for Changed DiffxElements
     '''
 
     fill = rgb(0xfc, 0xd1, 0x2a)
 
     def __init__(self):
-        XType.__init__(self)
+        DiffxNode.__init__(self)
 
 
-class ElementDeleted(XType):
+class DiffxNodeDeleted(DiffxNode):
     '''
-    SVG interface for Deleted XElements
+    SVG interface for Deleted DiffxElements
     '''
 
     fill = rgb(0xff, 0x00, 0xff)
 
     def __init__(self):
-        XType.__init__(self)
+        DiffxNode.__init__(self)
 
 
-class ElementAdded(XType):
+class DiffxNodeAdded(DiffxNode):
     '''
-    SVG interface for Added XElements
+    SVG interface for added diffx node
     '''
 
     fill = rgb(0x0f, 0xff, 0x00)
 
     def __init__(self):
-        XType.__init__(self)
+        DiffxNode.__init__(self)
 
 
-class ElementMoved(XType):
+class DiffxNodeMoved(DiffxNode):
     '''
-    SVG interface for Moved XElements
+    SVG interface for moved diffx node
     '''
 
     fill = rgb(0x1e, 0x2d, 0xd2)
 
     def __init__(self):
-        XType.__init__(self)
+        DiffxNode.__init__(self)
 
 
-class ElementMovedParent(XType):
+class DiffxParentNodeMoved(DiffxNode):
     '''
-    SVG interface for MovedParent XElements
+    SVG interface for parent diffx node moved
     '''
 
     fill = rgb(0x55, 0x99, 0xff)
 
     def __init__(self):
-        XType.__init__(self)
+        DiffxNode.__init__(self)
 
 
-class ElementTagConsitency(XType):
+class DiffxNodeTagConsi(DiffxNode):
     '''
-    SVG interface for TagConsitency XElements
+    SVG interface for diffx node with tag consistency
     '''
 
     fill = rgb(0x00, 0xa0, 0x70)
 
     def __init__(self):
-        XType.__init__(self)
+        DiffxNode.__init__(self)
 
 
-class ElementTagAttributeNameConsitency(XType):
+class DiffxNodeTagAttriNameConsi(DiffxNode):
     '''
-    SVG interface for TagAttributeNameConsitency XElements
+    SVG interface for diffx node with tag, attribute and name consistency
     '''
 
     fill = rgb(0x00, 0xd0, 0xe0)
 
     def __init__(self):
-        XType.__init__(self)
+        DiffxNode.__init__(self)
 
 
-class ElementTagAttributeNameValueConsitency(XType):
+class DiffxNodeTagAttriNameValueConsi(DiffxNode):
     '''
-    SVG interface for TagAttributeNameValueConsitency XElements
+    SVG interface for diffx node with tag, attri, name and value consistency
     '''
 
     fill = rgb(0x00, 0xa0, 0xf0)
 
     def __init__(self):
-        XType.__init__(self)
+        DiffxNode.__init__(self)
 
 
-class ElementTextAttributeValueConsitency(XType):
+class DiffxNodeTextAttriValueConsi(DiffxNode):
     '''
-    SVG interface for TextAttributeValueConsitency XElements
+    SVG interface for diffx node with text, attributes and value consistency
     '''
 
     fill = rgb(0x00, 0x70, 0xa0)
 
     def __init__(self):
-        XType.__init__(self)
+        DiffxNode.__init__(self)
 
 
-def generator_child_elements(elements, element):
+def gen_child_nodes(elements, element):
     '''
     Generator for all child elements of element that are part of elements
 
-    :param elements: [XElement, ... ]
-    :param element: XElement
+    :param elements: [DiffxElement, ... ]
+    :param element: DiffxElement
     '''
     for _element in elements[elements.index(element):]:
         if _element.xpath.find(element.xpath) == 0:
             yield _element
 
 
-def array_child_elements(elements, element):
+def arr_child_nodes(elements, element):
     '''
     Returns an array of child elements of element that are part of elements
-    Use CHILD_ARRAY over generator_child_elements if it is consumed more times afterwards.
+    Use CHILD_ARRAY over gen_child_nodes if it is consumed more times afterwards.
 
-    :param elements: [XElement, ..]
-    :param element: XElement
+    :param elements: [DiffxElement, ..]
+    :param element: DiffxElement
     '''
 
     _start_index = elements.index(element)
@@ -270,11 +270,11 @@ def array_child_elements(elements, element):
     return elements[_start_index + 1:_stop_index + 1]
 
 
-def generator_child_count(elements, child_cnt, *element_types):
+def gen_child_count(elements, child_cnt, *element_types):
     '''
     Generator for elements of a certain type and a specific number of children
 
-    :param elements: [XElement, XElement, .. ]
+    :param elements: [DiffxElement, DiffxElement, .. ]
     :param child_cnt: int - number of children
     '''
 
@@ -285,12 +285,12 @@ def generator_child_count(elements, child_cnt, *element_types):
                 yield _element
 
 
-def generator_xtypes(elements, *element_types):
+def gen_diffx_nodes(elements, *element_types):
     """
     Generator for elements of a certain type.
 
 
-    :param elements: [XElement, XElement, ...]
+    :param elements: [DiffxElement, DiffxElement, ...]
     """
 
     _append = []
@@ -304,9 +304,9 @@ def generator_xtypes(elements, *element_types):
             yield _element
 
 
-def generator_available_xtypes():
+def gen_available_diffx_node_types():
     '''
     Generator for all available XTypes
     '''
-    for _xtype in XType.__subclasses__():
+    for _xtype in DiffxNode.__subclasses__():
         yield _xtype

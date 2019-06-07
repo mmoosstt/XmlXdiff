@@ -14,7 +14,7 @@ import lxml.etree
 from diffx import base, xpath, hash, get_path
 
 
-class XDiffPath:
+class DiffxPath:
     '''
     Interface for file names
     '''
@@ -28,16 +28,16 @@ class XDiffPath:
         self.filepath = _x.replace("/", "\\")
 
 
-class XDiffExecutor:
+class DiffxExecutor:
     '''
     This is the heart and entry point of XmlXdiff. The orchestration of looping, hashing and
     comparing.
     '''
 
     def __init__(self):
-        self.path1 = XDiffPath(
+        self.path1 = DiffxPath(
             '{}\\..\\..\\tests\\test1\\a.xml'.format(get_path()))
-        self.path2 = XDiffPath(
+        self.path2 = DiffxPath(
             '{}\\..\\..\\tests\\test1\\b.xml'.format(get_path()))
 
         # initialised when execute is executed
@@ -48,8 +48,8 @@ class XDiffExecutor:
         self.xml2 = None
         self.root1 = None
         self.root2 = None
-        self.xelements1 = None
-        self.xelements2 = None
+        self.diffx_nodes_one = None
+        self.diffx_nodes_two = None
 
     def set_gravity(self, inp):
         '''
@@ -73,7 +73,7 @@ class XDiffExecutor:
 
         :param path: str - path not checked for validity till now
         '''
-        self.path1 = XDiffPath(path)
+        self.path1 = DiffxPath(path)
 
     def set_right_path(self, path):
         '''
@@ -81,7 +81,7 @@ class XDiffExecutor:
 
         :param path: str - path not checked for validity till now
         '''
-        self.path2 = XDiffPath(path)
+        self.path2 = DiffxPath(path)
 
     def execute(self):
         '''
@@ -94,366 +94,366 @@ class XDiffExecutor:
         self.root1 = self.xml1.getroot()
         self.root2 = self.xml2.getroot()
 
-        _xpath = xpath.XDiffXmlPath()
+        _xpath = xpath.DiffxPath()
 
-        self.xelements1 = _xpath.get_xelements(self.root1, "", 1)
-        self.xelements2 = _xpath.get_xelements(self.root2, "", 1)
+        self.diffx_nodes_one = _xpath.get_diffx_nodes(self.root1, "", 1)
+        self.diffx_nodes_two = _xpath.get_diffx_nodes(self.root2, "", 1)
 
         _child_cnts = {}
         _ = [_child_cnts.update({_e.child_cnt: None})
-             for _e in self.xelements1]
+             for _e in self.diffx_nodes_one]
         _ = [_child_cnts.update({_e.child_cnt: None})
-             for _e in self.xelements2]
+             for _e in self.diffx_nodes_two]
 
         for _child_cnt in reversed(sorted(_child_cnts.keys())):
 
-            self.find_unchanged_elements_with_children(_child_cnt,
-                                                   self.xelements1,
-                                                   self.xelements2)
+            self.find_unchanged_diffx_nodes_with_children(_child_cnt,
+                                                   self.diffx_nodes_one,
+                                                   self.diffx_nodes_two)
 
-            self.find_moved_elements_with_children(_child_cnt,
-                                               self.xelements1,
-                                               self.xelements2)
+            self.find_moved_diffx_nodes_with_children(_child_cnt,
+                                               self.diffx_nodes_one,
+                                               self.diffx_nodes_two)
 
-            self.find_moved_parent_elements(_child_cnt,
-                                         self.xelements1,
-                                         self.xelements2)
+            self.find_moved_parent_diffx_nodes(_child_cnt,
+                                         self.diffx_nodes_one,
+                                         self.diffx_nodes_two)
 
     def _calculate_hashes(self,
                          xelements,
                          callback,
                          child_cnt=None,
                          children=True,
-                         xtypes=(base.ElementChanged, base.ElementUnknown)):
+                         xtypes=(base.DiffxNodeChanged, base.DiffxNodeUnknown)):
 
         pass
 
-    def _generator_xelements(self,
+    def _gen_diffx_nodes(self,
                             xelements,
-                            hash_algorithm=hash.XDiffHasher.callback_hash_all,
+                            hash_algorithm=hash.DiffxHasher.callback_hash_all,
                             child_cnt=None,
                             children=True,
-                            xtypes=(base.ElementChanged, base.ElementUnknown)):
+                            xtypes=(base.DiffxNodeChanged, base.DiffxNodeUnknown)):
 
         if child_cnt is None:
-            _xelements_gen = base.generator_xtypes(xelements,
+            _diffx_nodes_gen = base.gen_diffx_nodes(xelements,
                                                   *xtypes)
 
         else:
-            _xelements_gen = base.generator_child_count(xelements,
+            _diffx_nodes_gen = base.gen_child_count(xelements,
                                                       child_cnt,
                                                       *xtypes)
 
-        hash.XDiffHasher.get_hashes(_xelements_gen, hash_algorithm, children)
+        hash.DiffxHasher.get_hashes(_diffx_nodes_gen, hash_algorithm, children)
 
         if child_cnt is None:
-            _generator = base.generator_xtypes(xelements, *xtypes)
+            _generator = base.gen_diffx_nodes(xelements, *xtypes)
 
         else:
-            _generator = base.generator_child_count(
+            _generator = base.gen_child_count(
                 xelements, child_cnt, *xtypes)
 
         return _generator
 
-    def set_element_type_with_children(self, xelement1, xelement2, xtype):
+    def set_xdiff_type_child_nodes(self, xelement1, xelement2, xtype):
         '''
         Set element type of child elements
 
-        :param xelement1: [XElement, XElement, ..]
-        :param xelement2: [XElement, XElement, ..]
+        :param xelement1: [DiffxElement, DiffxElement, ..]
+        :param xelement2: [DiffxElement, DiffxElement, ..]
         :param xtype: XType
         '''
 
-        _xelements1 = base.generator_child_elements(self.xelements1,
+        _diffx_nodes_one = base.gen_child_nodes(self.diffx_nodes_one,
                                                   xelement1)
 
-        _xelements2 = base.generator_child_elements(self.xelements2,
+        _diffx_nodes_two = base.gen_child_nodes(self.diffx_nodes_two,
                                                   xelement2)
 
-        for _xelement1 in _xelements1:
-            _xelement2 = next(_xelements2)
+        for _diffx_node_one in _diffx_nodes_one:
+            _diffx_node_two = next(_diffx_nodes_two)
 
-            if (isinstance(_xelement1.type, base.ElementUnknown) and
-                    isinstance(_xelement2.type, base.ElementUnknown)):
+            if (isinstance(_diffx_node_one.type, base.DiffxNodeUnknown) and
+                    isinstance(_diffx_node_two.type, base.DiffxNodeUnknown)):
 
-                _xelement1.set_type(xtype)
-                _xelement2.set_type(xtype)
-                _xelement1.add_xelement(_xelement2)
-                _xelement2.add_xelement(_xelement1)
+                _diffx_node_one.set_type(xtype)
+                _diffx_node_two.set_type(xtype)
+                _diffx_node_one.add_xelement(_diffx_node_two)
+                _diffx_node_two.add_xelement(_diffx_node_one)
 
-    def find_moved_parent_elements(self, child_cnt, xelements1, xelements2):
+    def find_moved_parent_diffx_nodes(self, child_cnt, diffx_nodes_one, diffx_nodes_two):
         '''
         Entry point of pseudo recursive execution
 
         :param child_cnt: int - only elements with a certain number of children are investigated
-        :param xelements1: [XElement, XElement, ...]
-        :param xelements2: [XElement, XElement, ...]
+        :param diffx_nodes_one: [DiffxElement, DiffxElement, ...]
+        :param diffx_nodes_two: [DiffxElement, DiffxElement, ...]
         '''
 
-        _xtypes = (base.ElementChanged, base.ElementUnknown)
-        _xelements2_generator = self._generator_xelements(xelements=xelements2,
-                                                         hash_algorithm=hash.XDiffHasher.callback_hash_all,
+        _xtypes = (base.DiffxNodeChanged, base.DiffxNodeUnknown)
+        _diffx_nodes_two_gen = self._gen_diffx_nodes(xelements=diffx_nodes_two,
+                                                         hash_algorithm=hash.DiffxHasher.callback_hash_all,
                                                          children=False,
                                                          child_cnt=child_cnt,
                                                          xtypes=_xtypes)
 
-        for _xelement2 in _xelements2_generator:
-            _xelements1_generator = self._generator_xelements(xelements=xelements1,
-                                                             hash_algorithm=hash.XDiffHasher.callback_hash_all,
+        for _diffx_node_two in _diffx_nodes_two_gen:
+            _diffx_nodes_two_gen = self._gen_diffx_nodes(xelements=diffx_nodes_one,
+                                                             hash_algorithm=hash.DiffxHasher.callback_hash_all,
                                                              children=False,
                                                              xtypes=_xtypes)
 
-            for _xelement1 in _xelements1_generator:
-                if _xelement1.hash == _xelement2.hash:
+            for _diffx_node_one in _diffx_nodes_two_gen:
+                if _diffx_node_one.hash == _diffx_node_two.hash:
 
-                    _xelement1.set_type(base.ElementMovedParent)
-                    _xelement2.set_type(base.ElementMovedParent)
-                    _xelement1.add_xelement(_xelement2)
-                    _xelement2.add_xelement(_xelement1)
+                    _diffx_node_one.set_type(base.DiffxParentNodeMoved)
+                    _diffx_node_two.set_type(base.DiffxParentNodeMoved)
+                    _diffx_node_one.add_xelement(_diffx_node_two)
+                    _diffx_node_two.add_xelement(_diffx_node_one)
 
-                    _xelements1 = base.array_child_elements(xelements1,
-                                                          _xelement1)
+                    _diffx_nodes_one = base.arr_child_nodes(diffx_nodes_one,
+                                                          _diffx_node_one)
 
-                    _xelements2 = base.array_child_elements(xelements2,
-                                                          _xelement2)
+                    _diffx_nodes_two = base.arr_child_nodes(diffx_nodes_two,
+                                                          _diffx_node_two)
 
                     _child_cnts = {}
                     _ = [_child_cnts.update({_e.child_cnt: None})
-                         for _e in _xelements1]
+                         for _e in _diffx_nodes_one]
                     _ = [_child_cnts.update({_e.child_cnt: None})
-                         for _e in _xelements2]
+                         for _e in _diffx_nodes_two]
 
                     for _child_cnt in reversed(sorted(_child_cnts.keys())):
 
-                        self.find_unchanged_elements_with_children(_child_cnt,
-                                                               _xelements1,
-                                                               _xelements2)
+                        self.find_unchanged_diffx_nodes_with_children(_child_cnt,
+                                                               _diffx_nodes_one,
+                                                               _diffx_nodes_two)
 
-                        self.find_moved_elements_with_children(_child_cnt,
-                                                           _xelements1,
-                                                           _xelements2)
+                        self.find_moved_diffx_nodes_with_children(_child_cnt,
+                                                           _diffx_nodes_one,
+                                                           _diffx_nodes_two)
 
                         # recursive entry point
-                        self.find_moved_parent_elements(_child_cnt,
-                                                     _xelements1,
-                                                     _xelements2)
+                        self.find_moved_parent_diffx_nodes(_child_cnt,
+                                                     _diffx_nodes_one,
+                                                     _diffx_nodes_two)
 
                         self.find_tag_name_attribute_name_value_consitency_with_children(_child_cnt,
-                                                                                 _xelements1,
-                                                                                 _xelements2)
+                                                                                 _diffx_nodes_one,
+                                                                                 _diffx_nodes_two)
 
                         self.find_attribute_value_element_value_consitency_with_children(_child_cnt,
-                                                                                  _xelements1,
-                                                                                  _xelements2)
+                                                                                  _diffx_nodes_one,
+                                                                                  _diffx_nodes_two)
 
                         self.find_tag_name_attribute_name_consitency_with_children(_child_cnt,
-                                                                            _xelements1,
-                                                                            _xelements2)
+                                                                            _diffx_nodes_one,
+                                                                            _diffx_nodes_two)
 
                         self.find_tag_name_consitency_with_children(_child_cnt,
-                                                               _xelements1,
-                                                               _xelements2)
+                                                               _diffx_nodes_one,
+                                                               _diffx_nodes_two)
 
-                    for _e in _xelements1:
-                        if isinstance(_e.type, base.ElementUnknown):
-                            _e.set_type(base.ElementDeleted)
+                    for _e in _diffx_nodes_one:
+                        if isinstance(_e.type, base.DiffxNodeUnknown):
+                            _e.set_type(base.DiffxNodeDeleted)
 
-                    for _e in _xelements2:
-                        if isinstance(_e.type, base.ElementUnknown):
-                            _e.set_type(base.ElementAdded)
+                    for _e in _diffx_nodes_two:
+                        if isinstance(_e.type, base.DiffxNodeUnknown):
+                            _e.set_type(base.DiffxNodeAdded)
 
                     break
 
-    def find_tag_name_consitency_with_children(self, child_cnt, xelements1, xelements2):
+    def find_tag_name_consitency_with_children(self, child_cnt, diffx_node_one, diffx_node_two):
         '''
         TBD
 
         :param child_cnt: int - only elements with a certain number of children are investigated
-        :param xelements1: [XElement, XElement, ...]
-        :param xelements2: [XElement, XElement, ...]
+        :param diffx_nodes_one: [DiffxElement, DiffxElement, ...]
+        :param diffx_nodes_two: [DiffxElement, DiffxElement, ...]
         '''
 
-        _xtypes = (base.ElementChanged, base.ElementUnknown)
+        _xtypes = (base.DiffxNodeChanged, base.DiffxNodeUnknown)
 
-        _xelements2_generator = self._generator_xelements(xelements=xelements2,
-                                                         hash_algorithm=hash.XDiffHasher.callback_hash_tag_name_consitency,
+        _diffx_nodes_two_gen = self._gen_diffx_nodes(xelements=diffx_node_two,
+                                                         hash_algorithm=hash.DiffxHasher.callback_hash_tag_name_consitency,
                                                          xtypes=_xtypes,
                                                          child_cnt=child_cnt)
 
-        for _xelement2 in _xelements2_generator:
+        for _diffx_node_two in _diffx_nodes_two_gen:
 
-            _xelements1_generator = self._generator_xelements(xelements=xelements1,
-                                                             hash_algorithm=hash.XDiffHasher.callback_hash_tag_name_consitency,
+            _diffx_nodes_one_gen = self._gen_diffx_nodes(xelements=diffx_node_one,
+                                                             hash_algorithm=hash.DiffxHasher.callback_hash_tag_name_consitency,
                                                              xtypes=_xtypes,
                                                              child_cnt=child_cnt)
-            for _xelement1 in _xelements1_generator:
+            for _diffx_node_one in _diffx_nodes_one_gen:
 
-                if _xelement1.hash == _xelement2.hash:
+                if _diffx_node_one.hash == _diffx_node_two.hash:
 
-                    self.set_element_type_with_children(_xelement1,
-                                                    _xelement2,
-                                                    base.ElementTagConsitency)
+                    self.set_xdiff_type_child_nodes(_diffx_node_one,
+                                                    _diffx_node_two,
+                                                    base.DiffxNodeTagConsi)
 
                     break
 
-    def find_attribute_value_element_value_consitency_with_children(self, child_cnt, xelements1, xelements2):
+    def find_attribute_value_element_value_consitency_with_children(self, child_cnt, diffx_node_one, diffx_node_two):
         '''
         TBD
 
         :param child_cnt: int - only elements with a certain number of children are investigated
-        :param xelements1: [XElement, XElement, ...]
-        :param xelements2: [XElement, XElement, ...]
+        :param diffx_nodes_one: [DiffxElement, DiffxElement, ...]
+        :param diffx_nodes_two: [DiffxElement, DiffxElement, ...]
         '''
 
-        _xtypes = (base.ElementChanged, base.ElementUnknown)
+        _xtypes = (base.DiffxNodeChanged, base.DiffxNodeUnknown)
 
-        _xelements2_generator = self._generator_xelements(xelements=xelements2,
-                                                         hash_algorithm=hash.XDiffHasher.callback_hash_attribute_value_element_value_consitency,
+        _diffx_nodes_two_gen = self._gen_diffx_nodes(xelements=diffx_node_two,
+                                                         hash_algorithm=hash.DiffxHasher.callback_hash_attribute_value_element_value_consitency,
                                                          xtypes=_xtypes,
                                                          child_cnt=child_cnt)
 
-        for _xelement2 in _xelements2_generator:
+        for _diffx_node_two in _diffx_nodes_two_gen:
 
-            _xelements1_generator = self._generator_xelements(xelements=xelements1,
-                                                             hash_algorithm=hash.XDiffHasher.callback_hash_attribute_value_element_value_consitency,
+            _diffx_nodes_one_gen = self._gen_diffx_nodes(xelements=diffx_node_one,
+                                                             hash_algorithm=hash.DiffxHasher.callback_hash_attribute_value_element_value_consitency,
                                                              xtypes=_xtypes,
                                                              child_cnt=child_cnt)
 
-            for _xelement1 in _xelements1_generator:
+            for _diffx_node_one in _diffx_nodes_one_gen:
 
-                if _xelement1.hash == _xelement2.hash:
+                if _diffx_node_one.hash == _diffx_node_two.hash:
 
-                    self.set_element_type_with_children(_xelement1,
-                                                    _xelement2,
-                                                    base.ElementTextAttributeValueConsitency)
+                    self.set_xdiff_type_child_nodes(_diffx_node_one,
+                                                    _diffx_node_two,
+                                                    base.DiffxNodeTextAttriValueConsi)
 
                     break
 
-    def find_tag_name_attribute_name_value_consitency_with_children(self, child_cnt, xelements1, xelements2):
+    def find_tag_name_attribute_name_value_consitency_with_children(self, child_cnt, diffx_node_one, diffx_node_two):
         '''
         TBD
 
         :param child_cnt: int - only elements with a certain number of children are investigated
-        :param xelements1: [XElement, XElement, ...]
-        :param xelements2: [XElement, XElement, ...]
+        :param diffx_nodes_one: [DiffxElement, DiffxElement, ...]
+        :param diffx_nodes_two: [DiffxElement, DiffxElement, ...]
         '''
 
-        _xtypes = (base.ElementChanged, base.ElementUnknown)
+        _xtypes = (base.DiffxNodeChanged, base.DiffxNodeUnknown)
 
-        _xelements2_generator = self._generator_xelements(xelements=xelements2,
-                                                         hash_algorithm=hash.XDiffHasher.callback_hash_tag_name_attribute_name_value_consitency,
+        _diffx_nodes_two_gen = self._gen_diffx_nodes(xelements=diffx_node_two,
+                                                         hash_algorithm=hash.DiffxHasher.callback_hash_tag_name_attribute_name_value_consitency,
                                                          xtypes=_xtypes,
                                                          child_cnt=child_cnt)
 
-        for _xelement2 in _xelements2_generator:
+        for _diffx_node_two in _diffx_nodes_two_gen:
 
-            _xelements1_generator = self._generator_xelements(xelements=xelements1,
-                                                             hash_algorithm=hash.XDiffHasher.callback_hash_tag_name_attribute_name_value_consitency,
+            _diffx_nodes_one_gen = self._gen_diffx_nodes(xelements=diffx_node_one,
+                                                             hash_algorithm=hash.DiffxHasher.callback_hash_tag_name_attribute_name_value_consitency,
                                                              xtypes=_xtypes,
                                                              child_cnt=child_cnt)
 
-            for _xelement1 in _xelements1_generator:
+            for _diffx_node_one in _diffx_nodes_one_gen:
 
-                if _xelement1.hash == _xelement2.hash:
+                if _diffx_node_one.hash == _diffx_node_two.hash:
 
-                    self.set_element_type_with_children(_xelement1,
-                                                    _xelement2,
-                                                    base.ElementTagAttributeNameValueConsitency)
+                    self.set_xdiff_type_child_nodes(_diffx_node_one,
+                                                    _diffx_node_two,
+                                                    base.DiffxNodeTagAttriNameValueConsi)
 
                     break
 
-    def find_tag_name_attribute_name_consitency_with_children(self, child_cnt, xelements1, xelements2):
+    def find_tag_name_attribute_name_consitency_with_children(self, child_cnt, diffx_node_one, diffx_node_two):
         '''
         TBD
 
         :param child_cnt: int - only elements with a certain number of children are investigated
-        :param xelements1: [XElement, XElement, ...]
-        :param xelements2: [XElement, XElement, ...]
+        :param diffx_nodes_one: [DiffxElement, DiffxElement, ...]
+        :param diffx_nodes_two: [DiffxElement, DiffxElement, ...]
         '''
 
-        _xtypes = (base.ElementChanged, base.ElementUnknown)
+        _xtypes = (base.DiffxNodeChanged, base.DiffxNodeUnknown)
 
-        _xelements2_generator = self._generator_xelements(xelements=xelements2,
-                                                         hash_algorithm=hash.XDiffHasher.callback_hash_tag_name_attribute_name_consitency,
+        _diffx_nodes_two_gen = self._gen_diffx_nodes(xelements=diffx_node_two,
+                                                         hash_algorithm=hash.DiffxHasher.callback_hash_tag_name_attribute_name_consitency,
                                                          xtypes=_xtypes,
                                                          child_cnt=child_cnt)
 
-        for _xelement2 in _xelements2_generator:
+        for _diffx_node_two in _diffx_nodes_two_gen:
 
-            _xelements1_generator = self._generator_xelements(xelements=xelements1,
-                                                             hash_algorithm=hash.XDiffHasher.callback_hash_tag_name_attribute_name_consitency,
+            _diffx_nodes_one_gen = self._gen_diffx_nodes(xelements=diffx_node_one,
+                                                             hash_algorithm=hash.DiffxHasher.callback_hash_tag_name_attribute_name_consitency,
                                                              xtypes=_xtypes,
                                                              child_cnt=child_cnt)
 
-            for _xelement1 in _xelements1_generator:
+            for _diffx_node_one in _diffx_nodes_one_gen:
 
-                if _xelement1.hash == _xelement2.hash:
+                if _diffx_node_one.hash == _diffx_node_two.hash:
 
-                    self.set_element_type_with_children(_xelement1,
-                                                    _xelement2,
-                                                    base.ElementTagAttributeNameConsitency)
+                    self.set_xdiff_type_child_nodes(_diffx_node_one,
+                                                    _diffx_node_two,
+                                                    base.DiffxNodeTagAttriNameConsi)
 
                     break
 
-    def find_moved_elements_with_children(self, child_cnt, xelements1, xelements2):
+    def find_moved_diffx_nodes_with_children(self, child_cnt, diffx_node_one, diffx_node_two):
         '''
         TBD
 
         :param child_cnt: int - only elements with a certain number of children are investigated
-        :param xelements1: [XElement, XElement, ...]
-        :param xelements2: [XElement, XElement, ...]
+        :param diffx_nodes_one: [DiffxElement, DiffxElement, ...]
+        :param diffx_nodes_two: [DiffxElement, DiffxElement, ...]
         '''
 
-        _xtypes = (base.ElementChanged, base.ElementUnknown)
+        _xtypes = (base.DiffxNodeChanged, base.DiffxNodeUnknown)
 
-        _xelements2_generator = self._generator_xelements(xelements=xelements2,
+        _diffx_nodes_two_gen = self._gen_diffx_nodes(xelements=diffx_node_two,
                                                          xtypes=_xtypes,
                                                          child_cnt=child_cnt)
 
-        for _xelement2 in _xelements2_generator:
+        for _diffx_node_two in _diffx_nodes_two_gen:
 
-            _xelements1_generator = self._generator_xelements(xelements=xelements1,
+            _diffx_nodes_one_gen = self._gen_diffx_nodes(xelements=diffx_node_one,
                                                              xtypes=_xtypes,
                                                              child_cnt=child_cnt)
 
-            for _xelement1 in _xelements1_generator:
+            for _diffx_node_one in _diffx_nodes_one_gen:
 
-                if _xelement1.hash == _xelement2.hash:
-                    if not _xelement1.xpath == _xelement2.xpath:
+                if _diffx_node_one.hash == _diffx_node_two.hash:
+                    if not _diffx_node_one.xpath == _diffx_node_two.xpath:
 
-                        self.set_element_type_with_children(_xelement1,
-                                                        _xelement2,
-                                                        base.ElementMoved)
+                        self.set_xdiff_type_child_nodes(_diffx_node_one,
+                                                        _diffx_node_two,
+                                                        base.DiffxNodeMoved)
                         break
 
-    def find_unchanged_elements_with_children(self, child_cnt, xelements1, xelements2):
+    def find_unchanged_diffx_nodes_with_children(self, child_cnt, diffx_node_one, diffx_node_two):
         '''
         TBD
 
         :param child_cnt: int - only elements with a certain number of children are investigated
-        :param xelements1: [XElement, XElement, ...]
-        :param xelements2: [XElement, XElement, ...]
+        :param diffx_nodes_one: [DiffxElement, DiffxElement, ...]
+        :param diffx_nodes_two: [DiffxElement, DiffxElement, ...]
         '''
 
-        _xtypes = (base.ElementChanged, base.ElementUnknown)
+        _xtypes = (base.DiffxNodeChanged, base.DiffxNodeUnknown)
 
-        _xelements2_generator = self._generator_xelements(xelements=xelements2,
+        _diffx_nodes_two_gen = self._gen_diffx_nodes(xelements=diffx_node_two,
                                                          xtypes=_xtypes,
                                                          child_cnt=child_cnt)
 
-        for _xelement2 in _xelements2_generator:
+        for _diffx_node_two in _diffx_nodes_two_gen:
 
-            _xelements1_generator = self._generator_xelements(xelements=xelements1,
+            _diffx_nodes_one_gen = self._gen_diffx_nodes(xelements=diffx_node_one,
                                                              xtypes=_xtypes,
                                                              child_cnt=child_cnt)
 
-            for _xelement1 in _xelements1_generator:
+            for _diffx_node_one in _diffx_nodes_one_gen:
 
-                if _xelement1.hash == _xelement2.hash:
-                    if _xelement1.xpath == _xelement2.xpath:
+                if _diffx_node_one.hash == _diffx_node_two.hash:
+                    if _diffx_node_one.xpath == _diffx_node_two.xpath:
 
-                        self.set_element_type_with_children(_xelement1,
-                                                        _xelement2,
-                                                        base.ElementUnchanged)
+                        self.set_xdiff_type_child_nodes(_diffx_node_one,
+                                                        _diffx_node_two,
+                                                        base.DiffxNodeUnchanged)
 
                         break

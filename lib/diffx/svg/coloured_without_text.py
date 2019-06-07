@@ -11,24 +11,24 @@ from diffx.svg import compact
 from diffx.svg.compact import DrawLegend
 
 
-class DrawXml(compact):
+class DrawDiffx(compact.DrawDiffx):
     '''
     Create diff without text.
     '''
 
     def __init__(self):
-        compact.DrawXml.__init__(self)
+        super(DrawDiffx, self).__init__()
 
     def _lines_callback(self, text):
         return [('', 40, 10)]
 
 
-class DrawXmlDiff(compact.DrawXmlDiff):
+class DrawDiffxDiff(compact.DrawDiffxDiff):
     '''
     Create diff without text.
     '''
 
     def __init__(self, path1, path2):
-        compact.DrawXmlDiff.__init__(self, path1, path2)
-        self.report1 = DrawXml()
-        self.report2 = DrawXml()
+        super(DrawDiffxDiff, self).__init__(path1, path2)
+        self.report1 = DrawDiffx()
+        self.report2 = DrawDiffx()

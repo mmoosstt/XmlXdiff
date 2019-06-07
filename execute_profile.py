@@ -9,7 +9,7 @@ import cProfile
 import sys
 import unittest
 import os
-import XmlXdiff.XDiffer as api
+import XmlXdiff.Diffxer as api
 sys.path.append(os.path.abspath("./tests"))
 from GeneralTests import CompareAll
 
