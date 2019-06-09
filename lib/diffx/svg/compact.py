@@ -174,7 +174,7 @@ class DrawLegend:
 
         _svg = SVG(insert=(self.pos_x, self.pos_y))
 
-        for _class in base.gen_available_diffx_node_types():
+        for _class in base.gen_available_dx_node_types():
             _svg.add(self.add_line(_class))
 
         _svg["width"] = self.pos_x_max
@@ -256,7 +256,7 @@ class DrawLegend:
         self.dwg.save()
 
 
-class DrawDiffx:
+class DrawDiffxNodes:
     '''
     Draw svg signle xml
     '''
@@ -316,19 +316,19 @@ class DrawDiffx:
 
         return "{tag}{attribs}: {text}".format(attribs=_attribs, tag=_tag, text=element.text)
 
-    def load_from_xelements(self, xelements, callback):
+    def load_from_diffx_nodes(self, dx_nodes, callback):
         '''
         DiffxElements to svg representation.
 
-        :param xelements: [DiffxElement, ...]
+        :param dx_nodes: [DiffxElement, ...]
         :param callback: method defining svg representation of xelement
         '''
 
         self.dwg = svgwrite.Drawing(filename="test.svg")
 
-        _root = xelements[0]
+        _root = dx_nodes[0]
         _node_level_z = 0
-        for _xelement in xelements:
+        for _xelement in dx_nodes:
 
             _node_level = DiffxPath.get_xpath_distance(
                 _root.xpath, _xelement.xpath)
@@ -358,13 +358,13 @@ class DrawDiffx:
 
         return render_text.Render.split_text_to_lines(text)
 
-    def add_text_box(self, xelement):
+    def add_text_box(self, dx_nodes):
         '''
         Simple text box with fixed width.
 
-        :param xelement: XTypes.DiffxElement
+        :param dx_nodes: XTypes.DiffxElement
         '''
-        _text = self.get_element_text(xelement.node)
+        _text = self.get_element_text(dx_nodes.node)
         _lines = self._lines_callback(_text)
 
         _y = copy.deepcopy(self.pos_y)
@@ -425,18 +425,18 @@ class DrawDiffx:
         self.pos_y = 0.3 * self.unit
         self.pos_x = self.pos_x_max  # + (5.5 * self.unit)
 
-    def save_svg(self, xelements):
+    def save_svg(self, dx_nodes):
         """
         Save svg to file.
         """
 
-        for _xelement in xelements:
-            self.dwg.add(_xelement.svg_node)
+        for _dx_node in dx_nodes:
+            self.dwg.add(_dx_node.svg_node)
 
         self.dwg.save()
 
 
-class DrawDiffxDiff(object):
+class DrawDiffxNodesCompared(object):
     '''
     Creation diff output.
     '''
@@ -449,8 +449,8 @@ class DrawDiffxDiff(object):
         self.path1 = path1
         self.path2 = path2
         self.differ = differ.DiffxExecutor()
-        self.report1 = DrawDiffx()
-        self.report2 = DrawDiffx()
+        self.report1 = DrawDiffxNodes()
+        self.report2 = DrawDiffxNodes()
 
     def draw(self):
         '''
@@ -466,14 +466,14 @@ class DrawDiffxDiff(object):
                                                                            filename2=self.differ.path2.filename)
 
         self.report1._move_right()
-        self.report1.load_from_xelements(self.differ.diffx_nodes_one,
-                                         self.report1.add_text_box)
-        self.report1.save_svg(self.differ.diffx_nodes_one)
+        self.report1.load_from_diffx_nodes(self.differ.dx_nodes_one,
+                                           self.report1.add_text_box)
+        self.report1.save_svg(self.differ.dx_nodes_one)
 
         self.report2._move_right()
-        self.report2.load_from_xelements(self.differ.diffx_nodes_two,
-                                         self.report2.add_text_box)
-        self.report2.save_svg(self.differ.diffx_nodes_two)
+        self.report2.load_from_diffx_nodes(self.differ.dx_nodes_two,
+                                           self.report2.add_text_box)
+        self.report2.save_svg(self.differ.dx_nodes_two)
 
         self.legend = DrawLegend()
 
@@ -513,15 +513,15 @@ class DrawDiffxDiff(object):
         self._draw_move_pattern(base.DiffxNodeTagAttriNameValueConsi)
 
         self._draw_changed_pattern(base.DiffxNodeChanged,
-                                   self.differ.diffx_nodes_two,
+                                   self.differ.dx_nodes_two,
                                    self.report1.pos_x_max * 1.2)
 
         self._draw_changed_pattern(base.DiffxNodeAdded,
-                                   self.differ.diffx_nodes_two,
+                                   self.differ.dx_nodes_two,
                                    self.report1.pos_x_max * 1.2)
 
         self._draw_changed_pattern(base.DiffxNodeDeleted,
-                                   self.differ.diffx_nodes_one)
+                                   self.differ.dx_nodes_one)
 
     def save_svg(self, filepath=None):
         '''
@@ -536,13 +536,13 @@ class DrawDiffxDiff(object):
 
         self.dwg.save()
 
-    def _draw_move_pattern(self, xtype):
+    def _draw_move_pattern(self, dx_node_type):
 
-        for _e in base.gen_diffx_nodes(self.differ.diffx_nodes_one, xtype):
+        for _e in base.gen_dx_nodes(self.differ.dx_nodes_one, dx_node_type):
             _start_svg1 = _e.svg_node
 
-            if _e.get_xelement():
-                _stop_svg2 = _e.get_xelement().svg_node
+            if _e.get_dx_nodes():
+                _stop_svg2 = _e.get_dx_nodes().svg_node
 
                 _x1 = float(_start_svg1['x'])
                 _y1 = float(_start_svg1['y'])
@@ -567,18 +567,18 @@ class DrawDiffxDiff(object):
 
                 _line = Polyline(points=[_p01, _p02, _p03, _p04, _p05, _p06, _p07, _p08, _p01],
                                  stroke_width="0.5",
-                                 stroke=xtype.fill,
-                                 fill=xtype.fill,
-                                 opacity=xtype.opacity)
+                                 stroke=dx_node_type.fill,
+                                 fill=dx_node_type.fill,
+                                 opacity=dx_node_type.opacity)
 
                 self.dwg.add(_line)
 
-    def _draw_changed_pattern(self, xtype, xelements, x_offset=0):
+    def _draw_changed_pattern(self, dx_node_type, dx_nodes, offset=0):
 
-        for _e in base.gen_diffx_nodes(xelements, xtype):
+        for _e in base.gen_dx_nodes(dx_nodes, dx_node_type):
             _start_svg1 = _e.svg_node
 
-            _x1 = float(_start_svg1['x']) + x_offset
+            _x1 = float(_start_svg1['x']) + offset
             _y1 = float(_start_svg1['y'])
 
             _p01 = (_x1, _y1)
@@ -590,8 +590,8 @@ class DrawDiffxDiff(object):
 
             _line = Polyline(points=[_p01, _p02, _p03, _p04, _p01],
                              stroke_width="1",
-                             stroke=xtype.fill,
-                             fill=xtype.fill,
-                             opacity=xtype.opacity)
+                             stroke=dx_node_type.fill,
+                             fill=dx_node_type.fill,
+                             opacity=dx_node_type.opacity)
 
             self.dwg.add(_line)

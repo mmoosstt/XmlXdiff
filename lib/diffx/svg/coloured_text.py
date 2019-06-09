@@ -11,27 +11,27 @@ from diffx.svg import compact
 from diffx.svg.compact import DrawLegend
 
 
-class DrawDiffx(compact.DrawDiffx):
+class DrawDiffxNodes(compact.DrawDiffxNodes):
     '''
     Draw svg signle xml
     '''
 
     def __init__(self):
-        compact.DrawDiffx.__init__(self)
+        compact.DrawDiffxNodes.__init__(self)
 
-    def add_text_box(self, xelement):
+    def add_text_box(self, dx_nodes):
         '''
         Text box with fixed width and content text diff.
 
-        :param xelement: XTypes.DiffxElement
+        :param dx_nodes: XTypes.DiffxElement
         '''
 
-        _node_text1 = self.get_element_text(xelement.node)
+        _node_text1 = self.get_element_text(dx_nodes.node)
 
-        if xelement.get_xelement() is None:
+        if dx_nodes.get_dx_nodes() is None:
             _node_text2 = ""
         else:
-            _node_text2 = self.get_element_text(xelement.get_xelement().node)
+            _node_text2 = self.get_element_text(dx_nodes.get_dx_nodes().node)
 
         _svg, _width, _height = self.add_text_block_compare(_node_text1, _node_text2)
         self.pos_y = self.pos_y + float(_height)
@@ -41,12 +41,12 @@ class DrawDiffx(compact.DrawDiffx):
         return _svg
 
 
-class DrawDiffxDiff(compact.DrawDiffxDiff):
+class DrawDiffxNodesCompared(compact.DrawDiffxNodesCompared):
     '''
     Create diff without text.
     '''
 
     def __init__(self, path1, path2):
-        compact.DrawDiffxDiff.__init__(self, path1, path2)
-        self.report1 = DrawDiffx()
-        self.report2 = DrawDiffx()
+        compact.DrawDiffxNodesCompared.__init__(self, path1, path2)
+        self.report1 = DrawDiffxNodes()
+        self.report2 = DrawDiffxNodes()

@@ -29,14 +29,14 @@ class DiffxPath():
     xml = None
 
     @classmethod
-    def get_diffx_nodes(cls, node, parent_path="", pos=0):
+    def get_dx_nodes(cls, node, parent_path="", pos=0):
         """
-        Creates a list of XmlXdiff.XTypes.DiffxElement from lxml root element for instance.
+        Creates a list of XmlXdiff.XTypes.DiffxNode from lxml root element for instance.
         """
 
-        cls.diffx_nodes = []
+        cls.dx_nodes = []
         cls.walk(node, parent_path, pos)
-        return cls.diffx_nodes
+        return cls.dx_nodes
 
     @classmethod
     def get_xpath_distance(cls, path1, path2):
@@ -96,32 +96,32 @@ class DiffxPath():
         return "*[name()='{tag}'][{pos}]".format(tag=_tag, pos=pos)
 
     @classmethod
-    def walk(cls, diffx_node, parent_path, pos, child_cnt=0):
+    def walk(cls, dx_node, parent_path, pos, child_cnt=0):
         '''
-        Creation of new xpath style for selected lxml etree diffx_node.
+        Creation of new xpath style for selected lxml etree dx_node.
 
-        :param diffx_node: lxml etree diffx_node
+        :param dx_node: lxml etree dx_node
         :param parent_path: start point of xpath
-        :param pos: start pos of diffx_node
+        :param pos: start pos of dx_node
         :param child_cnt: number of investigated children
         '''
 
         _path = "{parent}/{tag}".format(parent=parent_path,
-                                        tag=cls.get_tag(diffx_node, pos))
+                                        tag=cls.get_tag(dx_node, pos))
 
-        _diffx_node = base.DiffxElement()
-        _diffx_node.set_type(base.DiffxNodeUnknown)
-        _diffx_node.set_node(diffx_node)
-        _diffx_node.set_xpath(_path)
+        _dx_node = base.DiffxNode()
+        _dx_node.set_dx_type(base.DiffxNodeUnknown)
+        _dx_node.set_lxml_node(dx_node)
+        _dx_node.set_dx_path(_path)
 
-        cls.diffx_nodes.append(_diffx_node)
+        cls.dx_nodes.append(_dx_node)
 
         if cls.xml is not None:
             if not cls.xml.xpath(_path):
                 raise DiffxException("{} does not exist in xml".format(_path))
 
         _pos_dict = {}
-        for _child in diffx_node.getchildren():
+        for _child in dx_node.getchildren():
 
             if _child.tag in _pos_dict.keys():
                 _pos_dict[_child.tag] += 1
@@ -132,7 +132,7 @@ class DiffxPath():
             child_cnt += cls.walk(
                 _child, _path, _pos_dict[_child.tag], 0)
 
-        _diffx_node.set_child_cnt(child_cnt)
+        _dx_node.set_child_cnt(child_cnt)
         child_cnt = child_cnt + 1
 
         return child_cnt

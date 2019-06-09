@@ -154,19 +154,19 @@ class DiffxHasher():
         return bytes(hashpipe.hexdigest(), 'utf-8')
 
     @classmethod
-    def get_hashes(cls, xelements, callback_hash_algorithm, children=True):
+    def get_hashes(cls, dx_nodes, callback_hash_algorithm, children=True):
         '''
 
-        calculate hashes for xelements
+        calculate hashes for dx_nodes
 
-        :param xelements: [XmlXdiff.XTypes.DiffxElement, ...]
+        :param dx_nodes: [XmlXdiff.XTypes.DiffxElement, ...]
         :param callback_hash_algorithm: callback of this class for selection of hash algorithm
         :param children: bool - if true children are included
         '''
 
-        for _xelement in xelements:
+        for _dx_node in dx_nodes:
 
             _hash_algo = hashlib.sha1()
-            callback_hash_algorithm(_xelement.node, _hash_algo, children)
+            callback_hash_algorithm(_dx_node.node, _hash_algo, children)
             _hash = _hash_algo.hexdigest()
-            _xelement.set_hash(_hash)
+            _dx_node.set_hash(_hash)

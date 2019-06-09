@@ -11,7 +11,7 @@ import unittest
 import inspect
 
 from diffx import get_path, differ
-from diffx.svg.coloured_text import DrawDiffxDiff, DrawLegend
+from diffx.svg.coloured_text import DrawDiffxNodesCompared, DrawLegend
 from diffx.xpath import DiffxPath
 
 import lxml.etree
@@ -58,16 +58,16 @@ class ReportModule(unittest.TestCase):
         _l.save_svg('{}\\..\\..\\tests\\simple\\legend.svg'.format(get_path()))
 
     def testXSvgCompact(self):
-        from diffx.svg.compact import DrawDiffxDiff
-        self._simpleModule(DrawDiffxDiff)
+        from diffx.svg.compact import DrawDiffxNodesCompared
+        self._simpleModule(DrawDiffxNodesCompared)
 
     def testXSvgColoredText(self):
-        from diffx.svg.coloured_text import DrawDiffxDiff
-        self._simpleModule(DrawDiffxDiff)
+        from diffx.svg.coloured_text import DrawDiffxNodesCompared
+        self._simpleModule(DrawDiffxNodesCompared)
 
     def testXSvgColorOnly(self):
-        from diffx.svg.coloured_without_text import DrawDiffxDiff
-        self._simpleModule(DrawDiffxDiff)
+        from diffx.svg.coloured_without_text import DrawDiffxNodesCompared
+        self._simpleModule(DrawDiffxNodesCompared)
 
     def _simpleModule(self, modul_under_test):
 
@@ -126,12 +126,12 @@ class CompareAll(unittest.TestCase):
         _t = time.time()
         _path1 = "{}\\..\\..\\tests\\{}\\a.xml".format(get_path(), folder_name)
         _path2 = "{}\\..\\..\\tests\\{}\\b.xml".format(get_path(), folder_name)
-        cls.differ = DrawDiffxDiff(_path1, _path2)
+        cls.differ = DrawDiffxNodesCompared(_path1, _path2)
         cls.differ.draw()
         cls.differ.save_svg()
         print("{name}: delta_t={time:.4f}s xml_elements={cnt}".format(name=folder_name,
                                                                       time=time.time() - _t,
-                                                                      cnt=len(cls.differ.differ.diffx_nodes_two) + len(cls.differ.differ.diffx_nodes_one)))
+                                                                      cnt=len(cls.differ.differ.dx_nodes_two) + len(cls.differ.differ.dx_nodes_one)))
 
     def test13(self):
         name = inspect.currentframe().f_code.co_name
