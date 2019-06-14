@@ -18,20 +18,30 @@ python pip XmlXdiff
 ```
 
 ## fist step ##
+
+### file example ###
 ```
-from XmlXdiff.XReport import DrawXmlDiff
+from diffx import main
 
-_xml1 = """<root><deleted>with content</deleted><unchanged/><changed name="test1" /></root>"""
-_xml2 = """<root><unchanged/><changed name="test2" /><added/></root>"""
+_xml1 = './simple/xml1.xml'
+_xml2 = './simple/xml2.xml'
 
-with open("test1.xml", "w") as f:
-    f.write(_xml1)
+main.compare(_xml1, _xml2)
+main.save('./simple/diffx_file.svg')
 
-with open("test2.xml", "w") as f:
-    f.write(_xml2)
+```
 
-x = DrawXmlDiff("test1.xml", "test2.xml")
-x.saveSvg('xdiff.svg')
+### string example ###
+```
+# file example
+
+from diffx import main
+
+_xml1 = './simple/xml1.xml'
+_xml2 = './simple/xml2.xml'
+
+main.compare(_xml1, _xml2)
+main.save('./simple/diffx_file.svg')
 
 ```
 

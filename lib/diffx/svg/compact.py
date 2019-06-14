@@ -328,10 +328,10 @@ class DrawDiffxNodes:
 
         _root = dx_nodes[0]
         _node_level_z = 0
-        for _xelement in dx_nodes:
+        for _ds_node in dx_nodes:
 
             _node_level = DiffxPath.get_xpath_distance(
-                _root.xpath, _xelement.xpath)
+                _root.xpath, _ds_node.xpath)
 
             _steps = _node_level - _node_level_z
 
@@ -347,7 +347,7 @@ class DrawDiffxNodes:
                 for _x in range(abs(_steps)):
                     self._move_left()
 
-            _xelement.add_svg_node(callback(_xelement))
+            _ds_node.add_svg_node(callback(_ds_node))
 
     def _lines_callback(self, text):
         '''
@@ -441,39 +441,37 @@ class DrawDiffxNodesCompared(object):
     Creation diff output.
     '''
 
-    def __init__(self, path1, path2):
+    def __init__(self):
         self.dwg = None
         self.legend = None
-        self.filepath = None
-        self.differ = None
-        self.path1 = path1
-        self.path2 = path2
         self.differ = differ.DiffxExecutor()
         self.report1 = DrawDiffxNodes()
         self.report2 = DrawDiffxNodes()
+
+    def set_svg_filepath(self, value):
+        self.filepath = value
+
+    def set_first_xml_content(self, value):
+        self.differ.set_first_xml_content(value)
+
+    def set_second_xml_content(self, value):
+        self.differ.set_second_xml_content(value)
 
     def draw(self):
         '''
         Starts diff creation.
         '''
-
-        self.differ.set_left_path(self.path1)
-        self.differ.set_right_path(self.path2)
         self.differ.execute()
 
-        self.filepath = "{path}\\xdiff_{filename1}_{filename2}.svg".format(path=self.differ.path1.path,
-                                                                           filename1=self.differ.path1.filename,
-                                                                           filename2=self.differ.path2.filename)
-
         self.report1._move_right()
-        self.report1.load_from_diffx_nodes(self.differ.dx_nodes_one,
+        self.report1.load_from_diffx_nodes(self.differ.first_dx_nodes,
                                            self.report1.add_text_box)
-        self.report1.save_svg(self.differ.dx_nodes_one)
+        self.report1.save_svg(self.differ.first_dx_nodes)
 
         self.report2._move_right()
-        self.report2.load_from_diffx_nodes(self.differ.dx_nodes_two,
+        self.report2.load_from_diffx_nodes(self.differ.second_dx_nodes,
                                            self.report2.add_text_box)
-        self.report2.save_svg(self.differ.dx_nodes_two)
+        self.report2.save_svg(self.differ.second_dx_nodes)
 
         self.legend = DrawLegend()
 
@@ -495,7 +493,7 @@ class DrawDiffxNodesCompared(object):
                   self.report2.pos_x_max * 1.2 +
                   self.legend.pos_x_max)
 
-        self.dwg = svgwrite.Drawing(filename=self.filepath)
+        self.dwg = svgwrite.Drawing()
         self.dwg['height'] = _height
         self.dwg['width'] = _width
         self.dwg.viewbox(0, 0, _width, _height)
@@ -513,32 +511,19 @@ class DrawDiffxNodesCompared(object):
         self._draw_move_pattern(base.DiffxNodeTagAttriNameValueConsi)
 
         self._draw_changed_pattern(base.DiffxNodeChanged,
-                                   self.differ.dx_nodes_two,
+                                   self.differ.second_dx_nodes,
                                    self.report1.pos_x_max * 1.2)
 
         self._draw_changed_pattern(base.DiffxNodeAdded,
-                                   self.differ.dx_nodes_two,
+                                   self.differ.second_dx_nodes,
                                    self.report1.pos_x_max * 1.2)
 
         self._draw_changed_pattern(base.DiffxNodeDeleted,
-                                   self.differ.dx_nodes_one)
-
-    def save_svg(self, filepath=None):
-        '''
-        Save svg to filepath
-
-        :param filepath: str
-        '''
-
-        if filepath is not None:
-            self.dwg.filename = filepath
-            self.filepath = filepath
-
-        self.dwg.save()
+                                   self.differ.first_dx_nodes)
 
     def _draw_move_pattern(self, dx_node_type):
 
-        for _e in base.gen_dx_nodes(self.differ.dx_nodes_one, dx_node_type):
+        for _e in base.gen_dx_nodes(self.differ.first_dx_nodes, dx_node_type):
             _start_svg1 = _e.svg_node
 
             if _e.get_dx_nodes():

@@ -44,9 +44,9 @@ class HTMLFormatter(formatting.XMLFormatter):
 
 class UnSorted(unittest.TestCase):
 
-    path1 = "{}\\..\\..\\tests\\test9\\a.xml".format(
+    first_path = "{}\\..\\..\\tests\\test9\\a.xml".format(
         get_path())
-    path2 = "{}\\..\\..\\tests\\test9\\b.xml".format(
+    second_path = "{}\\..\\..\\tests\\test9\\b.xml".format(
         get_path())
     path = "{}\\..\\..\\tests".format(get_path())
 
@@ -54,7 +54,7 @@ class UnSorted(unittest.TestCase):
 
         _t = time.time()
 
-        result = main.diff_files(self.path1, self.path2)
+        result = main.diff_files(self.first_path, self.second_path)
 
         for x in result:
             print(x)
@@ -68,7 +68,7 @@ class UnSorted(unittest.TestCase):
             formatting_tags=('b', 'u', 'i', 'strike', 'em', 'super',
                              'sup', 'sub', 'link', 'a', 'span'))
 
-        result = main.diff_files(self.path1, self.path2, formatter=formatter)
+        result = main.diff_files(self.first_path, self.second_path, formatter=formatter)
 
         print(time.time() - _t)
 

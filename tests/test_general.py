@@ -10,8 +10,7 @@ import os
 import unittest
 import inspect
 
-from diffx import get_path, differ
-from diffx.svg.coloured_text import DrawDiffxNodesCompared, DrawLegend
+from diffx import get_path, main
 from diffx.xpath import DiffxPath
 
 import lxml.etree
@@ -112,26 +111,19 @@ class ReportModule(unittest.TestCase):
 
 class CompareAll(unittest.TestCase):
 
-    @staticmethod
-    def execute_old(folder_name):
-        _i = differ.DiffxExecutor()
-        _i.setPath1("{}\\..\\..\\tests\\{}\\a.xml".format(
-            get_path(), folder_name))
-        _i.setPath2("{}\\..\\..\\tests\\{}\\b.xml".format(
-            get_path(), folder_name))
-        _i.run()
-
     @classmethod
     def execute(cls, folder_name):
         _t = time.time()
         _path1 = "{}\\..\\..\\tests\\{}\\a.xml".format(get_path(), folder_name)
         _path2 = "{}\\..\\..\\tests\\{}\\b.xml".format(get_path(), folder_name)
-        cls.differ = DrawDiffxNodesCompared(_path1, _path2)
-        cls.differ.draw()
-        cls.differ.save_svg()
+        _path_svg = "{}\\..\\..\\tests\\{}\\xdiff_a_b.svg".format(get_path(), folder_name)
+
+        main.compare(_path1, _path2)
+        main.save(_path_svg, pretty=False)
+
         print("{name}: delta_t={time:.4f}s xml_elements={cnt}".format(name=folder_name,
                                                                       time=time.time() - _t,
-                                                                      cnt=len(cls.differ.differ.dx_nodes_two) + len(cls.differ.differ.dx_nodes_one)))
+                                                                      cnt=len(main.diffx.differ.second_dx_nodes) + len(main.diffx.differ.first_dx_nodes)))
 
     def test13(self):
         name = inspect.currentframe().f_code.co_name

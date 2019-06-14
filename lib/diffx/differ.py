@@ -9,9 +9,14 @@
 """
 
 import os
+import io
 import copy
 import lxml.etree
-from diffx import base, xpath, hash, get_path
+from diffx import base, xpath, hash
+
+
+class DifferException(Exception):
+    pass
 
 
 class DiffxPath:
@@ -35,21 +40,16 @@ class DiffxExecutor:
     '''
 
     def __init__(self):
-        self.path1 = DiffxPath(
-            '{}\\..\\..\\tests\\test1\\a.xml'.format(get_path()))
-        self.path2 = DiffxPath(
-            '{}\\..\\..\\tests\\test1\\b.xml'.format(get_path()))
-
         # initialised when execute is executed
         self.gravity = 0
-        self.path1 = None
-        self.path2 = None
-        self.xml1 = None
-        self.xml2 = None
-        self.root1 = None
-        self.root2 = None
-        self.dx_nodes_one = None
-        self.dx_nodes_two = None
+        self.first_path = None
+        self.second_path = None
+        self.first_xml = None
+        self.second_xml = None
+        self.first_root = None
+        self.second_root = None
+        self.first_dx_nodes = None
+        self.second_dx_nodes = None
 
     def set_gravity(self, inp):
         '''
@@ -67,57 +67,78 @@ class DiffxExecutor:
         '''
         return copy.deepcopy(self.gravity)
 
-    def set_left_path(self, path):
+    def get_file_like_obj(self, value):
+
+        if os.path.isfile(value):
+            _io = open(value, "rb")
+            return _io
+
+        elif isinstance(value, bytes):
+            _io = io.BytesIO()
+            _io.write(value)
+            _io.seek(0)
+            return _io
+
+        elif isinstance(value, str):
+            _io = io.StringIO()
+            _io.write(value)
+            _io.seek(0)
+            return _io
+
+        raise DifferException('input can not be converted to file like object')
+
+    def set_first_xml_content(self, value):
         '''
-        Interface setter for path1 - normal the left/elder side
+        Interface setter for first_path - normal the left/elder side
 
         :param path: str - path not checked for validity till now
         '''
-        self.path1 = DiffxPath(path)
 
-    def set_right_path(self, path):
+        self.first_xml = lxml.etree.parse(self.get_file_like_obj(value))
+        self.first_root = self.first_xml.getroot()
+
+    def set_second_xml_content(self, value):
         '''
-        Interface setter for path2 - normal the right/latest side
+        Interface setter for second_path - normal the right/latest side
 
         :param path: str - path not checked for validity till now
         '''
-        self.path2 = DiffxPath(path)
+        self.second_xml = lxml.etree.parse(self.get_file_like_obj(value))
+        self.second_root = self.second_xml.getroot()
 
     def execute(self):
         '''
         Entry point for differ.
         '''
 
-        self.xml1 = lxml.etree.parse(self.path1.filepath)
-        self.xml2 = lxml.etree.parse(self.path2.filepath)
+        if (
+                self.first_root is not None and
+                self.second_root is not None):
 
-        self.root1 = self.xml1.getroot()
-        self.root2 = self.xml2.getroot()
+            _xpath = xpath.DiffxPath()
 
-        _xpath = xpath.DiffxPath()
+            self.first_dx_nodes = _xpath.get_dx_nodes(self.first_root, "", 1)
+            self.second_dx_nodes = _xpath.get_dx_nodes(self.second_root, "", 1)
 
-        self.dx_nodes_one = _xpath.get_dx_nodes(self.root1, "", 1)
-        self.dx_nodes_two = _xpath.get_dx_nodes(self.root2, "", 1)
+            _child_cnts = {}
+            _ = [_child_cnts.update({_e.child_cnt: None})
+                 for _e in self.first_dx_nodes]
+            _ = [_child_cnts.update({_e.child_cnt: None})
+                 for _e in self.second_dx_nodes]
 
-        _child_cnts = {}
-        _ = [_child_cnts.update({_e.child_cnt: None})
-             for _e in self.dx_nodes_one]
-        _ = [_child_cnts.update({_e.child_cnt: None})
-             for _e in self.dx_nodes_two]
+            for _child_cnt in reversed(sorted(_child_cnts.keys())):
 
-        for _child_cnt in reversed(sorted(_child_cnts.keys())):
+                self.find_unchanged_dx_nodes_with_children(_child_cnt,
+                                                           self.first_dx_nodes,
+                                                           self.second_dx_nodes)
 
-            self.find_unchanged_dx_nodes_with_children(_child_cnt,
-                                                       self.dx_nodes_one,
-                                                       self.dx_nodes_two)
+                self.find_moved_dx_nodes_with_children(_child_cnt,
+                                                       self.first_dx_nodes,
+                                                       self.second_dx_nodes)
 
-            self.find_moved_dx_nodes_with_children(_child_cnt,
-                                                   self.dx_nodes_one,
-                                                   self.dx_nodes_two)
-
-            self.find_moved_parent_dx_nodes(_child_cnt,
-                                            self.dx_nodes_one,
-                                            self.dx_nodes_two)
+                self.find_moved_parent_dx_nodes(_child_cnt,
+                                                self.first_dx_nodes,
+                                                self.second_dx_nodes)
 
     def _calculate_hashes(self,
                           dx_nodes,
@@ -164,10 +185,10 @@ class DiffxExecutor:
         :param xtype: XType
         '''
 
-        _dx_nodes_one = base.gen_child_nodes(self.dx_nodes_one,
+        _dx_nodes_one = base.gen_child_nodes(self.first_dx_nodes,
                                              dx_node_one)
 
-        _dx_nodes_two = base.gen_child_nodes(self.dx_nodes_two,
+        _dx_nodes_two = base.gen_child_nodes(self.second_dx_nodes,
                                              dx_node_two)
 
         for _dx_node_one in _dx_nodes_one:
@@ -186,8 +207,8 @@ class DiffxExecutor:
         Entry point of pseudo recursive execution
 
         :param child_cnt: int - only elements with a certain number of children are investigated
-        :param dx_nodes_one: [DiffxElement, DiffxElement, ...]
-        :param dx_nodes_two: [DiffxElement, DiffxElement, ...]
+        :param first_dx_nodes: [DiffxElement, DiffxElement, ...]
+        :param second_dx_nodes: [DiffxElement, DiffxElement, ...]
         '''
 
         _xtypes = (base.DiffxNodeChanged, base.DiffxNodeUnknown)
@@ -269,8 +290,8 @@ class DiffxExecutor:
         TBD
 
         :param child_cnt: int - only elements with a certain number of children are investigated
-        :param dx_nodes_one: [DiffxElement, DiffxElement, ...]
-        :param dx_nodes_two: [DiffxElement, DiffxElement, ...]
+        :param first_dx_nodes: [DiffxElement, DiffxElement, ...]
+        :param second_dx_nodes: [DiffxElement, DiffxElement, ...]
         '''
 
         _xtypes = (base.DiffxNodeChanged, base.DiffxNodeUnknown)
@@ -301,8 +322,8 @@ class DiffxExecutor:
         TBD
 
         :param child_cnt: int - only elements with a certain number of children are investigated
-        :param dx_nodes_one: [DiffxElement, DiffxElement, ...]
-        :param dx_nodes_two: [DiffxElement, DiffxElement, ...]
+        :param first_dx_nodes: [DiffxElement, DiffxElement, ...]
+        :param second_dx_nodes: [DiffxElement, DiffxElement, ...]
         '''
 
         _xtypes = (base.DiffxNodeChanged, base.DiffxNodeUnknown)
@@ -334,8 +355,8 @@ class DiffxExecutor:
         TBD
 
         :param child_cnt: int - only elements with a certain number of children are investigated
-        :param dx_nodes_one: [DiffxElement, DiffxElement, ...]
-        :param dx_nodes_two: [DiffxElement, DiffxElement, ...]
+        :param first_dx_nodes: [DiffxElement, DiffxElement, ...]
+        :param second_dx_nodes: [DiffxElement, DiffxElement, ...]
         '''
 
         _xtypes = (base.DiffxNodeChanged, base.DiffxNodeUnknown)
@@ -367,8 +388,8 @@ class DiffxExecutor:
         TBD
 
         :param child_cnt: int - only elements with a certain number of children are investigated
-        :param dx_nodes_one: [DiffxElement, DiffxElement, ...]
-        :param dx_nodes_two: [DiffxElement, DiffxElement, ...]
+        :param first_dx_nodes: [DiffxElement, DiffxElement, ...]
+        :param second_dx_nodes: [DiffxElement, DiffxElement, ...]
         '''
 
         _xtypes = (base.DiffxNodeChanged, base.DiffxNodeUnknown)
@@ -400,8 +421,8 @@ class DiffxExecutor:
         TBD
 
         :param child_cnt: int - only elements with a certain number of children are investigated
-        :param dx_nodes_one: [DiffxElement, DiffxElement, ...]
-        :param dx_nodes_two: [DiffxElement, DiffxElement, ...]
+        :param first_dx_nodes: [DiffxElement, DiffxElement, ...]
+        :param second_dx_nodes: [DiffxElement, DiffxElement, ...]
         '''
 
         _xtypes = (base.DiffxNodeChanged, base.DiffxNodeUnknown)
@@ -431,8 +452,8 @@ class DiffxExecutor:
         TBD
 
         :param child_cnt: int - only elements with a certain number of children are investigated
-        :param dx_nodes_one: [DiffxElement, DiffxElement, ...]
-        :param dx_nodes_two: [DiffxElement, DiffxElement, ...]
+        :param first_dx_nodes: [DiffxElement, DiffxElement, ...]
+        :param second_dx_nodes: [DiffxElement, DiffxElement, ...]
         '''
 
         _xtypes = (base.DiffxNodeChanged, base.DiffxNodeUnknown)

@@ -11,11 +11,31 @@ import os
 
 
 def get_path():
-    """
-    get folder path of diffx independent from deployment.
-    purpose unittesting/debugging
+    return __path__[0]
 
-    return: path 
-    """
 
-    return __file__.replace('\\__init__.py', "")
+class main:
+    from diffx.svg.coloured_text import DrawDiffxNodesCompared
+    diffx = None
+
+    @classmethod
+    def compare(cls, first_xml_content, second_xml_content):
+        cls.diffx = cls.DrawDiffxNodesCompared()
+        cls.diffx.set_first_xml_content(first_xml_content)
+        cls.diffx.set_second_xml_content(second_xml_content)
+        cls.diffx.draw()
+
+    @classmethod
+    def save(cls, filepath, pretty=False):
+        if not cls.diffx.dwg is None:
+            cls.diffx.dwg.saveas(filepath, pretty=pretty)
+
+    @classmethod
+    def get_string(cls):
+        if not cls.diffx.dwg is None:
+            return cls.diffx.dwg.tostring()
+
+    @classmethod
+    def get_etree(cls):
+        if not cls.diffx.dwg is None:
+            return cls.diffx.dwg.get_xml()

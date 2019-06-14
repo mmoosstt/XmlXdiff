@@ -28,7 +28,7 @@ class DrawDiffxNodesCompared(compact.DrawDiffxNodesCompared):
     Create diff without text.
     '''
 
-    def __init__(self, path1, path2):
-        super(DrawDiffxNodesCompared, self).__init__(path1, path2)
+    def __init__(self):
+        super(DrawDiffxNodesCompared, self).__init__()
         self.report1 = DrawDiffxNodes()
         self.report2 = DrawDiffxNodes()
