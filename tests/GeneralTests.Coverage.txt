@@ -1,14 +1,14 @@
-Name                                      Stmts   Miss  Cover
--------------------------------------------------------------
-lib\XmlXdiff\XDiffer.py                     155      3    98%
-lib\XmlXdiff\XHash.py                        71      0   100%
-lib\XmlXdiff\XPath.py                        54      3    94%
-lib\XmlXdiff\XReport\XRender.py              65      4    94%
-lib\XmlXdiff\XReport\XSvgColorOnly.py        12      0   100%
-lib\XmlXdiff\XReport\XSvgColoredText.py      43      0   100%
-lib\XmlXdiff\XReport\XSvgCompact.py         268      8    97%
-lib\XmlXdiff\XReport\__init__.py              0      0   100%
-lib\XmlXdiff\XTypes.py                      107      2    98%
-lib\XmlXdiff\__init__.py                      3      0   100%
--------------------------------------------------------------
-TOTAL                                       778     20    97%
+Name                                     Stmts   Miss  Cover
+------------------------------------------------------------
+lib\diffx\__init__.py                       21      4    81%
+lib\diffx\base.py                          107      2    98%
+lib\diffx\differ.py                        170     19    89%
+lib\diffx\hash.py                           71      0   100%
+lib\diffx\svg\__init__.py                    0      0   100%
+lib\diffx\svg\coloured_text.py              21      0   100%
+lib\diffx\svg\coloured_without_text.py      12      5    58%
+lib\diffx\svg\compact.py                   340     34    90%
+lib\diffx\svg\render_text.py                76      2    97%
+lib\diffx\xpath.py                          54      3    94%
+------------------------------------------------------------
+TOTAL                                      872     69    92%

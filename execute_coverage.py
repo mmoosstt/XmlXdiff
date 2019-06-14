@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath("./tests"))
 cov = coverage.Coverage()
 cov.start()
 
-from GeneralTests import CompareAll, ReportModule
+from test_general import CompareAll, ReportModule
 
 test_suite = unittest.TestSuite()
 test_suite.addTest(ReportModule('testXSvgColoredText'))

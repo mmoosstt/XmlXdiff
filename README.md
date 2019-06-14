@@ -78,18 +78,18 @@ All xml elements that are still marked as changed have to be investigated
 [//]: # (insert_performance_start)
 
 ```
-test1: delta_t=0.0970s xml_elements=63
-test2: delta_t=0.0192s xml_elements=5
-test3: delta_t=0.0257s xml_elements=10
-test4: delta_t=0.0387s xml_elements=32
-test5: delta_t=0.0632s xml_elements=34
-test6: delta_t=0.0634s xml_elements=34
-test7: delta_t=0.0424s xml_elements=8
-test8: delta_t=0.2233s xml_elements=67
-test9: delta_t=7.4147s xml_elements=6144
-test11: delta_t=0.0805s xml_elements=34
-test12: delta_t=0.0931s xml_elements=45
-test13: delta_t=0.1199s xml_elements=75
+test1: delta_t=0.0699s xml_elements=63
+test2: delta_t=0.0104s xml_elements=5
+test3: delta_t=0.0154s xml_elements=10
+test4: delta_t=0.0240s xml_elements=32
+test5: delta_t=0.0258s xml_elements=34
+test6: delta_t=0.0290s xml_elements=34
+test7: delta_t=0.0124s xml_elements=8
+test8: delta_t=0.1027s xml_elements=67
+test9: delta_t=4.2290s xml_elements=6144
+test11: delta_t=0.0298s xml_elements=34
+test12: delta_t=0.0288s xml_elements=45
+test13: delta_t=0.0442s xml_elements=75
 
 ```
 
@@ -100,20 +100,20 @@ test13: delta_t=0.1199s xml_elements=75
 [//]: # (insert_coverage_start)
 
 ```
-Name                                      Stmts   Miss  Cover
--------------------------------------------------------------
-lib\XmlXdiff\XDiffer.py                     155      3    98%
-lib\XmlXdiff\XHash.py                        71      0   100%
-lib\XmlXdiff\XPath.py                        54      3    94%
-lib\XmlXdiff\XReport\XRender.py              65      4    94%
-lib\XmlXdiff\XReport\XSvgColorOnly.py        12      0   100%
-lib\XmlXdiff\XReport\XSvgColoredText.py      43      0   100%
-lib\XmlXdiff\XReport\XSvgCompact.py         268      8    97%
-lib\XmlXdiff\XReport\__init__.py              0      0   100%
-lib\XmlXdiff\XTypes.py                      107      2    98%
-lib\XmlXdiff\__init__.py                      3      0   100%
--------------------------------------------------------------
-TOTAL                                       778     20    97%
+Name                                     Stmts   Miss  Cover
+------------------------------------------------------------
+lib\diffx\__init__.py                       21      4    81%
+lib\diffx\base.py                          107      2    98%
+lib\diffx\differ.py                        170     19    89%
+lib\diffx\hash.py                           71      0   100%
+lib\diffx\svg\__init__.py                    0      0   100%
+lib\diffx\svg\coloured_text.py              21      0   100%
+lib\diffx\svg\coloured_without_text.py      12      5    58%
+lib\diffx\svg\compact.py                   340     34    90%
+lib\diffx\svg\render_text.py                76      2    97%
+lib\diffx\xpath.py                          54      3    94%
+------------------------------------------------------------
+TOTAL                                      872     69    92%
 
 ```
 
@@ -125,6 +125,14 @@ TOTAL                                       778     20    97%
  * investigation of merge interfaces
 
 ## release notes ##
+
+v1.0.0
+* XmlXdiff renamed to diffx
+* ui improved diffx.main added as entry point
+* code refactored - pythonic, pep8
+* text block introduced
+* performance improved
+
 
 v0.3.3:
  * source code clean up
