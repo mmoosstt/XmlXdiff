@@ -26,7 +26,7 @@ from diffx import main
 _xml1 = './simple/xml1.xml'
 _xml2 = './simple/xml2.xml'
 
-main.compare(_xml1, _xml2)
+main.compare_xml(_xml1, _xml2)
 main.save('./simple/diffx_file.svg')
 
 ```
@@ -40,7 +40,7 @@ from diffx import main
 _xml1 = './simple/xml1.xml'
 _xml2 = './simple/xml2.xml'
 
-main.compare(_xml1, _xml2)
+main.compare_xml(_xml1, _xml2)
 main.save('./simple/diffx_file.svg')
 
 ```

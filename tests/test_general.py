@@ -118,7 +118,7 @@ class CompareAll(unittest.TestCase):
         _path2 = "{}\\..\\..\\tests\\{}\\b.xml".format(get_path(), folder_name)
         _path_svg = "{}\\..\\..\\tests\\{}\\xdiff_a_b.svg".format(get_path(), folder_name)
 
-        main.compare(_path1, _path2)
+        main.compare_xml(_path1, _path2)
         main.save(_path_svg, pretty=False)
 
         print("{name}: delta_t={time:.4f}s xml_elements={cnt}".format(name=folder_name,

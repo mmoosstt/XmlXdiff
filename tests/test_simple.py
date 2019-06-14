@@ -15,12 +15,12 @@ class MainUseCases(unittest.TestCase):
         _xml1 = """<root><deleted>with content</deleted><unchanged/><changed name="test1" /></root>"""
         _xml2 = """<root><unchanged/><changed name="test2" /><added/></root>"""
 
-        main.compare(_xml1, _xml2)
+        main.compare_xml(_xml1, _xml2)
         main.save('./simple/diffx_string.svg')
 
     def test_compare_file(self):
         _xml1 = './simple/xml1.xml'
         _xml2 = './simple/xml2.xml'
 
-        main.compare(_xml1, _xml2)
+        main.compare_xml(_xml1, _xml2)
         main.save('./simple/diffx_file.svg')

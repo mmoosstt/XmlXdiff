@@ -19,7 +19,7 @@ class main:
     diffx = None
 
     @classmethod
-    def compare(cls, first_xml_content, second_xml_content):
+    def compare_xml(cls, first_xml_content, second_xml_content):
         cls.diffx = cls.DrawDiffxNodesCompared()
         cls.diffx.set_first_xml_content(first_xml_content)
         cls.diffx.set_second_xml_content(second_xml_content)
