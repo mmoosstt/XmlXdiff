@@ -1,13 +1,13 @@
 from setuptools import find_packages, setup, Command
 
 
-NAME = 'XmlXdiff'
+NAME = 'diffx'
 DESCRIPTION = 'Compare xml files with svg output.'
 URL = 'https://github.com/mmoosstt/XmlXdiff'
 EMAIL = 'diponaut@gmx.de'
 AUTHOR = 'mmoosstt'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 REQUIRED = [
     'PySide2',

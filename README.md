@@ -1,6 +1,6 @@
-# XmlXdiff #
+# diffx #
 
-XmlXdiff was inspired by [X-Diff](http://www.inf.unibz.it/~nutt/Teaching/XMLDM1112/XMLDM1112Coursework/WangEtAl-ICDE2003.pdf "X-Diff: An Effective Change Detection Algorithm for XML Documents").
+diffx was inspired by [X-Diff](http://www.inf.unibz.it/~nutt/Teaching/XMLDM1112/XMLDM1112Coursework/WangEtAl-ICDE2003.pdf "X-Diff: An Effective Change Detection Algorithm for XML Documents").
 
 Since version 0.3.2 the distance cost's algorithm is replaced by parent-identification. This might by a wrong decision but the result's for huge xml documents (see. test 9) improved in performance and quality. 
 
@@ -14,7 +14,7 @@ This is not a bullet prove library (till now). It s more a playground to get in 
 ## installation ##
 
 ```
-python pip XmlXdiff
+python pip diffx
 ```
 
 ## fist step ##
@@ -33,20 +33,18 @@ main.save('./simple/diffx_file.svg')
 
 ### string example ###
 ```
-# file example
-
 from diffx import main
 
-_xml1 = './simple/xml1.xml'
-_xml2 = './simple/xml2.xml'
+_xml1 = """<root><deleted>with content</deleted><unchanged/><changed name="test1" /></root>"""
+_xml2 = """<root><unchanged/><changed name="test2" /><added/></root>"""
 
 main.compare_xml(_xml1, _xml2)
-main.save('./simple/diffx_file.svg')
+main.save('./simple/diffx_string.svg')
 
 ```
 
 # status quo #
-![XmlXdiff example](https://github.com/mmoosstt/XmlXdiff/blob/master/tests/test14/xdiff_a_b.svg "XmlXdiff/tests/test1")
+![diffx example](https://github.com/mmoosstt/XmlXdiff/blob/master/tests/test14/xdiff_a_b.svg "XmlXdiff/tests/test1")
 
  
 # implementation #
@@ -125,30 +123,15 @@ TOTAL                                      872     69    92%
  * investigation of merge interfaces
 
 ## release notes ##
+v1.0.1
+* README.md updated
 
 v1.0.0
-* XmlXdiff renamed to diffx
+* XmlXdiff moved diffx
 * ui improved diffx.main added as entry point
 * code refactored - pythonic, pep8
 * text block introduced
 * performance improved
-
-
-v0.3.3:
- * source code clean up
- * diff text without spaces 
- * static code quality tools introduced
- 
-v0.3.2:
- * implemented parent-identification without children context
- * split segments replaced by parent-identification (no dependency to number of child's nor content of child's)
- * color scheme changed
- * coverage improved
-
-v0.2.2:
- * search areas are split into segments between unchanged xml nodes
- * added/deleted/verified to be added
- * overlapping search areas possible now (merge proposals)
  
 ## documentation ##
 ![Tests](./doc/tests.md "Executed Tests")
