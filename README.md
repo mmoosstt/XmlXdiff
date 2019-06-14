@@ -46,7 +46,7 @@ main.save('./simple/diffx_file.svg')
 ```
 
 # status quo #
-![XmlXdiff example](https://github.com/mmoosstt/XmlXdiff/blob/master/tests/test1/xdiff_a_b.svg "XmlXdiff/tests/test1")
+![XmlXdiff example](https://github.com/mmoosstt/XmlXdiff/blob/master/tests/test14/xdiff_a_b.svg "XmlXdiff/tests/test1")
 
  
 # implementation #
