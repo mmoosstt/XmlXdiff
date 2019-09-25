@@ -2,12 +2,12 @@ from setuptools import find_packages, setup, Command
 
 
 NAME = 'diffx'
-DESCRIPTION = 'Compare xml files with svg output.'
-URL = 'https://github.com/mmoosstt/XmlXdiff'
+DESCRIPTION = 'compare xml or json files with svg/html report'
+URL = 'https://github.com/mmoosstt/diffx'
 EMAIL = 'diponaut@gmx.de'
 AUTHOR = 'mmoosstt'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = "1.1.1"
+VERSION = "1.1.2"
 
 REQUIRED = [
     'PySide2',
