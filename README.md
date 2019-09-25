@@ -51,7 +51,7 @@ from diffx import main
 json1 = './simple/xml1.json'
 json2 = './simple/xml2.json'
 
-main.compare_xml(json1, json2)
+main.compare_json(json1, json2)
 main.save('./simple/diffx_file.svg')
 
 ```
