@@ -1,5 +1,7 @@
 # diffx #
 
+This library was designed to compare two *.xml or *.json files. The main focus was to produce a intuitive interpretable *.svg output file. In future there will be a text export available, too. 
+
 diffx was inspired by [X-Diff](http://www.inf.unibz.it/~nutt/Teaching/XMLDM1112/XMLDM1112Coursework/WangEtAl-ICDE2003.pdf "X-Diff: An Effective Change Detection Algorithm for XML Documents").
 
 Since version 0.3.2 the distance cost's algorithm is replaced by parent-identification. This might by a wrong decision but the result's for huge xml documents (see. test 9) improved in performance and quality. 
@@ -135,6 +137,9 @@ TOTAL                              873     60    93%
  * investigation of merge interfaces
 
 ## release notes ##
+v1.1.1
+* README.md typo corrected
+
 v1.1.0
 * README.md updated
 * main.compare_json implemented
