@@ -109,7 +109,28 @@ class ReportModule(unittest.TestCase):
         x.save_svg(_out)
 
 
-class CompareAll(unittest.TestCase):
+class CompareAllJsons(unittest.TestCase):
+
+    @classmethod
+    def execute(cls, folder_name):
+        _t = time.time()
+        _path1 = "{}\\..\\..\\tests\\{}\\a.json".format(get_path(), folder_name)
+        _path2 = "{}\\..\\..\\tests\\{}\\b.json".format(get_path(), folder_name)
+        _path_svg = "{}\\..\\..\\tests\\{}\\xdiff_a_b.svg".format(get_path(), folder_name)
+
+        main.compare_json(_path1, _path2)
+        main.save(_path_svg, pretty=False)
+
+        print("{name}: delta_t={time:.4f}s xml_elements={cnt}".format(name=folder_name,
+                                                                      time=time.time() - _t,
+                                                                      cnt=len(main.diffx.differ.second_dx_nodes) + len(main.diffx.differ.first_dx_nodes)))
+
+    def test15(self):
+        name = inspect.currentframe().f_code.co_name
+        self.__class__.execute(name)
+
+
+class CompareAllXmls(unittest.TestCase):
 
     @classmethod
     def execute(cls, folder_name):

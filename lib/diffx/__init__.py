@@ -8,6 +8,8 @@
 """
 
 import os
+import dicttoxml
+import json
 
 
 def get_path():
@@ -24,6 +26,24 @@ class main:
         cls.diffx.set_first_xml_content(first_xml_content)
         cls.diffx.set_second_xml_content(second_xml_content)
         cls.diffx.draw()
+
+    @classmethod
+    def compare_json(cls, first_json, second_json):
+
+        def _json_dict(input_obj):
+
+            if os.path.isfile(input_obj):
+                with open(input_obj, 'r') as f:
+                    return json.loads(f.read())
+            return json.load(first_json)
+
+        first_dict = _json_dict(first_json)
+        second_dict = _json_dict(second_json)
+
+        first_xml_content = dicttoxml.dicttoxml(first_dict)
+        second_xml_content = dicttoxml.dicttoxml(second_dict)
+
+        cls.compare_xml(first_xml_content, second_xml_content)
 
     @classmethod
     def save(cls, filepath, pretty=False):

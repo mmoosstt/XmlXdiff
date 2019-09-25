@@ -10,6 +10,7 @@ This is not a bullet prove library (till now). It s more a playground to get in 
  * PySide2
  * svgwrite
  * lxml
+ * dicttoxml
  
 ## installation ##
 
@@ -19,7 +20,7 @@ python pip diffx
 
 ## fist step ##
 
-### file example ###
+### xml file example ###
 ```
 from diffx import main
 
@@ -31,7 +32,7 @@ main.save('./simple/diffx_file.svg')
 
 ```
 
-### string example ###
+### xml string example ###
 ```
 from diffx import main
 
@@ -40,6 +41,18 @@ _xml2 = """<root><unchanged/><changed name="test2" /><added/></root>"""
 
 main.compare_xml(_xml1, _xml2)
 main.save('./simple/diffx_string.svg')
+
+```
+
+### json file example ###
+```
+from diffx import main
+
+json1 = './simple/xml1.json'
+json2 = './simple/xml2.json'
+
+main.compare_xml(json1, json2)
+main.save('./simple/diffx_file.svg')
 
 ```
 
@@ -98,20 +111,19 @@ test13: delta_t=0.0442s xml_elements=75
 [//]: # (insert_coverage_start)
 
 ```
-Name                                     Stmts   Miss  Cover
-------------------------------------------------------------
-lib\diffx\__init__.py                       21      4    81%
-lib\diffx\base.py                          107      2    98%
-lib\diffx\differ.py                        170     19    89%
-lib\diffx\hash.py                           71      0   100%
-lib\diffx\svg\__init__.py                    0      0   100%
-lib\diffx\svg\coloured_text.py              21      0   100%
-lib\diffx\svg\coloured_without_text.py      12      5    58%
-lib\diffx\svg\compact.py                   340     34    90%
-lib\diffx\svg\render_text.py                76      2    97%
-lib\diffx\xpath.py                          54      3    94%
-------------------------------------------------------------
-TOTAL                                      872     69    92%
+Name                             Stmts   Miss  Cover
+----------------------------------------------------
+lib\diffx\__init__.py               34      5    85%
+lib\diffx\base.py                  107      2    98%
+lib\diffx\differ.py                170     14    92%
+lib\diffx\hash.py                   71      0   100%
+lib\diffx\svg\__init__.py            0      0   100%
+lib\diffx\svg\coloured_text.py      21      0   100%
+lib\diffx\svg\compact.py           340     34    90%
+lib\diffx\svg\render_text.py        76      2    97%
+lib\diffx\xpath.py                  54      3    94%
+----------------------------------------------------
+TOTAL                              873     60    93%
 
 ```
 
@@ -123,6 +135,10 @@ TOTAL                                      872     69    92%
  * investigation of merge interfaces
 
 ## release notes ##
+v1.1.0
+* README.md updated
+* main.compare_json implemented
+
 v1.0.1
 * README.md updated
 
